@@ -1429,16 +1429,21 @@ window.loadUserData = async function(code) {
     } else {
       userDoc = snapshot.docs[0].data();
     }
-    
-   userData = userDoc;
-// 🔒 Жёсткая проверка: админ ТОЛЬКО если код PRIDE
+    userData = userDoc;
+
+// 🔒 ЖЁСТКАЯ ПРОВЕРКА: админ ТОЛЬКО если код PRIDE
 isAdmin = (userData.code === 'PRIDE');
+
+// Если в БД стоит isAdmin, но код не PRIDE - сбрасываем
 if (userData.code !== 'PRIDE' && userData.isAdmin) {
-  // Если в БД случайно стоит isAdmin - сбрасываем
-  await updateDoc(doc(db, "users", userData.uid), { isAdmin: false });
+  console.log("🔧 Сбрасываем isAdmin для:", userData.code);
+  updateDoc(doc(db, "users", userDoc.uid || currentUser.uid), { isAdmin: false });
 }
-    window.showMainApp();
-    window.loadBets();
+
+console.log("👤 Пользователь:", userData.code, "| Админ:", isAdmin);
+
+window.showMainApp();
+window.loadBets();
     
   } catch (error) {
     console.error("Ошибка загрузки данных:", error);
@@ -1468,9 +1473,20 @@ window.showMainApp = function() {
   document.getElementById('profileCode').textContent = userData.code;
   document.getElementById('profilePoints').textContent = userData.totalPoints || 0;
   
-  if (isAdmin) {
+  // 🔒 ЖЁСТКАЯ проверка - только PRIDE видит админку
+  if (userData.code === 'PRIDE') {
     document.getElementById('adminBadge').classList.remove('hidden');
     document.getElementById('navAdmin').classList.remove('hidden');
+    console.log("👑 Показана админ-панель для PRIDE");
+    
+    // 🔥 ВАЖНО: Вызываем renderAdminMatches ЗДЕСЬ!
+    setTimeout(() => {
+      console.log("📊 Отрисовываем матчи для админки...");
+      window.renderAdminMatches();
+    }, 100);
+  } else {
+    document.getElementById('adminBadge').classList.add('hidden');
+    document.getElementById('navAdmin').classList.add('hidden');
   }
   
   window.loadLeaderboard();
@@ -1479,17 +1495,27 @@ window.showMainApp = function() {
 
 // Загрузка ставок
 window.loadBets = function() {
-  if (!currentUser) return;
+  if (!userData || !userData.code) {
+    console.error("❌ Нет данных пользователя для загрузки ставок");
+    return;
+  }
+  
+  console.log("📥 Загружаем ставки для кода:", userData.code);
+  
   const betsRef = collection(db, "bets");
-  const q = query(betsRef, where("userId", "==", currentUser.uid));
+  // 🔑 Ищем по КОДУ, а не по UID!
+  const q = query(betsRef, where("userCode", "==", userData.code));
   
   onSnapshot(q, (snapshot) => {
     allBets = [];
     snapshot.forEach(doc => {
       allBets.push({id: doc.id, ...doc.data()});
     });
+    console.log("✅ Загружено ставок:", allBets.length);
     window.renderMatches();
     window.loadProfileStats();
+  }, (error) => {
+    console.error("❌ Ошибка загрузки ставок:", error);
   });
 };
 
@@ -1673,14 +1699,15 @@ window.saveBet = async function() {
   }
   
   let betData = {
-    userId: currentUser.uid,
-    userCode: userData.code,
-    userName: userData.lastName + ' ' + userData.initials,
-    matchId: currentBetMatch.id,
-    betType: currentBetType,
-    points: 0,
-    createdAt: serverTimestamp()
-  };
+  // 🔑 userCode - ГЛАВНЫЙ идентификатор!
+  userCode: userData.code,
+  userId: currentUser.uid, // сохраняем для обратной совместимости
+  userName: userData.lastName + ' ' + userData.initials,
+  matchId: currentBetMatch.id,
+  betType: currentBetType,
+  points: 0,
+  createdAt: serverTimestamp()
+};
   
   if (currentBetType === 'outcome') {
     if (!currentOutcome) {
@@ -1827,32 +1854,132 @@ window.loadProfileStats = async function() {
 
 // Админ-панель
 window.renderAdminMatches = function() {
+  console.log("🎯 renderAdminMatches вызван. Матчей:", allMatches.length);
+  
   const container = document.getElementById('adminMatchesList');
-  if (!container) return;
+  if (!container) {
+    console.error("❌ Контейнер adminMatchesList не найден!");
+    return;
+  }
+  
+  if (allMatches.length === 0) {
+    container.innerHTML = '<div class="loading">⏳ Загрузка матчей...</div>';
+    console.warn("⚠️ Матчи ещё не загружены");
+    return;
+  }
+  
   container.innerHTML = '';
   
-  allMatches.forEach(match => {
-    const item = document.createElement('div');
-    item.className = 'admin-match-item';
+  // Группируем по статусу
+  const finished = allMatches.filter(m => m.result !== null);
+  const scheduled = allMatches.filter(m => m.result === null);
+  
+  console.log("✅ Завершено:", finished.length, "| Ожидается:", scheduled.length);
+  
+  // Сначала матчи, которые можно заполнить (запланированные)
+  if (scheduled.length > 0) {
+    const section = document.createElement('div');
+    section.innerHTML = '<h4 style="margin:15px 0 10px;color:#28a745;">📝 Ожидают результата (' + scheduled.length + ')</h4>';
+    container.appendChild(section);
     
+    scheduled.forEach(match => {
+      container.appendChild(window.createAdminMatchItem(match));
+    });
+  }
+  
+  // Потом завершённые
+  if (finished.length > 0) {
+    const section = document.createElement('div');
+    section.innerHTML = '<h4 style="margin:15px 0 10px;color:#6c757d;">✅ Завершённые (' + finished.length + ')</h4>';
+    container.appendChild(section);
+    
+    finished.forEach(match => {
+      container.appendChild(window.createAdminMatchItem(match));
+    });
+  }
+};
+
+window.createAdminMatchItem = function(match) {
+  const item = document.createElement('div');
+  item.className = 'admin-match-item';
     const matchDate = new Date(match.date);
-    const dateStr = matchDate.toLocaleDateString('ru-RU') + ' ' + matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+  const dateStr = matchDate.toLocaleDateString('ru-RU') + ' ' + 
+                  matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+  
+  const groupLabel = match.group ? 'Группа ' + match.group : 
+                     (match.stage === 'round_of_32' ? '1/16' : 
+                      match.stage === 'round_of_16' ? '1/8' :
+                      match.stage === 'quarter' ? '1/4' :
+                      match.stage === 'semi' ? '1/2' :
+                      match.stage === 'final' ? 'Финал' : match.stage);
+  
+  item.innerHTML = `
+    <div class="admin-match-header">
+      <span>${match.team1.flag} ${match.team1.name} vs ${match.team2.name} ${match.team2.flag}</span>
+      <span style="color:#666;font-size:11px;">${groupLabel} | ${dateStr}</span>
+    </div>
+    <div class="result-inputs">
+      <input type="number" class="result-input" id="result_${match.id}_1" min="0" max="20" 
+             value="${match.result ? match.result.team1 : ''}" placeholder="0">
+      <span style="font-weight:bold;font-size:18px;">:</span>
+      <input type="number" class="result-input" id="result_${match.id}_2" min="0" max="20" 
+             value="${match.result ? match.result.team2 : ''}" placeholder="0">
+      <button class="btn btn-small" style="background:#28a745;" onclick="window.saveMatchResult('${match.id}')">💾</button>
+      ${match.result ? `<button class="btn btn-small" style="background:#dc3545;" onclick="window.clearMatchResult('${match.id}')">✖</button>` : ''}
+    </div>
+  `;
+  
+  return item;
+};
+
+// Функция очистки результата
+window.clearMatchResult = async function(matchId) {
+  if (!confirm('Удалить результат матча? Очки будут пересчитаны.')) return;
+  
+  try {
+    const match = allMatches.find(m => m.id === matchId);
+    const oldResult = match.result;
     
-    item.innerHTML = `
-      <div class="admin-match-header">
-        <span>${match.team1.name} vs ${match.team2.name}</span>
-        <span style="color:#666;font-size:12px;">${dateStr}</span>
-      </div>
-      <div class="result-inputs">
-        <input type="number" class="result-input" id="result_${match.id}_1" min="0" max="20" value="${match.result ? match.result.team1 : ''}" placeholder="0">
-        <span style="font-weight:bold;">:</span>
-        <input type="number" class="result-input" id="result_${match.id}_2" min="0" max="20" value="${match.result ? match.result.team2 : ''}" placeholder="0">
-        <button class="btn btn-small" style="background:#28a745;" onclick="window.saveMatchResult('${match.id}')">💾</button>
-      </div>
-    `;
+    await updateDoc(doc(db, "matches", matchId), {
+      result: null,
+      status: "scheduled"
+    });
     
-    container.appendChild(item);
-  });
+    // Обнуляем очки за этот матч
+    const betsRef = collection(db, "bets");
+    const q = query(betsRef, where("matchId", "==", matchId));
+    const snapshot = await getDocs(q);
+    
+    const batch = writeBatch(db);
+    const userPointsChanges = {};    
+    snapshot.forEach(docSnap => {
+      const bet = docSnap.data();
+      batch.update(docSnap.ref, {points: 0});
+      if (!userPointsChanges[bet.userCode]) userPointsChanges[bet.userCode] = 0;
+      userPointsChanges[bet.userCode] -= (bet.points || 0);
+    });
+    
+    await batch.commit();
+    
+    // Обновляем очки пользователей
+    for (const [userCode, change] of Object.entries(userPointsChanges)) {
+      if (change === 0) continue;
+      const usersQuery = query(collection(db, "users"), where("code", "==", userCode));
+      const usersSnap = await getDocs(usersQuery);
+      if (!usersSnap.empty) {
+        const userDoc = usersSnap.docs[0];
+        const current = userDoc.data().totalPoints || 0;
+        await updateDoc(userDoc.ref, {
+          totalPoints: Math.max(0, current + change)
+        });
+      }
+    }
+    
+    window.showAlert('✅ Результат удалён', 'success');
+  } catch (error) {
+    console.error(error);
+    window.showAlert('❌ ' + error.message, 'error');
+  }
 };
 
 window.saveMatchResult = async function(matchId) {
@@ -1938,16 +2065,23 @@ window.calculateBetPoints = async function(matchId, score1, score2) {
   
   await batch.commit();
   
-  for (const [userId, change] of Object.entries(userPointsChanges)) {
-    if (change === 0) continue;
-    const userDoc = await getDoc(doc(db, "users", userId));
-    if (userDoc.exists()) {
-      const current = userDoc.data().totalPoints || 0;
-      await updateDoc(doc(db, "users", userId), {
-        totalPoints: Math.max(0, current + change)
-      });
-    }
+  // 🔑 Используем userCode вместо userId
+for (const [userCode, change] of Object.entries(userPointsChanges)) {
+  if (change === 0) continue;
+  
+  // Ищем пользователя по коду
+  const usersQuery = query(collection(db, "users"), where("code", "==", userCode));
+  const usersSnap = await getDocs(usersQuery);
+  
+  if (!usersSnap.empty) {
+    const userDoc = usersSnap.docs[0];
+    const current = userDoc.data().totalPoints || 0;
+    await updateDoc(userDoc.ref, {
+      totalPoints: Math.max(0, current + change)
+    });
+    console.log(`✅ ${userCode}: ${current} → ${Math.max(0, current + change)}`);
   }
+}
 };
 
 // ========== АВТОМАТИЧЕСКОЕ ПРОДВИЖЕНИЕ ПО СЕТКЕ ==========
