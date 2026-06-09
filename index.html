@@ -195,12 +195,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </div>
 <div class="nav-tabs">
 <button class="nav-btn active" onclick="window.showTab('matches')">Матчи</button>
+<button class="nav-btn" onclick="window.showTab('bracket')">Сетка</button>
 <button class="nav-btn" onclick="window.showTab('leaderboard')">Таблица</button>
 <button class="nav-btn" onclick="window.showTab('profile')">Профиль</button>
 <button class="nav-btn hidden" id="navAdmin" onclick="window.showTab('admin')">Админ</button>
 </div>
 </div>
-
+</div>
+<div id="bracketTab" class="tab-content">
+<h2 style="margin-bottom:20px;color:#E31E24;">🏆 Сетка плей-офф</h2>
+<div id="bracketContainer"><div class="loading">Загрузка...</div></div>
+</div>
 <div id="matchesTab" class="tab-content active">
 <div class="filter-tabs">
 <button class="filter-btn active" onclick="window.filterMatches('all',this)">Все</button>
@@ -1321,9 +1326,10 @@ window.loadMatches = async function() {
       snap.forEach(doc => {
         allMatches.push({id: doc.id, ...doc.data()});
       });
-      allMatches.sort((a, b) => new Date(a.date) - new Date(b.date));
-      window.renderMatches();
-      if (isAdmin) window.renderAdminMatches();
+     allMatches.sort((a, b) => new Date(a.date) - new Date(b.date));
+window.renderMatches();
+window.renderBracket();
+if (isAdmin) window.renderAdminMatches();
     });
   } catch (error) {
     console.error("Ошибка матчей:", error);
