@@ -92,6 +92,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .alert{padding:12px 18px;border-radius:10px;margin-bottom:15px;font-weight:600;font-size:14px}
 .alert-error{background:#f8d7da;color:#721c24}
 .alert-success{background:#d4edda;color:#155724}
+.alert-info{background:#cce5ff;color:#004085}
 .search-input{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:10px;margin-bottom:15px;font-size:15px}
 .loading{text-align:center;padding:40px;color:#666}
 .bet-item{background:#f8f9fa;padding:12px;border-radius:10px;margin-bottom:10px;font-size:13px}
@@ -114,6 +115,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="auth-title">🏆 ЧМ-2026</div>
 <div class="auth-subtitle">Тотализатор ЭТАЖИ</div>
 <div id="alertContainer"></div>
+<button class="btn btn-secondary" onclick="forceLoadEmployees()" style="margin-top:15px;font-size:12px;padding:10px;">
+   Принудительно загрузить сотрудников
+</button>
+<button class="btn btn-secondary" onclick="checkFirestore()" style="margin-top:10px;font-size:12px;padding:10px;">
+  🔍 Проверить Firestore
+</button>
 
 <div id="loginForm">
 <div class="form-group">
@@ -1225,31 +1232,43 @@ async function loadEmployees() {
     const employeesRef = collection(db, "employees");
     const snapshot = await getDocs(employeesRef);
     
-    if (snapshot.size < 50) {
-      console.log("Загрузка сотрудников в Firestore...");
-      showAlert("⏳ Загрузка базы сотрудников...", "success");
+    console.log("В Firestore сейчас сотрудников:", snapshot.size);
+    
+    // Принудительно загружаем ВСЕХ сотрудников, если их меньше 500
+    if (snapshot.size < 500) {
+      console.log("Начинаем загрузку", employeesList.length, "сотрудников...");
+      showAlert("⏳ Загрузка базы сотрудников (" + employeesList.length + " чел.)...", "info");
       
-      const batch = writeBatch(db);
-      let count = 0;
-      employeesList.forEach(emp => {
-        const docRef = doc(employeesRef, emp.code);
-        const parts = emp.fullName.split(' ');
-        const lastName = parts[0] || emp.fullName;
-        const initials = parts.slice(1).map(n => n.charAt(0) + '.').join('');
-        batch.set(docRef, {
-          code: emp.code,
-          fullName: emp.fullName,
-          lastName: lastName,
-          initials: initials || '',
-          registered: false
+      // Загружаем порциями по 100, чтобы не превысить лимит
+      for (let i = 0; i < employeesList.length; i += 100) {
+        const batch = writeBatch(db);
+        const portion = employeesList.slice(i, i + 100);
+        
+        portion.forEach(emp => {
+          const docRef = doc(employeesRef, emp.code);
+          const parts = emp.fullName.split(' ');
+          const lastName = parts[0] || emp.fullName;
+          const initials = parts.slice(1).map(n => n.charAt(0) + '.').join('');
+          batch.set(docRef, {
+            code: emp.code,
+            fullName: emp.fullName,
+            lastName: lastName,
+            initials: initials || '',
+            registered: false
+          });
         });
-        count++;
-      });
-      await batch.commit();
-      console.log(`Загружено ${count} сотрудников`);
+        
+        await batch.commit();
+        console.log("Загружено", Math.min(i + 100, employeesList.length), "из", employeesList.length);
+      }
+      
+      showAlert("✅ База сотрудников загружена!", "success");
+    } else {
+      console.log("Сотрудники уже загружены, пропускаем");
     }
   } catch (error) {
-    console.error("Ошибка загрузки сотрудников:", error);
+    console.error("ОШИБКА загрузки сотрудников:", error);
+    showAlert("❌ Ошибка загрузки: " + error.message, "error");
   }
 }
 
@@ -1257,13 +1276,18 @@ async function loadAdminCode() {
   try {
     const adminDoc = await getDoc(doc(db, "admin_codes", "main"));
     if (!adminDoc.exists()) {
+      console.log("Создаём admin_codes/main...");
       await setDoc(doc(db, "admin_codes", "main"), {
         code: ADMIN_CODE,
         description: "Основной админ-код"
       });
+      console.log("✅ Админ-код создан");
+    } else {
+      console.log("Админ-код уже существует:", adminDoc.data());
     }
   } catch (error) {
-    console.error("Ошибка admin_codes:", error);
+    console.error("ОШИБКА admin_codes:", error);
+    showAlert("❌ Ошибка админ-кода: " + error.message, "error");
   }
 }
 
@@ -2212,6 +2236,70 @@ window.showRegisterForm = function() {
 window.showLoginForm = function() {
   document.getElementById('registerForm').classList.add('hidden');
   document.getElementById('loginForm').classList.remove('hidden');
+};
+  // Принудительная загрузка сотрудников по кнопке
+window.forceLoadEmployees = async function() {
+  showAlert("⏳ Начинаю загрузку...", "info");
+  try {
+    const employeesRef = collection(db, "employees");
+    const batch = writeBatch(db);
+    let count = 0;
+    
+    for (let i = 0; i < employeesList.length; i += 100) {
+      const portion = employeesList.slice(i, i + 100);
+      portion.forEach(emp => {
+        const docRef = doc(employeesRef, emp.code);
+        const parts = emp.fullName.split(' ');
+        const lastName = parts[0] || emp.fullName;
+        const initials = parts.slice(1).map(n => n.charAt(0) + '.').join('');
+        batch.set(docRef, {
+          code: emp.code,
+          fullName: emp.fullName,
+          lastName: lastName,
+          initials: initials || '',
+          registered: false
+        });
+        count++;
+      });
+      await batch.commit();
+      console.log("Порция загружена:", count);
+    }
+    
+    showAlert("✅ Загружено " + count + " сотрудников!", "success");
+  } catch (error) {
+    console.error(error);
+    showAlert("❌ Ошибка: " + error.message, "error");
+  }
+};
+  }
+// Проверка Firestore
+window.checkFirestore = async function() {
+  try {
+    // Проверяем employees
+    const empSnap = await getDocs(collection(db, "employees"));
+    console.log("Сотрудников в Firestore:", empSnap.size);
+    
+    // Проверяем admin_codes
+    const adminDoc = await getDoc(doc(db, "admin_codes", "main"));
+    console.log("Админ-код:", adminDoc.exists() ? adminDoc.data() : "НЕ СУЩЕСТВУЕТ");
+    
+    // Проверяем matches
+    const matchSnap = await getDocs(collection(db, "matches"));
+    console.log("Матчей в Firestore:", matchSnap.size);
+    
+    // Проверяем конкретного сотрудника PRIDE
+    const prideDoc = await getDoc(doc(db, "employees", "PRIDE"));
+    console.log("PRIDE в Firestore:", prideDoc.exists() ? prideDoc.data() : "НЕ НАЙДЕН");
+    
+    // Проверяем 1245791824
+    const chaykaDoc = await getDoc(doc(db, "employees", "1245791824"));
+    console.log("1245791824 в Firestore:", chaykaDoc.exists() ? chaykaDoc.data() : "НЕ НАЙДЕН");
+    
+    showAlert(`📊 Статистика:\n• Сотрудников: ${empSnap.size}\n• Матчей: ${matchSnap.size}\n• PRIDE: ${prideDoc.exists() ? '✅' : '❌'}\n• 1245791824: ${chaykaDoc.exists() ? '✅' : '❌'}`, "info");
+  } catch (error) {
+    console.error(error);
+    showAlert("❌ Ошибка проверки: " + error.message, "error");
+  }
 };
 </script>
 </body>
