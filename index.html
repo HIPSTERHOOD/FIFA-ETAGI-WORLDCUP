@@ -1347,12 +1347,12 @@ function setupAuthListener() {
   });
 }
 
-function showAuthScreen() {
+window.showAuthScreen = function() {
   document.getElementById('authScreen').style.display = 'flex';
   document.getElementById('mainApp').style.display = 'none';
 }
 
-function showMainApp() {
+window.showMainApp = function() {
   document.getElementById('authScreen').style.display = 'none';
   document.getElementById('mainApp').style.display = 'block';
   document.getElementById('userName').textContent = `${userData.lastName} ${userData.initials}`;
@@ -2273,32 +2273,63 @@ window.forceLoadEmployees = async function() {
 };
   }
 // Проверка Firestore
+// Принудительная загрузка сотрудников
+window.forceLoadEmployees = async function() {
+  showAlert(" Начинаю загрузку...", "info");
+  try {
+    const employeesRef = collection(db, "employees");
+    
+    for (let i = 0; i < employeesList.length; i += 100) {
+      const batch = writeBatch(db);
+      const portion = employeesList.slice(i, i + 100);
+      
+      portion.forEach(emp => {
+        const docRef = doc(employeesRef, emp.code);
+        const parts = emp.fullName.split(' ');
+        const lastName = parts[0] || emp.fullName;
+        const initials = parts.slice(1).map(n => n.charAt(0) + '.').join('');
+        batch.set(docRef, {
+          code: emp.code,
+          fullName: emp.fullName,
+          lastName: lastName,
+          initials: initials || '',
+          registered: false
+        });
+      });
+      
+      await batch.commit();
+      console.log("Загружено", Math.min(i + 100, employeesList.length));
+    }
+    
+    showAlert("✅ Загружено " + employeesList.length + " сотрудников!", "success");
+  } catch (error) {
+    console.error(error);
+    showAlert("❌ Ошибка: " + error.message, "error");
+  }
+};
+
+// Проверка Firestore
 window.checkFirestore = async function() {
   try {
-    // Проверяем employees
     const empSnap = await getDocs(collection(db, "employees"));
     console.log("Сотрудников в Firestore:", empSnap.size);
     
-    // Проверяем admin_codes
     const adminDoc = await getDoc(doc(db, "admin_codes", "main"));
     console.log("Админ-код:", adminDoc.exists() ? adminDoc.data() : "НЕ СУЩЕСТВУЕТ");
     
-    // Проверяем matches
     const matchSnap = await getDocs(collection(db, "matches"));
     console.log("Матчей в Firestore:", matchSnap.size);
     
-    // Проверяем конкретного сотрудника PRIDE
     const prideDoc = await getDoc(doc(db, "employees", "PRIDE"));
-    console.log("PRIDE в Firestore:", prideDoc.exists() ? prideDoc.data() : "НЕ НАЙДЕН");
+    console.log("PRIDE:", prideDoc.exists() ? "✅ НАЙДЕН" : "❌ НЕ НАЙДЕН");
     
-    // Проверяем 1245791824
     const chaykaDoc = await getDoc(doc(db, "employees", "1245791824"));
-    console.log("1245791824 в Firestore:", chaykaDoc.exists() ? chaykaDoc.data() : "НЕ НАЙДЕН");
+    console.log("1245791824:", chaykaDoc.exists() ? "✅ НАЙДЕН" : "❌ НЕ НАЙДЕН");
     
     showAlert(`📊 Статистика:\n• Сотрудников: ${empSnap.size}\n• Матчей: ${matchSnap.size}\n• PRIDE: ${prideDoc.exists() ? '✅' : '❌'}\n• 1245791824: ${chaykaDoc.exists() ? '✅' : '❌'}`, "info");
   } catch (error) {
     console.error(error);
-    showAlert("❌ Ошибка проверки: " + error.message, "error");
+    showAlert("❌ Ошибка: " + error.message, "error");
   }
 };
 </script>
