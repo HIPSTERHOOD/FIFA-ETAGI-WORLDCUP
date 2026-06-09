@@ -1324,7 +1324,7 @@ async function loadMatches() {
   }
 }
 
-function setupAuthListener() {
+window.setupAuthListener = function() {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUser = user;
@@ -2217,7 +2217,7 @@ window.showTab = function(tabName) {
 };
 
 // УТИЛИТЫ
-function showAlert(message, type) {
+window.showAlert = function(message, type) {
   const container = document.getElementById('alertContainer');
   if (!container) return;
   const alert = document.createElement('div');
@@ -2269,9 +2269,7 @@ window.forceLoadEmployees = async function() {
   } catch (error) {
     console.error(error);
     showAlert("❌ Ошибка: " + error.message, "error");
-  }
-};
-  }
+
 // Проверка Firestore
 // Принудительная загрузка сотрудников
 window.forceLoadEmployees = async function() {
