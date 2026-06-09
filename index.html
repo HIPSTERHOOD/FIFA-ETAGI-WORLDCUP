@@ -31,25 +31,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .nav-btn{flex:1;min-width:70px;padding:10px;background:rgba(255,255,255,0.1);border:none;color:white;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;white-space:nowrap}
 .nav-btn.active{background:white;color:#E31E24}
 /* Убираем лишние отступы */
+/* Убираем пустое пространство */
 .tab-content {
   display: none;
-  padding: 0; /* Было 20px */
+  padding: 0;
   padding-bottom: 100px;
-  background: #f5f5f5; /* Добавляем фон */
+  background: #f5f5f5;
 }
 
 .tab-content.active {
   display: block;
 }
 
-/* Убираем красную полосу у фильтров */
+/* Фильтры без лишнего фона */
 .filter-tabs {
   display: flex;
   gap: 8px;
-  margin-bottom: 0; /* Было 20px */
+  margin-bottom: 0;
   overflow-x: auto;
-  background: #E31E24; /* Красный фон */
-  padding: 15px; /* Добавляем отступы */
+  background: transparent; /* Убираем красный фон */
+  padding: 10px 20px;
 }
   
 .filter-btn{padding:8px 14px;background:white;border:2px solid #E31E24;color:#E31E24;border-radius:20px;font-weight:600;cursor:pointer;font-size:13px;white-space:nowrap}
@@ -178,8 +179,41 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 }
 
   /* Белый текст на красном фоне */
-.date-header h3,
+/* ЧЁРНЫЙ текст везде для лучшей видимости */
 .filter-btn,
+.date-header h3,
+.match-group,
+.match-time,
+.name,
+.vs,
+.btn-bet,
+.leaderboard-item,
+.user-name-lb,
+.points,
+.profile-stat,
+.stat-label,
+.stat-value,
+.admin-section h3,
+.admin-match-header,
+.bet-match,
+.bet-details,
+.bet-points,
+.modal-title,
+.bet-type-selector,
+.outcome-btn,
+.score-select,
+.search-input,
+.loading,
+.alert,
+.form-group label,
+.form-group input,
+.btn,
+.auth-title,
+.auth-subtitle {
+  color: #1a1a1a !important;
+}
+
+/* Исключение: белый текст в шапке (красный фон) */
 .header,
 .header-title,
 .nav-btn,
@@ -188,10 +222,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   color: white !important;
 }
 
-/* Иконки и даты */
-.match-card .date-icon,
-.match-card time {
-  color: #1a1a1a;
+/* Кнопки фильтров - белый фон, чёрный текст */
+.filter-btn {
+  background: white !important;
+  color: #1a1a1a !important;
+  border: 2px solid #E31E24 !important;
+}
+
+.filter-btn.active {
+  background: #E31E24 !important;
+  color: white !important;
 }
 </style>
 </head>
@@ -1507,16 +1547,16 @@ window.showMainApp = function() {
   document.getElementById('userPoints').textContent = userData.totalPoints || 0;
   document.getElementById('profileName').textContent = userData.fullName;
   
-  // 🔒 Скрываем код для всех, кроме самого админа
+  // Скрываем код для всех
   if (userData.code === 'PRIDE') {
-    document.getElementById('profileCode').textContent = '••••••••'; // Скрыто
+    document.getElementById('profileCode').textContent = '••••••••';
   } else {
     document.getElementById('profileCode').textContent = userData.code;
   }
   
   document.getElementById('profilePoints').textContent = userData.totalPoints || 0;
   
-  // 🔒 Только PRIDE видит админку
+  // Только PRIDE видит админку
   if (userData.code === 'PRIDE') {
     document.getElementById('adminBadge').classList.remove('hidden');
     document.getElementById('navAdmin').classList.remove('hidden');
@@ -1530,7 +1570,37 @@ window.showMainApp = function() {
   
   window.loadLeaderboard();
   window.loadProfileStats();
+  
+  // 🔥 ВАЖНО: Подписываемся на обновление очков текущего пользователя
+  window.subscribeToUserPoints();
 };
+
+  // Подписка на обновление очков в реальном времени
+window.subscribeToUserPoints = function() {
+  if (!userData || !userData.code) return;
+  
+  const userRef = doc(db, "users", currentUser.uid);
+  
+  onSnapshot(userRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const updatedData = docSnap.data();
+      const newPoints = updatedData.totalPoints || 0;
+      
+      console.log("📊 Очки обновились:", userData.totalPoints, "→", newPoints);
+      
+      // Обновляем глобальную переменную
+      userData.totalPoints = newPoints;
+      
+      // Обновляем отображение везде
+      document.getElementById('userPoints').textContent = newPoints;
+      document.getElementById('profilePoints').textContent = newPoints;
+      
+      // Обновляем таблицу лидеров
+      window.loadLeaderboard();
+    }
+  });
+};
+
 
 // Загрузка ставок
 window.loadBets = function() {
@@ -2028,8 +2098,6 @@ window.clearMatchResult = async function(matchId) {
 };
 
 window.saveMatchResult = async function(matchId) {
-  console.log("💾 saveMatchResult вызван для матча:", matchId);
-  
   const score1Input = document.getElementById('result_' + matchId + '_1');
   const score2Input = document.getElementById('result_' + matchId + '_2');
   
@@ -2049,45 +2117,40 @@ window.saveMatchResult = async function(matchId) {
   try {
     const match = allMatches.find(m => m.id === matchId);
     
-    console.log("📝 Сохраняем результат:", match.team1.name, score1 + ":" + score2, match.team2.name);
-    
     await updateDoc(doc(db, "matches", matchId), {
       result: {team1: score1, team2: score2},
       status: "finished"
     });
     
-    console.log("✅ Результат сохранён в Firestore");
-    
-    // 🔥 Пересчитываем очки за ставки
+    // Пересчитываем очки
     await window.calculateBetPoints(matchId, score1, score2);
     
     // 🔥 Обновляем таблицу лидеров
     window.loadLeaderboard();
     
-    // Если это групповой матч - обновляем таблицу группы
+    // Групповой матч
     if (match.stage === 'group') {
-      console.log("📋 Это групповой матч, обновляем таблицу группы...");
       await window.updatePlayoffMatches();
     }
     
-    // Если это матч плей-офф - продвигаем победителя
+    // Плей-офф
     if (match.stage !== 'group' && match.nextMatch) {
-      console.log("🏆 Это плей-офф, продвигаем победителя...");
       await window.advanceWinner(matchId);
     }
     
     window.showAlert('✅ Результат сохранён! Очки начислены.', 'success');
     
-    // Перерисовываем админ-панель
+    // Перерисовываем админку
     window.renderAdminMatches();
     
   } catch (error) {
-    console.error("💥 Ошибка сохранения результата:", error);
-    window.showAlert('❌ Ошибка: ' + error.message, 'error');
+    console.error(error);
+    window.showAlert('❌ ' + error.message, 'error');
   }
 };
+  
 window.calculateBetPoints = async function(matchId, score1, score2) {
-  console.log("🎯 calculateBetPoints вызван для матча:", matchId, "счёт:", score1 + ":" + score2);
+  console.log("🎯 calculateBetPoints для матча:", matchId);
   
   const betsRef = collection(db, "bets");
   const q = query(betsRef, where("matchId", "==", matchId));
@@ -2100,19 +2163,16 @@ window.calculateBetPoints = async function(matchId, score1, score2) {
     const bet = docSnap.data();
     let points = 0;
     
-    // 🔑 Используем userCode вместо userId
     const userCode = bet.userCode || bet.userId;
     const oldPoints = bet.points || 0;
     
     if (!userPointsChanges[userCode]) userPointsChanges[userCode] = 0;
     userPointsChanges[userCode] -= oldPoints;
     
-    // Рассчитываем очки
     if (bet.betType === 'score') {
       const [betScore1, betScore2] = bet.exactScore.split(':').map(Number);
       if (betScore1 === score1 && betScore2 === score2) {
         points = 2;
-        console.log(`✅ Точный счёт угадан: ${userCode} получил 2 очка`);
       }
     } else if (bet.betType === 'outcome') {
       let actualOutcome = 'draw';
@@ -2121,7 +2181,6 @@ window.calculateBetPoints = async function(matchId, score1, score2) {
       
       if (bet.outcome === actualOutcome) {
         points = 1;
-        console.log(`✅ Исход угадан: ${userCode} получил 1 очко`);
       }
     }
     
@@ -2130,13 +2189,11 @@ window.calculateBetPoints = async function(matchId, score1, score2) {
   });
   
   await batch.commit();
-  console.log("✅ Очки за ставки обновлены в Firestore");
   
-  // 🔑 Обновляем totalPoints у пользователей (используем userCode)
+  // Обновляем totalPoints у пользователей
   for (const [userCode, change] of Object.entries(userPointsChanges)) {
     if (change === 0) continue;
     
-    // Ищем пользователя по коду
     const usersQuery = query(collection(db, "users"), where("code", "==", userCode));
     const usersSnap = await getDocs(usersQuery);
     
@@ -2149,13 +2206,11 @@ window.calculateBetPoints = async function(matchId, score1, score2) {
         totalPoints: newTotal
       });
       
-      console.log(`💰 ${userCode}: ${current} → ${newTotal} (изменение: ${change})`);
-    } else {
-      console.warn(`⚠️ Пользователь с кодом ${userCode} не найден`);
+      console.log(`💰 ${userCode}: ${current} → ${newTotal} (+${change})`);
     }
   }
   
-  // 🔥 ВАЖНО: Обновляем таблицу лидеров
+  // 🔥 Обновляем таблицу лидеров
   console.log("📊 Обновляем таблицу лидеров...");
   window.loadLeaderboard();
 };
