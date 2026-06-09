@@ -100,6 +100,60 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .team.team2{justify-content:flex-start;text-align:left}
 .vs,.result{padding:5px 0}
 .outcome-options{grid-template-columns:1fr}
+  .bracket-stage {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.bracket-stage h3 {
+  color: #E31E24;
+  margin-bottom: 15px;
+  font-size: 18px;
+  border-bottom: 2px solid #E31E24;
+  padding-bottom: 10px;
+}
+
+.bracket-match {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-left: 4px solid #E31E24;
+}
+
+.bracket-team {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  margin: 4px 0;
+  border-radius: 6px;
+  background: white;
+}
+
+.bracket-team.winner {
+  background: #d4edda;
+  font-weight: bold;
+  border-left: 3px solid #28a745;
+}
+
+.bracket-team .flag {
+  font-size: 24px;
+  margin-right: 10px;
+}
+
+.bracket-team .name {
+  flex: 1;
+  font-size: 14px;
+}
+
+.bracket-team .score {
+  font-weight: bold;
+  color: #E31E24;
+  margin-left: 10px;
 }
 </style>
 </head>
@@ -1046,12 +1100,69 @@ const employeesList = [
 {code:"186873",fullName:"Ященко Наталья Владимировна"}
 ];
 
-// Матчи ЧМ-2026
 const matchesData = [
-{id:"A1",stage:"group",group:"A",team1:{name:"Мексика",code:"MEX",flag:"🇲"},team2:{name:"ЮАР",code:"RSA",flag:"🇿🇦"},date:"2026-06-11T22:00:00+03:00"},
-{id:"A2",stage:"group",group:"A",team1:{name:"Ю. Корея",code:"KOR",flag:"🇰🇷"},team2:{name:"Чехия",code:"CZE",flag:"🇨"},date:"2026-06-12T05:00:00+03:00"},
-{id:"B1",stage:"group",group:"B",team1:{name:"Канада",code:"CAN",flag:"🇨🇦"},team2:{name:"Босния",code:"BIH",flag:"🇧🇦"},date:"2026-06-12T22:00:00+03:00"},
-// ... добавьте остальные матчи
+  // ========== ГРУППОВОЙ ЭТАП (72 матча) ==========
+  // Группа A
+  {id:"A1",stage:"group",group:"A",team1:{name:"Мексика",code:"MEX",flag:"🇲🇽"},team2:{name:"ЮАР",code:"RSA",flag:"🇿🇦"},date:"2026-06-11T22:00:00+03:00",nextMatch:"A_winner"},
+  {id:"A2",stage:"group",group:"A",team1:{name:"Ю. Корея",code:"KOR",flag:"🇰🇷"},team2:{name:"Чехия",code:"CZE",flag:"🇨"},date:"2026-06-12T05:00:00+03:00",nextMatch:"A_winner"},
+  {id:"A3",stage:"group",group:"A",team1:{name:"Чехия",code:"CZE",flag:"🇨🇿"},team2:{name:"ЮАР",code:"RSA",flag:"🇿🇦"},date:"2026-06-18T19:00:00+03:00",nextMatch:"A_winner"},
+  {id:"A4",stage:"group",group:"A",team1:{name:"Мексика",code:"MEX",flag:"🇲🇽"},team2:{name:"Ю. Корея",code:"KOR",flag:"🇰🇷"},date:"2026-06-19T04:00:00+03:00",nextMatch:"A_winner"},
+  {id:"A5",stage:"group",group:"A",team1:{name:"Чехия",code:"CZE",flag:"🇨🇿"},team2:{name:"Мексика",code:"MEX",flag:"🇲🇽"},date:"2026-06-25T04:00:00+03:00",nextMatch:"A_winner"},
+  {id:"A6",stage:"group",group:"A",team1:{name:"ЮАР",code:"RSA",flag:"🇿🇦"},team2:{name:"Ю. Корея",code:"KOR",flag:"🇰🇷"},date:"2026-06-25T04:00:00+03:00",nextMatch:"A_winner"},
+  
+  // Группа B
+  {id:"B1",stage:"group",group:"B",team1:{name:"Канада",code:"CAN",flag:"🇨"},team2:{name:"Босния",code:"BIH",flag:"🇧🇦"},date:"2026-06-12T22:00:00+03:00",nextMatch:"B_winner"},
+  {id:"B2",stage:"group",group:"B",team1:{name:"Катар",code:"QAT",flag:"🇶🇦"},team2:{name:"Швейцария",code:"SUI",flag:"🇨🇭"},date:"2026-06-13T22:00:00+03:00",nextMatch:"B_winner"},
+  {id:"B3",stage:"group",group:"B",team1:{name:"Швейцария",code:"SUI",flag:"🇨🇭"},team2:{name:"Босния",code:"BIH",flag:"🇧🇦"},date:"2026-06-18T22:00:00+03:00",nextMatch:"B_winner"},
+  {id:"B4",stage:"group",group:"B",team1:{name:"Канада",code:"CAN",flag:"🇨🇦"},team2:{name:"Катар",code:"QAT",flag:"🇶🇦"},date:"2026-06-19T01:00:00+03:00",nextMatch:"B_winner"},
+  {id:"B5",stage:"group",group:"B",team1:{name:"Швейцария",code:"SUI",flag:"🇨🇭"},team2:{name:"Канада",code:"CAN",flag:"🇨"},date:"2026-06-25T01:00:00+03:00",nextMatch:"B_winner"},
+  {id:"B6",stage:"group",group:"B",team1:{name:"Босния",code:"BIH",flag:"🇧"},team2:{name:"Катар",code:"QAT",flag:"🇶🇦"},date:"2026-06-24T22:00:00+03:00",nextMatch:"B_winner"},
+  
+  // ... (добавьте остальные группы C-L по аналогии)
+  
+  // ========== 1/16 ФИНАЛА (16 матчей) ==========
+  {id:"R32_1",stage:"round_of_32",team1:{name:"TBD_A1",code:"TBD",flag:"❓"},team2:{name:"TBD_C2",code:"TBD",flag:"❓"},date:"2026-06-28T22:00:00+03:00",nextMatch:"R16_1",dependsOn:["A","C"]},
+  {id:"R32_2",stage:"round_of_32",team1:{name:"TBD_B1",code:"TBD",flag:"❓"},team2:{name:"TBD_D2",code:"TBD",flag:"❓"},date:"2026-06-29T01:00:00+03:00",nextMatch:"R16_2",dependsOn:["B","D"]},
+  {id:"R32_3",stage:"round_of_32",team1:{name:"TBD_C1",code:"TBD",flag:"❓"},team2:{name:"TBD_AB3",code:"TBD",flag:"❓"},date:"2026-06-29T04:00:00+03:00",nextMatch:"R16_3",dependsOn:["C","AB"]},
+  {id:"R32_4",stage:"round_of_32",team1:{name:"TBD_D1",code:"TBD",flag:"❓"},team2:{name:"TBD_EF3",code:"TBD",flag:"❓"},date:"2026-06-29T22:00:00+03:00",nextMatch:"R16_4",dependsOn:["D","EF"]},
+  {id:"R32_5",stage:"round_of_32",team1:{name:"TBD_E1",code:"TBD",flag:"❓"},team2:{name:"TBD_F2",code:"TBD",flag:"❓"},date:"2026-06-30T01:00:00+03:00",nextMatch:"R16_5",dependsOn:["E","F"]},
+  {id:"R32_6",stage:"round_of_32",team1:{name:"TBD_F1",code:"TBD",flag:"❓"},team2:{name:"TBD_GH3",code:"TBD",flag:"❓"},date:"2026-06-30T04:00:00+03:00",nextMatch:"R16_6",dependsOn:["F","GH"]},
+  {id:"R32_7",stage:"round_of_32",team1:{name:"TBD_G1",code:"TBD",flag:"❓"},team2:{name:"TBD_H2",code:"TBD",flag:"❓"},date:"2026-06-30T22:00:00+03:00",nextMatch:"R16_7",dependsOn:["G","H"]},
+  {id:"R32_8",stage:"round_of_32",team1:{name:"TBD_H1",code:"TBD",flag:"❓"},team2:{name:"TBD_AB3_2",code:"TBD",flag:"❓"},date:"2026-07-01T01:00:00+03:00",nextMatch:"R16_8",dependsOn:["H","AB"]},
+  {id:"R32_9",stage:"round_of_32",team1:{name:"TBD_I1",code:"TBD",flag:"❓"},team2:{name:"TBD_J2",code:"TBD",flag:"❓"},date:"2026-07-01T04:00:00+03:00",nextMatch:"R16_9",dependsOn:["I","J"]},
+  {id:"R32_10",stage:"round_of_32",team1:{name:"TBD_J1",code:"TBD",flag:"❓"},team2:{name:"TBD_KL3",code:"TBD",flag:"❓"},date:"2026-07-01T22:00:00+03:00",nextMatch:"R16_10",dependsOn:["J","KL"]},
+  {id:"R32_11",stage:"round_of_32",team1:{name:"TBD_K1",code:"TBD",flag:"❓"},team2:{name:"TBD_L2",code:"TBD",flag:"❓"},date:"2026-07-02T01:00:00+03:00",nextMatch:"R16_11",dependsOn:["K","L"]},
+  {id:"R32_12",stage:"round_of_32",team1:{name:"TBD_L1",code:"TBD",flag:"❓"},team2:{name:"TBD_IJ3",code:"TBD",flag:"❓"},date:"2026-07-02T04:00:00+03:00",nextMatch:"R16_12",dependsOn:["L","IJ"]},
+  {id:"R32_13",stage:"round_of_32",team1:{name:"TBD_I2",code:"TBD",flag:"❓"},team2:{name:"TBD_KL3_2",code:"TBD",flag:"❓"},date:"2026-07-02T22:00:00+03:00",nextMatch:"R16_13",dependsOn:["I","KL"]},
+  {id:"R32_14",stage:"round_of_32",team1:{name:"TBD_J2_2",code:"TBD",flag:"❓"},team2:{name:"TBD_GH3_2",code:"TBD",flag:"❓"},date:"2026-07-03T01:00:00+03:00",nextMatch:"R16_14",dependsOn:["J","GH"]},
+  {id:"R32_15",stage:"round_of_32",team1:{name:"TBD_K2",code:"TBD",flag:"❓"},team2:{name:"TBD_EF3_2",code:"TBD",flag:"❓"},date:"2026-07-03T04:00:00+03:00",nextMatch:"R16_15",dependsOn:["K","EF"]},
+  {id:"R32_16",stage:"round_of_32",team1:{name:"TBD_L2_2",code:"TBD",flag:"❓"},team2:{name:"TBD_CD3",code:"TBD",flag:"❓"},date:"2026-07-03T22:00:00+03:00",nextMatch:"R16_16",dependsOn:["L","CD"]},
+  
+  // ========== 1/8 ФИНАЛА (8 матчей) ==========
+  {id:"R16_1",stage:"round_of_16",team1:{name:"TBD_R32_1",code:"TBD",flag:"❓"},team2:{name:"TBD_R32_2",code:"TBD",flag:"❓"},date:"2026-07-05T22:00:00+03:00",nextMatch:"QF_1",dependsOn:["R32_1","R32_2"]},
+  {id:"R16_2",stage:"round_of_16",team1:{name:"TBD_R32_3",code:"TBD",flag:"❓"},team2:{name:"TBD_R32_4",code:"TBD",flag:"❓"},date:"2026-07-06T01:00:00+03:00",nextMatch:"QF_2",dependsOn:["R32_3","R32_4"]},
+  {id:"R16_3",stage:"round_of_16",team1:{name:"TBD_R32_5",code:"TBD",flag:"❓"},team2:{name:"TBD_R32_6",code:"TBD",flag:"❓"},date:"2026-07-06T04:00:00+03:00",nextMatch:"QF_3",dependsOn:["R32_5","R32_6"]},
+  {id:"R16_4",stage:"round_of_16",team1:{name:"TBD_R32_7",code:"TBD",flag:"❓"},team2:{name:"TBD_R32_8",code:"TBD",flag:"❓"},date:"2026-07-06T22:00:00+03:00",nextMatch:"QF_4",dependsOn:["R32_7","R32_8"]},
+  {id:"R16_5",stage:"round_of_16",team1:{name:"TBD_R32_9",code:"TBD",flag:"❓"},team2:{name:"TBD_R32_10",code:"TBD",flag:"❓"},date:"2026-07-07T01:00:00+03:00",nextMatch:"QF_5",dependsOn:["R32_9","R32_10"]},
+  {id:"R16_6",stage:"round_of_16",team1:{name:"TBD_R32_11",code:"TBD",flag:"❓"},team2:{name:"TBD_R32_12",code:"TBD",flag:"❓"},date:"2026-07-07T04:00:00+03:00",nextMatch:"QF_6",dependsOn:["R32_11","R32_12"]},
+  {id:"R16_7",stage:"round_of_16",team1:{name:"TBD_R32_13",code:"TBD",flag:"❓"},team2:{name:"TBD_R32_14",code:"TBD",flag:"❓"},date:"2026-07-07T22:00:00+03:00",nextMatch:"QF_7",dependsOn:["R32_13","R32_14"]},
+  {id:"R16_8",stage:"round_of_16",team1:{name:"TBD_R32_15",code:"TBD",flag:"❓"},team2:{name:"TBD_R32_16",code:"TBD",flag:"❓"},date:"2026-07-08T01:00:00+03:00",nextMatch:"QF_8",dependsOn:["R32_15","R32_16"]},
+  
+  // ========== 1/4 ФИНАЛА (4 матча) ==========
+  {id:"QF_1",stage:"quarter",team1:{name:"TBD_R16_1",code:"TBD",flag:"❓"},team2:{name:"TBD_R16_2",code:"TBD",flag:"❓"},date:"2026-07-10T22:00:00+03:00",nextMatch:"SF_1",dependsOn:["R16_1","R16_2"]},
+  {id:"QF_2",stage:"quarter",team1:{name:"TBD_R16_3",code:"TBD",flag:"❓"},team2:{name:"TBD_R16_4",code:"TBD",flag:"❓"},date:"2026-07-11T01:00:00+03:00",nextMatch:"SF_2",dependsOn:["R16_3","R16_4"]},
+  {id:"QF_3",stage:"quarter",team1:{name:"TBD_R16_5",code:"TBD",flag:"❓"},team2:{name:"TBD_R16_6",code:"TBD",flag:"❓"},date:"2026-07-11T04:00:00+03:00",nextMatch:"SF_3",dependsOn:["R16_5","R16_6"]},
+  {id:"QF_4",stage:"quarter",team1:{name:"TBD_R16_7",code:"TBD",flag:"❓"},team2:{name:"TBD_R16_8",code:"TBD",flag:"❓"},date:"2026-07-11T22:00:00+03:00",nextMatch:"SF_4",dependsOn:["R16_7","R16_8"]},
+  
+  // ========== 1/2 ФИНАЛА (2 матча) ==========
+  {id:"SF_1",stage:"semi",team1:{name:"TBD_QF_1",code:"TBD",flag:"❓"},team2:{name:"TBD_QF_2",code:"TBD",flag:"❓"},date:"2026-07-14T22:00:00+03:00",nextMatch:"FINAL",dependsOn:["QF_1","QF_2"]},
+  {id:"SF_2",stage:"semi",team1:{name:"TBD_QF_3",code:"TBD",flag:"❓"},team2:{name:"TBD_QF_4",code:"TBD",flag:"❓"},date:"2026-07-15T22:00:00+03:00",nextMatch:"FINAL",dependsOn:["QF_3","QF_4"]},
+  
+  // ========== МАТЧ ЗА 3 МЕСТО ==========
+  {id:"THIRD",stage:"third",team1:{name:"TBD_SF_1_L",code:"TBD",flag:"❓"},team2:{name:"TBD_SF_2_L",code:"TBD",flag:"❓"},date:"2026-07-18T22:00:00+03:00",dependsOn:["SF_1","SF_2"]},
+  
+  // ========== ФИНАЛ ==========
+  {id:"FINAL",stage:"final",team1:{name:"TBD_SF_1",code:"TBD",flag:"❓"},team2:{name:"TBD_SF_2",code:"TBD",flag:"❓"},date:"2026-07-19T22:00:00+03:00",dependsOn:["SF_1","SF_2"]}
 ];
 
 // Инициализация
@@ -1633,8 +1744,16 @@ window.renderAdminMatches = function() {
 };
 
 window.saveMatchResult = async function(matchId) {
-  const score1 = parseInt(document.getElementById('result_' + matchId + '_1').value);
-  const score2 = parseInt(document.getElementById('result_' + matchId + '_2').value);
+  const score1Input = document.getElementById('result_' + matchId + '_1');
+  const score2Input = document.getElementById('result_' + matchId + '_2');
+  
+  if (!score1Input || !score2Input) {
+    window.showAlert('Поля ввода не найдены', 'error');
+    return;
+  }
+  
+  const score1 = parseInt(score1Input.value);
+  const score2 = parseInt(score2Input.value);
   
   if (isNaN(score1) || isNaN(score2) || score1 < 0 || score2 < 0) {
     window.showAlert('Введите корректный счёт', 'error');
@@ -1642,15 +1761,30 @@ window.saveMatchResult = async function(matchId) {
   }
   
   try {
+    const match = allMatches.find(m => m.id === matchId);
+    
     await updateDoc(doc(db, "matches", matchId), {
       result: {team1: score1, team2: score2},
       status: "finished"
     });
     
+    // Пересчитываем очки за ставки
     await window.calculateBetPoints(matchId, score1, score2);
-    window.showAlert('✅ Результат сохранён!', 'success');
+    
+    // Если это групповой матч - обновляем таблицу группы
+    if (match.stage === 'group') {
+      await window.updatePlayoffMatches();
+    }
+    
+    // Если это матч плей-офф - продвигаем победителя
+    if (match.stage !== 'group' && match.nextMatch) {
+      await window.advanceWinner(matchId);
+    }
+    
+    window.showAlert('✅ Результат сохранён! Очки начислены.', 'success');
     
   } catch (error) {
+    console.error(error);
     window.showAlert('Ошибка: ' + error.message, 'error');
   }
 };
@@ -1704,6 +1838,184 @@ window.calculateBetPoints = async function(matchId, score1, score2) {
   }
 };
 
+// ========== АВТОМАТИЧЕСКОЕ ПРОДВИЖЕНИЕ ПО СЕТКЕ ==========
+
+// Расчёт таблицы группы и определение победителей
+window.calculateGroupStandings = function(groupId) {
+  const groupMatches = allMatches.filter(m => m.group === groupId && m.stage === 'group' && m.result);
+  
+  const standings = {};
+  
+  // Инициализация команд
+  groupMatches.forEach(match => {
+    if (!standings[match.team1.code]) {
+      standings[match.team1.code] = {
+        code: match.team1.code,
+        name: match.team1.name,
+        flag: match.team1.flag,
+        points: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        goalDifference: 0
+      };
+    }
+    if (!standings[match.team2.code]) {
+      standings[match.team2.code] = {
+        code: match.team2.code,
+        name: match.team2.name,
+        flag: match.team2.flag,
+        points: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        goalDifference: 0
+      };
+    }
+  });
+  
+  // Подсчёт очков
+  groupMatches.forEach(match => {
+    const t1 = standings[match.team1.code];
+    const t2 = standings[match.team2.code];
+    
+    t1.goalsFor += match.result.team1;
+    t1.goalsAgainst += match.result.team2;
+    t1.goalDifference = t1.goalsFor - t1.goalsAgainst;
+    
+    t2.goalsFor += match.result.team2;
+    t2.goalsAgainst += match.result.team1;
+    t2.goalDifference = t2.goalsFor - t2.goalsAgainst;
+    
+    if (match.result.team1 > match.result.team2) {
+      t1.points += 3;
+    } else if (match.result.team1 < match.result.team2) {
+      t2.points += 3;
+    } else {
+      t1.points += 1;
+      t2.points += 1;
+    }
+  });
+  
+  // Сортировка: очки → разница мячей → забитые мячи
+  const sorted = Object.values(standings).sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+    return b.goalsFor - a.goalsFor;
+  });
+  
+  return sorted; // [0] - 1 место, [1] - 2 место, [2] - 3 место, [3] - 4 место
+};
+
+// Обновление команд в матчах плей-офф
+window.updatePlayoffMatches = async function() {
+  const updates = [];
+  
+  // Для каждой группы определяем 1-е и 2-е места
+  const groups = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+  const groupWinners = {};
+  
+  groups.forEach(group => {
+    const standings = window.calculateGroupStandings(group);
+    groupWinners[group] = {
+      first: standings[0],
+      second: standings[1],
+      third: standings[2]
+    };
+  });
+  
+  // Обновляем матчи 1/16 финала
+  // Здесь нужна логика согласно расписанию ФИФА
+  // Пример для первых матчей:
+  
+  // R32_1: Победитель A vs 3-е место C/D/E
+  if (groupWinners.A && groupWinners.A.first) {
+    updates.push({
+      matchId: 'R32_1',
+      team: 'team1',
+      data: groupWinners.A.first
+    });
+  }
+  
+  // R32_2: Победитель B vs 3-е место A/C/D
+  if (groupWinners.B && groupWinners.B.first) {
+    updates.push({
+      matchId: 'R32_2',
+      team: 'team1',
+      data: groupWinners.B.first
+    });
+  }
+  
+  // ... добавьте остальные матчи по аналогии
+  
+  // Применяем обновления
+  for (const update of updates) {
+    const match = allMatches.find(m => m.id === update.matchId);
+    if (match) {
+      const matchRef = doc(db, "matches", update.matchId);
+      const updateData = {};
+      
+      if (update.team === 'team1') {
+        updateData['team1'] = update.data;
+        updateData['team1.name'] = update.data.name;
+        updateData['team1.code'] = update.data.code;
+        updateData['team1.flag'] = update.data.flag;
+      } else {
+        updateData['team2'] = update.data;
+        updateData['team2.name'] = update.data.name;
+        updateData['team2.code'] = update.data.code;
+        updateData['team2.flag'] = update.data.flag;
+      }
+      
+      await updateDoc(matchRef, updateData);
+    }
+  }
+};
+
+// Продвижение победителя в следующий раунд
+window.advanceWinner = async function(matchId) {
+  const match = allMatches.find(m => m.id === matchId);
+  if (!match || !match.result || !match.nextMatch) return;
+  
+  // Определяем победителя
+  let winner;
+  if (match.result.team1 > match.result.team2) {
+    winner = match.team1;
+  } else if (match.result.team2 > match.result.team1) {
+    winner = match.team2;
+  } else {
+    // Ничья в плей-офф - нужно дополнительное время/пенальти
+    // Пока оставляем TBD
+    return;
+  }
+  
+  // Находим следующий матч
+  const nextMatch = allMatches.find(m => m.id === match.nextMatch);
+  if (!nextMatch) return;
+  
+  // Определяем, в какую позицию вставлять (team1 или team2)
+  // Это зависит от структуры сетки
+  const teamPosition = nextMatch.team1.code === 'TBD' ? 'team1' : 'team2';
+  
+  // Обновляем следующий матч
+  const nextMatchRef = doc(db, "matches", match.nextMatch);
+  const updateData = {};
+  
+  if (teamPosition === 'team1') {
+    updateData['team1'] = winner;
+    updateData['team1.name'] = winner.name;
+    updateData['team1.code'] = winner.code;
+    updateData['team1.flag'] = winner.flag;
+  } else {
+    updateData['team2'] = winner;
+    updateData['team2.name'] = winner.name;
+    updateData['team2.code'] = winner.code;
+    updateData['team2.flag'] = winner.flag;
+  }
+  
+  await updateDoc(nextMatchRef, updateData);
+  
+  // Рекурсивно продолжаем продвижение
+  await window.advanceWinner(match.nextMatch);
+};  
 // Навигация
 window.showTab = function(tabName) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -1742,6 +2054,67 @@ window.forceLoadEmployees = async function() {
   await window.loadEmployees();
 };
 
+  // Отображение сетки плей-офф
+window.renderBracket = function() {
+  const container = document.getElementById('bracketContainer');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  // Группируем матчи по стадиям
+  const stages = {
+    'round_of_32': {name: '1/16 финала', matches: []},
+    'round_of_16': {name: '1/8 финала', matches: []},
+    'quarter': {name: '1/4 финала', matches: []},
+    'semi': {name: '1/2 финала', matches: []},
+    'third': {name: 'Матч за 3 место', matches: []},
+    'final': {name: 'ФИНАЛ', matches: []}
+  };
+  
+  allMatches.forEach(match => {
+    if (stages[match.stage]) {
+      stages[match.stage].matches.push(match);
+    }
+  });
+  
+  // Отрисовываем каждую стадию
+  Object.keys(stages).forEach(stageKey => {
+    const stage = stages[stageKey];
+    if (stage.matches.length === 0) return;
+    
+    const stageDiv = document.createElement('div');
+    stageDiv.className = 'bracket-stage';
+    stageDiv.innerHTML = `<h3>${stage.name}</h3>`;
+    
+    stage.matches.forEach(match => {
+      const matchDiv = document.createElement('div');
+      matchDiv.className = 'bracket-match';
+      
+      const isFinished = match.result !== null;
+      const team1Class = isFinished && match.result.team1 > match.result.team2 ? 'winner' : '';
+      const team2Class = isFinished && match.result.team2 > match.result.team1 ? 'winner' : '';
+      
+      matchDiv.innerHTML = `
+        <div class="bracket-team ${team1Class}">
+          <span class="flag">${match.team1.flag}</span>
+          <span class="name">${match.team1.name}</span>
+          <span class="score">${isFinished ? match.result.team1 : '-'}</span>
+        </div>
+        <div class="bracket-team ${team2Class}">
+          <span class="flag">${match.team2.flag}</span>
+          <span class="name">${match.team2.name}</span>
+          <span class="score">${isFinished ? match.result.team2 : '-'}</span>
+        </div>
+      `;
+      
+      stageDiv.appendChild(matchDiv);
+    });
+    
+    container.appendChild(stageDiv);
+  });
+};
+
+  
 window.checkFirestore = async function() {
   try {
     const empSnap = await getDocs(collection(db, "employees"));
