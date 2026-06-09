@@ -1274,28 +1274,51 @@ window.setupAuthListener = function() {
 window.loginUser = async function() {
   const code = document.getElementById('loginCode').value.trim();
   
+  console.log("🔍 Попытка входа с кодом:", code);
+  
   if (!code) {
     window.showAlert('Введите код сотрудника', 'error');
     return;
   }
   
   try {
-    // Проверяем существование сотрудника
+    // Шаг 1: Проверяем сотрудника
+    console.log("📋 Проверяем сотрудника в Firestore...");
     const empDoc = await getDoc(doc(db, "employees", code));
+    
     if (!empDoc.exists()) {
-      window.showAlert('❌ Сотрудник не найден', 'error');
+      console.error("❌ Сотрудник не найден:", code);
+      window.showAlert('❌ Сотрудник с кодом "' + code + '" не найден. Нажмите "📥 Загрузить сотрудников"', 'error');
       return;
     }
     
+    console.log("✅ Сотрудник найден:", empDoc.data().fullName);
     const empData = empDoc.data();
     currentEmployeeCode = code;
     
-    // Анонимный вход
-    await signInAnonymously(auth);
+    // Шаг 2: Анонимный вход
+    console.log("🔐 Выполняем анонимный вход...");
+    const userCredential = await signInAnonymously(auth);
+    console.log("✅ Анонимный вход успешен, UID:", userCredential.user.uid);
+    
+    // Шаг 3: Загружаем данные пользователя
+    console.log("📥 Загружаем данные пользователя...");
+    await window.loadUserData(code);
     
   } catch (error) {
-    console.error("Ошибка входа:", error);
-    window.showAlert('Ошибка: ' + error.message, 'error');
+    console.error("💥 Ошибка входа:", error);
+    
+    let message = 'Ошибка: ' + error.message;
+    
+    if (error.code === 'auth/admin-restricted-operation') {
+      message = '❌ Anonymous Auth отключён в Firebase!\n\nЗайдите в Firebase Console → Authentication → Sign-in method → включите Anonymous';
+    } else if (error.code === 'auth/network-request-failed') {
+      message = '❌ Нет интернета или проблема с сетью';
+    } else if (error.code === 'auth/api-key-not-valid') {
+      message = '❌ Неверный API ключ Firebase';
+    }
+    
+    window.showAlert(message, 'error');
   }
 };
 
