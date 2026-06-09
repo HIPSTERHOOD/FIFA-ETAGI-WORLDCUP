@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ЧМ-2026 | Тотализатор ЭТАЖИ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #1a1a1a;
+            overflow-x: hidden;
+        }
+
+        #authScreen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(135deg, #E31E24 0%, #1a1a1a 100%);
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .auth-title {
+            text-align: center;
+            color: #E31E24;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .auth-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1a1a1a;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #E31E24;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: #E31E24;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #c41a1f;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(227, 30, 36, 0.3);
+        }
+
+        .btn-secondary {
+            background: #1a1a1a;
+        }
+
+        .btn-secondary:hover {
+            background: #333;
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .auth-switch a {
+            color: #E31E24;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        #mainApp {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #E31E24;
+            color: white;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-points {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .user-name {
+            font-weight: 600;
+        }
+
+        .admin-badge {
+            background: #FFD700;
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+        }
+
+        .nav-btn {
+            flex: 1;
+            min-width: 80px;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .nav-btn.active {
+            background: white;
+            color: #E31E24;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .match-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .match-group {
+            background: #f0f0f0;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .match-teams {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .team {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .team.team2 {
+            justify-content: flex-end;
+        }
+
+        .flag {
+            font-size: 28px;
+        }
+
+        .name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .vs {
+            font-weight: bold;
+            color: #E31E24;
+            padding: 0 20px;
+        }
+
+        .btn-bet {
+            width: 100%;
+            padding: 14px;
+            background: #E31E24;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .match-locked {
+            text-align: center;
+            color: #999;
+            padding: 10px;
+            font-style: italic;
+        }
+
+        .leaderboard-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .leaderboard-item.current-user {
+            background: #fff3cd;
+            border: 2px solid #E31E24;
+        }
+
+        .position {
+            font-size: 24px;
+            font-weight: bold;
+            min-width: 40px;
+        }
+
+        .user-name {
+            flex: 1;
+            font-weight: 600;
+        }
+
+        .points {
+            color: #E31E24;
+            font-weight: bold;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #E31E24;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .bet-type-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .bet-type-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .bet-type-btn.active {
+            border-color: #E31E24;
+            background: #E31E24;
+            color: white;
+        }
+
+        .outcome-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .outcome-btn {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .outcome-btn.active {
+            border-color: #E31E24;
+            background: #E31E24;
+            color: white;
+        }
+
+        .score-selectors {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .score-select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div id="authScreen">
+        <div class="auth-container">
+            <div class="auth-title">🏆 ЧМ-2026</div>
+            <div class="auth-subtitle">Тотализатор ЭТАЖИ</div>
+            
+            <div id="alertContainer"></div>
+            
+            <div id="loginForm">
+                <div class="form-group">
+                    <label>Код сотрудника</label>
+                    <input type="text" id="loginCode" placeholder="Введите код">
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="loginPassword" placeholder="Введите пароль">
+                </div>
+                <button class="btn" onclick="loginUser()">🔐 Войти</button>
+                <div class="auth-switch">
+                    Впервые? <a onclick="showRegisterForm()">Зарегистрироваться</a>
+                </div>
+            </div>
+            
+            <div id="registerForm" class="hidden">
+                <div class="form-group">
+                    <label>ФИО</label>
+                    <input type="text" id="regFullName" placeholder="Фамилия Имя Отчество">
+                </div>
+                <div class="form-group">
+                    <label>Код сотрудника</label>
+                    <input type="text" id="regCode" placeholder="Введите код">
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="regPassword" placeholder="Придумайте пароль (мин. 6 символов)">
+                </div>
+                <div class="form-group">
+                    <label>Подтверждение пароля</label>
+                    <input type="password" id="regConfirmPassword" placeholder="Повторите пароль">
+                </div>
+                <div class="form-group">
+                    <label>Админ-код (если есть)</label>
+                    <input type="text" id="regAdminCode" placeholder="Код администратора">
+                </div>
+                <button class="btn" onclick="registerUser()">📝 Зарегистрироваться</button>
+                <button class="btn btn-secondary" onclick="showLoginForm()">Уже есть аккаунт</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainApp">
+        <div class="header">
+            <div class="header-top">
+                <div class="header-title">🏆 ЧМ-2026</div>
+                <div class="user-info">
+                    <div class="user-points">🔴 <span id="userPoints">0</span></div>
+                    <div class="user-name">
+                        <span id="userName"></span>
+                        <span id="adminBadge" class="admin-badge hidden">АДМИН</span>
+                    </div>
+                    <button onclick="logout()" style="background:none;border:none;color:white;cursor:pointer;font-size:20px;">🚪</button>
+                </div>
+            </div>
+            <div class="nav-tabs">
+                <button class="nav-btn active" id="navMatches">Матчи</button>
+                <button class="nav-btn" id="navLeaderboard">Таблица</button>
+                <button class="nav-btn" id="navProfile">Профиль</button>
+                <button class="nav-btn hidden" id="navAdmin">Админ</button>
+            </div>
+        </div>
+
+        <div id="matchesTab" class="tab-content active">
+            <div id="matchesList"></div>
+        </div>
+
+        <div id="leaderboardTab" class="tab-content">
+            <h2 style="margin-bottom: 20px; color: #E31E24;">🏆 Таблица лидеров</h2>
+            <div id="leaderboardList"></div>
+        </div>
+
+        <div id="profileTab" class="tab-content">
+            <h2 style="margin-bottom: 20px; color: #E31E24;">👤 Мой профиль</h2>
+            <div class="match-card">
+                <p><strong>ФИО:</strong> <span id="profileName"></span></p>
+                <p><strong>Код:</strong> <span id="profileCode"></span></p>
+                <p><strong>Очков:</strong> <span id="profilePoints"></span></p>
+            </div>
+        </div>
+
+        <div id="adminTab" class="tab-content">
+            <h2 style="margin-bottom: 20px; color: #E31E24;">⚙️ Админ-панель</h2>
+            <div class="match-card">
+                <p>Управление матчами и ставками</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="betModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title"> Ставка на матч</div>
+                <button class="modal-close" onclick="closeBetModal()">×</button>
+            </div>
+            
+            <div id="betMatchInfo"></div>
+            
+            <div class="bet-type-selector">
+                <button class="bet-type-btn active" onclick="selectBetType('outcome')" id="betTypeOutcome">Исход матча</button>
+                <button class="bet-type-btn" onclick="selectBetType('score')" id="betTypeScore">Точный счёт</button>
+            </div>
+            
+            <div id="outcomeSection">
+                <p style="margin-bottom: 10px; font-weight: 600;">Выберите исход:</p>
+                <div class="outcome-options">
+                    <button class="outcome-btn" onclick="selectOutcome('team1')" id="outcomeTeam1">П1</button>
+                    <button class="outcome-btn" onclick="selectOutcome('draw')" id="outcomeDraw">Ничья</button>
+                    <button class="outcome-btn" onclick="selectOutcome('team2')" id="outcomeTeam2">П2</button>
+                </div>
+            </div>
+            
+            <div id="scoreSection" class="hidden">
+                <p style="margin-bottom: 10px; font-weight: 600;">Выберите точный счёт:</p>
+                <div class="score-selectors">
+                    <select class="score-select" id="scoreTeam1">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                    <span style="font-size: 24px; font-weight: bold;">:</span>
+                    <select class="score-select" id="scoreTeam2">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+                <p style="color: #666; font-size: 14px; text-align: center;">Счёт 0:0 недоступен</p>
+            </div>
+            
+            <button class="btn" onclick="saveBet()">💰 Сделать ставку</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCV3qfYaqrJ2CCfuxkR3gEDLRizIpWjJbs",
+            authDomain: "football-championship-etagi.firebaseapp.com",
+            projectId: "football-championship-etagi",
+            storageBucket: "football-championship-etagi.firebasestorage.app",
+            messagingSenderId: "604719925709",
+            appId: "1:604719925709:web:2b37c51f9acd80dd185c84",
+            measurementId: "G-4ZNYHFVE51"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let userData = null;
+        let isAdmin = false;
+
+        const employeesData = [
+            {code: "PRIDE", fullName: "Чайка Илья Владиславович", lastName: "Чайка", initials: "И.В.", isAdmin: true},
+            {code: "138403", fullName: "Абрамов Вячеслав Владимирович", lastName: "Абрамов", initials: "В.В."},
+            {code: "83470", fullName: "Абрамова Татьяна Валерьевна", lastName: "Абрамова", initials: "Т.В."},
+            {code: "202518", fullName: "Агаев Камил Эмильевич", lastName: "Агаев", initials: "К.Э."},
+        ];
+
+        const matchesData = [
+            {id: "A1", stage: "group", group: "A", team1: {name: "Мексика", code: "MEX", flag: "🇽"}, team2: {name: "ЮАР", code: "RSA", flag: "🇦"}, date: "2026-06-11T22:00:00+03:00"},
+            {id: "A2", stage: "group", group: "A", team1: {name: "Ю. Корея", code: "KOR", flag: "🇰🇷"}, team2: {name: "Чехия", code: "CZE", flag: "🇨"}, date: "2026-06-12T05:00:00+03:00"},
+        ];
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            await initializeData();
+            setupAuthListener();
+            setupNavigation();
+        });
+
+        async function initializeData() {
+            await loadEmployees();
+            await loadMatches();
+        }
+
+        async function loadEmployees() {
+            const employeesRef = collection(db, "employees");
+            const snapshot = await getDocs(employeesRef);
+            
+            if (snapshot.empty) {
+                const batch = writeBatch(db);
+                employeesData.forEach(emp => {
+                    const docRef = doc(employeesRef, emp.code);
+                    batch.set(docRef, {
+                        ...emp,
+                        registered: false
+                    });
+                });
+                await batch.commit();
+            }
+        }
+
+        async function loadMatches() {
+            const matchesRef = collection(db, "matches");
+            const snapshot = await getDocs(matchesRef);
+            
+            if (snapshot.empty) {
+                const batch = writeBatch(db);
+                matchesData.forEach(match => {
+                    const docRef = doc(matchesRef, match.id);
+                    batch.set(docRef, {
+                        ...match,
+                        result: null,
+                        status: "scheduled"
+                    });
+                });
+                await batch.commit();
+            }
+        }
+
+        function setupAuthListener() {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUser = user;
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) {
+                        userData = userDoc.data();
+                        isAdmin = userData.isAdmin || false;
+                        showMainApp();
+                    }
+                } else {
+                    currentUser = null;
+                    userData = null;
+                    isAdmin = false;
+                    showAuthScreen();
+                }
+            });
+        }
+
+        function showAuthScreen() {
+            document.getElementById('authScreen').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+        }
+
+        function showMainApp() {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('userName').textContent = `${userData.lastName} ${userData.initials}`;
+            document.getElementById('userPoints').textContent = userData.totalPoints || 0;
+            document.getElementById('profileName').textContent = userData.fullName;
+            document.getElementById('profileCode').textContent = userData.code;
+            document.getElementById('profilePoints').textContent = userData.totalPoints || 0;
+            
+            if (isAdmin) {
+                document.getElementById('adminBadge').classList.remove('hidden');
+                document.getElementById('navAdmin').classList.remove('hidden');
+            }
+            
+            renderMatches();
+            loadLeaderboard();
+        }
+
+        window.registerUser = async function() {
+            const fullName = document.getElementById('regFullName').value.trim();
+            const code = document.getElementById('regCode').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const adminCode = document.getElementById('regAdminCode').value.trim();
+            
+            if (!fullName || !code || !password) {
+                showAlert('Заполните все поля', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showAlert('Пароль должен быть не менее 6 символов', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showAlert('Пароли не совпадают', 'error');
+                return;
+            }
+            
+            try {
+                const empDoc = await getDoc(doc(db, "employees", code));
+                if (!empDoc.exists()) {
+                    showAlert('Сотрудник с таким кодом не найден', 'error');
+                    return;
+                }
+                
+                const empData = empDoc.data();
+                if (empData.registered) {
+                    showAlert('Этот сотрудник уже зарегистрирован', 'error');
+                    return;
+                }
+                
+                let isAdmin = false;
+                if (adminCode) {
+                    const adminDoc = await getDoc(doc(db, "admin_codes", "main"));
+                    if (adminDoc.exists() && adminDoc.data().code === adminCode) {
+                        isAdmin = true;
+                    } else {
+                        showAlert('Неверный админ-код', 'error');
+                        return;
+                    }
+                }
+                
+                const email = `${code}@etagi-worldcup.local`;
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                
+                await setDoc(doc(db, "users", userCredential.user.uid), {
+                    uid: userCredential.user.uid,
+                    code: code,
+                    fullName: fullName,
+                    lastName: empData.lastName || fullName.split(' ')[0],
+                    initials: empData.initials || '',
+                    email: email,
+                    isAdmin: isAdmin || empData.isAdmin || false,
+                    totalPoints: 0,
+                    createdAt: serverTimestamp()
+                });
+                
+                await updateDoc(doc(db, "employees", code), {
+                    registered: true
+                });
+                
+                showAlert('Регистрация успешна!', 'success');
+                
+            } catch (error) {
+                console.error("Registration error:", error);
+                showAlert('Ошибка регистрации: ' + error.message, 'error');
+            }
+        };
+
+        window.loginUser = async function() {
+            const code = document.getElementById('loginCode').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!code || !password) {
+                showAlert('Введите код и пароль', 'error');
+                return;
+            }
+            
+            try {
+                const email = `${code}@etagi-worldcup.local`;
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                console.error("Login error:", error);
+                showAlert('Ошибка входа: проверьте код и пароль', 'error');
+            }
+        };
+
+        window.logout = async function() {
+            await signOut(auth);
+        };
+
+        function renderMatches() {
+            const container = document.getElementById('matchesList');
+            container.innerHTML = '';
+            
+            matchesData.forEach(match => {
+                const card = document.createElement('div');
+                card.className = 'match-card';
+                
+                const matchDate = new Date(match.date);
+                const matchTime = matchDate.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
+                const isLocked = matchDate <= new Date();
+                
+                card.innerHTML = `
+                    <div class="match-header">
+                        <span class="match-group">Группа ${match.group}</span>
+                        <span>${matchTime}</span>
+                    </div>
+                    <div class="match-teams">
+                        <div class="team team1">
+                            <span class="flag">${match.team1.flag}</span>
+                            <span class="name">${match.team1.name}</span>
+                        </div>
+                        <div class="vs">VS</div>
+                        <div class="team team2">
+                            <span class="name">${match.team2.name}</span>
+                            <span class="flag">${match.team2.flag}</span>
+                        </div>
+                    </div>
+                    ${!isLocked ? `
+                        <button class="btn-bet" onclick="openBetModal('${match.id}')">
+                            💰 Сделать ставку
+                        </button>
+                    ` : '<div class="match-locked">Ставки закрыты</div>'}
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        async function loadLeaderboard() {
+            const usersRef = collection(db, "users");
+            const q = query(usersRef, orderBy("totalPoints", "desc"));
+            const snapshot = await getDocs(q);
+            
+            const container = document.getElementById('leaderboardList');
+            container.innerHTML = '';
+            
+            snapshot.forEach(doc => {
+                const user = doc.data();
+                const item = document.createElement('div');
+                item.className = `leaderboard-item ${user.code === userData?.code ? 'current-user' : ''}`;
+                
+                item.innerHTML = `
+                    <span class="position">🏆</span>
+                    <span class="user-name">${user.lastName} ${user.initials}</span>
+                    <span class="points">${user.totalPoints || 0} очков</span>
+                `;
+                
+                container.appendChild(item);
+            });
+        }
+
+        window.openBetModal = function(matchId) {
+            const match = matchesData.find(m => m.id === matchId);
+            if (!match) return;
+            
+            document.getElementById('betMatchInfo').innerHTML = `
+                <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="text-align: center; flex: 1;">
+                            <div style="font-size: 32px;">${match.team1.flag}</div>
+                            <div style="font-weight: 600;">${match.team1.name}</div>
+                        </div>
+                        <div style="padding: 0 20px; color: #666;">VS</div>
+                        <div style="text-align: center; flex: 1;">
+                            <div style="font-size: 32px;">${match.team2.flag}</div>
+                            <div style="font-weight: 600;">${match.team2.name}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('betModal').classList.add('active');
+        };
+
+        window.closeBetModal = function() {
+            document.getElementById('betModal').classList.remove('active');
+        };
+
+        window.selectBetType = function(type) {
+            document.getElementById('betTypeOutcome').classList.toggle('active', type === 'outcome');
+            document.getElementById('betTypeScore').classList.toggle('active', type === 'score');
+            document.getElementById('outcomeSection').classList.toggle('hidden', type !== 'outcome');
+            document.getElementById('scoreSection').classList.toggle('hidden', type !== 'score');
+        };
+
+        window.selectOutcome = function(outcome) {
+            document.querySelectorAll('.outcome-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('outcome' + outcome.charAt(0).toUpperCase() + outcome.slice(1)).classList.add('active');
+        };
+
+        window.saveBet = async function() {
+            showAlert('Ставка сохранена!', 'success');
+            closeBetModal();
+        };
+
+        function setupNavigation() {
+            document.getElementById('navMatches').addEventListener('click', () => showTab('matches'));
+            document.getElementById('navLeaderboard').addEventListener('click', () => showTab('leaderboard'));
+            document.getElementById('navProfile').addEventListener('click', () => showTab('profile'));
+            document.getElementById('navAdmin').addEventListener('click', () => showTab('admin'));
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('nav' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            container.innerHTML = '';
+            container.appendChild(alert);
+            
+            setTimeout(() => alert.remove(), 3000);
+        }
+
+        window.showRegisterForm = function() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+        };
+
+        window.showLoginForm = function() {
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        };
+    </script>
+</body>
+</html>
