@@ -52,6 +52,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   background: transparent; /* Убираем красный фон */
   padding: 10px 20px;
 }
+
+  /* Кнопки навигации - красный фон, белый текст */
+.nav-btn {
+  flex: 1;
+  min-width: 70px;
+  padding: 10px;
+  background: rgba(255,255,255,0.2) !important; /* Полупрозрачный белый */
+  border: none;
+  color: white !important; /* Белый текст */
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.nav-btn.active {
+  background: white !important; /* Белая плашка */
+  color: #E31E24 !important; /* Красный текст */
+}
   
 .filter-btn{padding:8px 14px;background:white;border:2px solid #E31E24;color:#E31E24;border-radius:20px;font-weight:600;cursor:pointer;font-size:13px;white-space:nowrap}
 .filter-btn.active{background:#E31E24;color:white}
@@ -1601,7 +1621,85 @@ window.subscribeToUserPoints = function() {
   });
 };
 
+// Подписка на обновление очков в реальном времени
+window.subscribeToUserPoints = function() {
+  if (!userData || !userData.code) return;
+  
+  const userRef = doc(db, "users", currentUser.uid);
+  
+  onSnapshot(userRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const updatedData = docSnap.data();
+      const newPoints = updatedData.totalPoints || 0;
+      
+      console.log("📊 Очки обновились:", userData.totalPoints, "→", newPoints);
+      
+      // Обновляем глобальную переменную
+      userData.totalPoints = newPoints;
+      
+      // 🔥 Обновляем ВСЕ места где показываются очки
+      document.getElementById('userPoints').textContent = newPoints;
+      document.getElementById('profilePoints').textContent = newPoints;
+      
+      // Обновляем таблицу лидеров
+      window.loadLeaderboard();
+    }
+  }, (error) => {
+    console.error("❌ Ошибка подписки на очки:", error);
+  });
+};
 
+  // Очистка дубликатов пользователей
+window.removeDuplicateUsers = async function() {
+  if (!confirm('Удалить дубликаты пользователей?')) return;
+  
+  try {
+    const usersRef = collection(db, "users");
+    const snapshot = await getDocs(usersRef);
+    
+    const usersByCode = {};
+    const duplicates = [];
+    
+    // Находим дубликаты
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      const code = data.code;
+      
+      if (usersByCode[code]) {
+        // Это дубликат - оставляем тот, что новее
+        const existing = usersByCode[code];
+        const existingTime = existing.createdAt?.toMillis() || 0;
+        const newTime = data.createdAt?.toMillis() || 0;
+        
+        if (newTime > existingTime) {
+          duplicates.push(existing.id);
+          usersByCode[code] = { id: docSnap.id, ...data };
+        } else {
+          duplicates.push(docSnap.id);
+        }
+      } else {
+        usersByCode[code] = { id: docSnap.id, ...data };
+      }
+    });
+    
+    // Удаляем дубликаты
+    const batch = writeBatch(db);
+    duplicates.forEach(id => {
+      batch.delete(doc(db, "users", id));
+    });
+    
+    await batch.commit();
+    
+    window.showAlert(`✅ Удалено дубликатов: ${duplicates.length}`, 'success');
+    console.log("🗑️ Удалены дубликаты:", duplicates);
+    
+  } catch (error) {
+    console.error("❌ Ошибка:", error);
+    window.showAlert('❌ ' + error.message, 'error');
+  }
+};
+
+  
 // Загрузка ставок
 window.loadBets = function() {
   if (!userData || !userData.code) {
@@ -1874,19 +1972,30 @@ window.renderLeaderboard = function(users) {
   if (!container) return;
   container.innerHTML = '';
   
-  if (users.length === 0) {
+  if (!users || users.length === 0) {
     container.innerHTML = '<div class="loading">Пока пусто</div>';
     return;
   }
+  
+  // 🔥 Убираем дубликаты по коду
+  const uniqueUsers = {};
+  users.forEach(user => {
+    const code = user.code;
+    if (!uniqueUsers[code] || (user.totalPoints || 0) > (uniqueUsers[code].totalPoints || 0)) {
+      uniqueUsers[code] = user;
+    }
+  });
+  
+  const sortedUsers = Object.values(uniqueUsers).sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
   
   let currentPosition = 1;
   let previousPoints = -1;
   let posCounter = 0;
   
-  users.forEach((user, index) => {
-    // 🔒 Скрываем PRIDE из таблицы для обычных сотрудников
+  sortedUsers.forEach((user, index) => {
+    // Скрываем PRIDE для обычных сотрудников
     if (user.code === 'PRIDE' && userData.code !== 'PRIDE') {
-      return; // Не показываем админа обычным сотрудникам
+      return;
     }
     
     if (user.totalPoints !== previousPoints) {
@@ -1903,7 +2012,6 @@ window.renderLeaderboard = function(users) {
     else if (currentPosition === 2) medal = '🥈';
     else if (currentPosition === 3) medal = '🥉';
     
-    // 🔒 Показываем только ФИО, без кода
     item.innerHTML = `
       <span class="position">${medal || currentPosition}</span>
       <span class="user-name-lb">${user.lastName} ${user.initials}</span>
