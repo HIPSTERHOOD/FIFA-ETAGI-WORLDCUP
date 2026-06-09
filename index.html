@@ -2179,14 +2179,24 @@ window.checkFirestore = async function() {
   try {
     const empSnap = await getDocs(collection(db, "employees"));
     const matchSnap = await getDocs(collection(db, "matches"));
-    const prideDoc = await getDoc(doc(db, "employees", "PRIDE"));
-    const chaykaDoc = await getDoc(doc(db, "employees", "1245791824"));
+    const usersSnap = await getDocs(collection(db, "users"));
+    
+    // 🔥 ВАЖНО: Сбрасываем isAdmin у всех, кроме PRIDE
+    let fixedCount = 0;
+    usersSnap.forEach(async (docSnap) => {
+      const userData = docSnap.data();
+      if (userData.code !== 'PRIDE' && userData.isAdmin === true) {
+        await updateDoc(doc(db, "users", docSnap.id), { isAdmin: false });
+        fixedCount++;
+        console.log("🔧 Сброшен isAdmin у:", userData.code);
+      }
+    });
     
     const msg = "📊 Статистика:\n" +
                 "• Сотрудников: " + empSnap.size + "\n" +
                 "• Матчей: " + matchSnap.size + "\n" +
-                "• PRIDE: " + (prideDoc.exists() ? '✅' : '❌') + "\n" +
-                "• 1245791824: " + (chaykaDoc.exists() ? '✅' : '❌');
+                "• Пользователей: " + usersSnap.size + "\n" +
+                "• 🔧 Исправлено isAdmin: " + fixedCount;
     
     window.showAlert(msg, "info");
   } catch (error) {
