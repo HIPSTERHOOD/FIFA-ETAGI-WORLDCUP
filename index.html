@@ -6,32 +6,27 @@
 <title>ЧМ-2026 | Тотализатор ЭТАЖИ</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;color:#1a1a1a;overflow-x:hidden}
-#authScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(135deg,#E31E24 0%,#1a1a1a 100%)}
-.auth-container{background:white;border-radius:20px;padding:30px;width:100%;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,0.3)}
-.auth-title{text-align:center;color:#E31E24;font-size:28px;font-weight:bold;margin-bottom:10px}
-.auth-subtitle{text-align:center;color:#666;margin-bottom:30px;font-size:14px}
-.form-group{margin-bottom:20px}
-.form-group label{display:block;margin-bottom:8px;font-weight:600;font-size:14px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#E31E24 0%,#1a1a1a 100%);color:#1a1a1a;overflow-x:hidden;min-height:100vh}
+.auth-container{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.auth-box{background:white;border-radius:20px;padding:40px;width:100%;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,0.3);text-align:center}
+.auth-title{color:#E31E24;font-size:32px;font-weight:bold;margin-bottom:10px}
+.auth-subtitle{color:#666;margin-bottom:30px;font-size:14px}
+.form-group{margin-bottom:20px;text-align:left}
+.form-group label{display:block;margin-bottom:8px;font-weight:600;font-size:14px;color:#1a1a1a}
 .form-group input{width:100%;padding:14px;border:2px solid #e0e0e0;border-radius:10px;font-size:16px}
 .form-group input:focus{outline:none;border-color:#E31E24}
-.form-hint{font-size:12px;color:#666;margin-top:5px}
-.btn{width:100%;padding:16px;background:#E31E24;color:white;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;margin-top:10px}
-.btn:hover{background:#c41a1f}
-.btn-secondary{background:#1a1a1a}
-.btn-success{background:#28a745}
-.btn-small{padding:8px 16px;font-size:14px;width:auto;margin-top:0}
-.auth-switch{text-align:center;margin-top:20px;color:#666}
-.auth-switch a{color:#E31E24;font-weight:600;cursor:pointer}
-#mainApp{display:none;min-height:100vh}
+.btn{width:100%;padding:16px;background:#E31E24;color:white;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;margin-top:10px;transition:all 0.3s}
+.btn:hover{background:#c41a1f;transform:translateY(-2px)}
+.btn-secondary{background:#1a1a1a;margin-top:10px}
+.btn-small{padding:8px 16px;font-size:13px;width:auto}
+#mainApp{display:none;min-height:100vh;background:#f5f5f5}
 .header{background:#E31E24;color:white;padding:15px 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,0.2)}
 .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;gap:10px}
 .header-title{font-size:20px;font-weight:bold}
 .user-info{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .user-points{background:rgba(255,255,255,0.2);padding:6px 12px;border-radius:20px;font-weight:600;font-size:14px}
 .user-name{font-weight:600;font-size:14px}
-.admin-badge{background:#FFD700;color:#000;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:bold;margin-left:5px}
-.impersonate-badge{background:#ff6b6b;color:white;padding:4px 8px;border-radius:10px;font-size:11px;font-weight:bold;margin-left:5px}
+.admin-badge{background:#FFD700;color:#000;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:bold}
 .nav-tabs{display:flex;gap:8px;overflow-x:auto}
 .nav-btn{flex:1;min-width:70px;padding:10px;background:rgba(255,255,255,0.1);border:none;color:white;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;white-space:nowrap}
 .nav-btn.active{background:white;color:#E31E24}
@@ -41,7 +36,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .filter-btn{padding:8px 14px;background:white;border:2px solid #E31E24;color:#E31E24;border-radius:20px;font-weight:600;cursor:pointer;font-size:13px;white-space:nowrap}
 .filter-btn.active{background:#E31E24;color:white}
 .date-header{margin:20px 0 15px;padding:10px 0;border-bottom:3px solid #E31E24}
-.date-header h3{color:#E31E24;font-size:16px;text-transform:capitalize}
+.date-header h3{color:#E31E24;font-size:16px}
 .match-card{background:white;border-radius:15px;padding:18px;margin-bottom:15px;box-shadow:0 2px 10px rgba(0,0,0,0.08)}
 .match-header{display:flex;justify-content:space-between;margin-bottom:12px;font-size:13px;color:#666}
 .match-group{background:#f0f0f0;padding:4px 10px;border-radius:12px;font-weight:600}
@@ -53,7 +48,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .vs{font-weight:bold;color:#E31E24;padding:0 10px;font-size:12px}
 .result{font-size:22px;font-weight:bold;color:#E31E24;padding:0 10px}
 .btn-bet{width:100%;padding:12px;background:#E31E24;color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-size:14px}
-.btn-bet:disabled{background:#ccc;cursor:not-allowed}
 .match-locked{text-align:center;color:#999;padding:8px;font-style:italic;font-size:13px}
 .user-bet-info{background:#fff3cd;padding:10px;border-radius:8px;margin-top:10px;font-size:13px;border-left:4px solid #E31E24}
 .bet-type{font-weight:600;color:#E31E24}
@@ -89,7 +83,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .result-input{width:60px;padding:8px;border:2px solid #e0e0e0;border-radius:8px;text-align:center;font-size:16px;font-weight:600}
 .user-list-item{display:flex;justify-content:space-between;align-items:center;padding:12px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;gap:10px;flex-wrap:wrap}
 .hidden{display:none!important}
-.alert{padding:12px 18px;border-radius:10px;margin-bottom:15px;font-weight:600;font-size:14px}
+.alert{padding:12px 18px;border-radius:10px;margin-bottom:15px;font-weight:600;font-size:14px;position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:2000;max-width:90%}
 .alert-error{background:#f8d7da;color:#721c24}
 .alert-success{background:#d4edda;color:#155724}
 .alert-info{background:#cce5ff;color:#004085}
@@ -99,6 +93,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .bet-match{font-weight:600;margin-bottom:5px}
 .bet-details{color:#666;margin-bottom:5px}
 .bet-points{color:#28a745;font-weight:600}
+.debug-btns{margin-top:15px;display:flex;gap:10px;flex-direction:column}
 @media (max-width:768px){
 .header-title{font-size:18px}
 .match-teams{flex-direction:column;gap:8px}
@@ -110,57 +105,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </head>
 <body>
 
-<div id="authScreen">
-<div class="auth-container">
-<div class="auth-title">🏆 ФУТБОЛЬНЫЙ ЧМ-2026 X ЭТАЖИ</div>
+<div id="authScreen" class="auth-container">
+<div class="auth-box">
+<div class="auth-title">🏆 ЧМ-2026</div>
 <div class="auth-subtitle">Тотализатор ЭТАЖИ</div>
 <div id="alertContainer"></div>
-<button class="btn btn-secondary" onclick="forceLoadEmployees()" style="margin-top:15px;font-size:12px;padding:10px;">
-   Принудительно загрузить сотрудников
-</button>
-<button class="btn btn-secondary" onclick="checkFirestore()" style="margin-top:10px;font-size:12px;padding:10px;">
-  🔍 Проверить Firestore
-</button>
 
-<div id="loginForm">
 <div class="form-group">
 <label>Код сотрудника</label>
-<input type="text" id="loginCode" placeholder="Введите код" autocomplete="off">
-</div>
-<div class="form-group">
-<label>Пароль</label>
-<input type="password" id="loginPassword" placeholder="Введите пароль">
-<div class="form-hint">💡 Админ может войти в любой аккаунт, введя свой админ-пароль</div>
-</div>
-<button class="btn" onclick="loginUser()">🔐 Войти</button>
-<div class="auth-switch">
-Впервые? <a onclick="showRegisterForm()">Зарегистрироваться</a>
-</div>
+<input type="text" id="loginCode" placeholder="Введите ваш код" autocomplete="off">
 </div>
 
-<div id="registerForm" class="hidden">
-<div class="form-group">
-<label>ФИО</label>
-<input type="text" id="regFullName" placeholder="Фамилия Имя Отчество" autocomplete="off">
-</div>
-<div class="form-group">
-<label>Код сотрудника</label>
-<input type="text" id="regCode" placeholder="Введите код" autocomplete="off">
-</div>
-<div class="form-group">
-<label>Пароль</label>
-<input type="password" id="regPassword" placeholder="Минимум 6 символов">
-</div>
-<div class="form-group">
-<label>Подтверждение пароля</label>
-<input type="password" id="regConfirmPassword" placeholder="Повторите пароль">
-</div>
-<div class="form-group">
-<label>Админ-код (только для админов)</label>
-<input type="text" id="regAdminCode" placeholder="Оставьте пустым, если не админ" autocomplete="off">
-</div>
-<button class="btn" onclick="registerUser()">📝 Зарегистрироваться</button>
-<button class="btn btn-secondary" onclick="showLoginForm()">← Уже есть аккаунт</button>
+<button class="btn" onclick="window.loginUser()">🔐 Войти</button>
+
+<div class="debug-btns">
+<button class="btn btn-secondary" onclick="window.forceLoadEmployees()">📥 Загрузить сотрудников</button>
+<button class="btn btn-secondary" onclick="window.checkFirestore()">🔍 Проверить Firestore</button>
 </div>
 </div>
 </div>
@@ -174,44 +134,42 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="user-name">
 <span id="userName"></span>
 <span id="adminBadge" class="admin-badge hidden">АДМИН</span>
-<span id="impersonateBadge" class="impersonate-badge hidden">ВХОД КАК</span>
 </div>
-<button onclick="logout()" style="background:none;border:none;color:white;cursor:pointer;font-size:20px;">🚪</button>
+<button onclick="window.logout()" style="background:none;border:none;color:white;cursor:pointer;font-size:20px;">🚪</button>
 </div>
 </div>
 <div class="nav-tabs">
-<button class="nav-btn active" id="navMatches" onclick="showTab('matches')">Матчи</button>
-<button class="nav-btn" id="navLeaderboard" onclick="showTab('leaderboard')">Таблица</button>
-<button class="nav-btn" id="navProfile" onclick="showTab('profile')">Профиль</button>
-<button class="nav-btn hidden" id="navAdmin" onclick="showTab('admin')">Админ</button>
+<button class="nav-btn active" onclick="window.showTab('matches')">Матчи</button>
+<button class="nav-btn" onclick="window.showTab('leaderboard')">Таблица</button>
+<button class="nav-btn" onclick="window.showTab('profile')">Профиль</button>
+<button class="nav-btn hidden" id="navAdmin" onclick="window.showTab('admin')">Админ</button>
 </div>
 </div>
 
 <div id="matchesTab" class="tab-content active">
 <div class="filter-tabs">
-<button class="filter-btn active" onclick="filterMatches('all',this)">Все</button>
-<button class="filter-btn" onclick="filterMatches('today',this)">Сегодня</button>
-<button class="filter-btn" onclick="filterMatches('group',this)">Группы</button>
-<button class="filter-btn" onclick="filterMatches('playoff',this)">Плей-офф</button>
+<button class="filter-btn active" onclick="window.filterMatches('all',this)">Все</button>
+<button class="filter-btn" onclick="window.filterMatches('today',this)">Сегодня</button>
+<button class="filter-btn" onclick="window.filterMatches('group',this)">Группы</button>
+<button class="filter-btn" onclick="window.filterMatches('playoff',this)">Плей-офф</button>
 </div>
 <div id="matchesList"><div class="loading">Загрузка матчей...</div></div>
 </div>
 
 <div id="leaderboardTab" class="tab-content">
 <h2 style="margin-bottom:20px;color:#E31E24;">🏆 Таблица лидеров</h2>
-<input type="text" class="search-input" id="leaderboardSearch" placeholder="🔍 Поиск сотрудника..." oninput="searchLeaderboard()">
+<input type="text" class="search-input" id="leaderboardSearch" placeholder="🔍 Поиск..." oninput="window.searchLeaderboard()">
 <div id="leaderboardList"><div class="loading">Загрузка...</div></div>
 </div>
 
 <div id="profileTab" class="tab-content">
-<h2 style="margin-bottom:20px;color:#E31E24;">👤 Мой профиль</h2>
+<h2 style="margin-bottom:20px;color:#E31E24;">👤 Профиль</h2>
 <div class="profile-card">
 <div class="profile-stat"><span class="stat-label">ФИО:</span><span class="stat-value" id="profileName"></span></div>
 <div class="profile-stat"><span class="stat-label">Код:</span><span class="stat-value" id="profileCode"></span></div>
-<div class="profile-stat"><span class="stat-label">Всего очков:</span><span class="stat-value" id="profilePoints"></span></div>
-<div class="profile-stat"><span class="stat-label">Сделано ставок:</span><span class="stat-value" id="profileBets"></span></div>
+<div class="profile-stat"><span class="stat-label">Очков:</span><span class="stat-value" id="profilePoints"></span></div>
+<div class="profile-stat"><span class="stat-label">Ставок:</span><span class="stat-value" id="profileBets"></span></div>
 <div class="profile-stat"><span class="stat-label">Угадано:</span><span class="stat-value" id="profileCorrect"></span></div>
-<div class="profile-stat"><span class="stat-label">Место в рейтинге:</span><span class="stat-value" id="profileRank"></span></div>
 </div>
 <h3 style="margin-bottom:15px;color:#E31E24;">📋 История ставок</h3>
 <div id="betsHistoryList"></div>
@@ -220,33 +178,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div id="adminTab" class="tab-content">
 <h2 style="margin-bottom:20px;color:#E31E24;">⚙️ Админ-панель</h2>
 <div class="admin-section">
-<h3>📊 Ввод результатов матчей</h3>
+<h3>📊 Результаты матчей</h3>
 <div id="adminMatchesList"></div>
 </div>
 <div class="admin-section">
-<h3>👥 Все пользователи</h3>
-<input type="text" class="search-input" id="adminUserSearch" placeholder="🔍 Поиск..." oninput="searchAdminUsers()">
+<h3>👥 Пользователи</h3>
+<input type="text" class="search-input" id="adminUserSearch" placeholder="🔍 Поиск..." oninput="window.searchAdminUsers()">
 <div id="adminUsersList"></div>
-</div>
-<div class="admin-section">
-<h3>🔐 Назначить админа</h3>
-<div class="form-group">
-<label>Код сотрудника</label>
-<input type="text" id="adminMakeCode" placeholder="Введите код">
-</div>
-<button class="btn" onclick="makeAdmin()">Назначить админом</button>
-</div>
-<div class="admin-section">
-<h3>✏️ Ручное изменение очков</h3>
-<div class="form-group">
-<label>Код сотрудника</label>
-<input type="text" id="adminPointsCode" placeholder="Код">
-</div>
-<div class="form-group">
-<label>Новое количество очков</label>
-<input type="number" id="adminPointsValue" placeholder="0">
-</div>
-<button class="btn" onclick="setUserPoints()">Установить очки</button>
 </div>
 </div>
 </div>
@@ -254,24 +192,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div id="betModal" class="modal">
 <div class="modal-content">
 <div class="modal-header">
-<div class="modal-title">📝 Ставка на матч</div>
-<button class="modal-close" onclick="closeBetModal()">×</button>
+<div class="modal-title">📝 Ставка</div>
+<button class="modal-close" onclick="window.closeBetModal()">×</button>
 </div>
 <div id="betMatchInfo"></div>
 <div class="bet-type-selector">
-<button class="bet-type-btn active" onclick="selectBetType('outcome')" id="betTypeOutcome">📊 Исход</button>
-<button class="bet-type-btn" onclick="selectBetType('score')" id="betTypeScore">🎯 Точный счёт</button>
+<button class="bet-type-btn active" onclick="window.selectBetType('outcome')" id="betTypeOutcome">📊 Исход</button>
+<button class="bet-type-btn" onclick="window.selectBetType('score')" id="betTypeScore">🎯 Точный счёт</button>
 </div>
 <div id="outcomeSection">
-<p style="margin-bottom:10px;font-weight:600;font-size:14px;">Выберите исход (+1 очко):</p>
+<p style="margin-bottom:10px;font-weight:600;font-size:14px;">Исход (+1 очко):</p>
 <div class="outcome-options">
-<button class="outcome-btn" onclick="selectOutcome('team1')" id="outcomeTeam1">П1</button>
-<button class="outcome-btn" onclick="selectOutcome('draw')" id="outcomeDraw">Ничья</button>
-<button class="outcome-btn" onclick="selectOutcome('team2')" id="outcomeTeam2">П2</button>
+<button class="outcome-btn" onclick="window.selectOutcome('team1')" id="outcomeTeam1">П1</button>
+<button class="outcome-btn" onclick="window.selectOutcome('draw')" id="outcomeDraw">Ничья</button>
+<button class="outcome-btn" onclick="window.selectOutcome('team2')" id="outcomeTeam2">П2</button>
 </div>
 </div>
 <div id="scoreSection" class="hidden">
-<p style="margin-bottom:10px;font-weight:600;font-size:14px;">Выберите точный счёт (+2 очка):</p>
+<p style="margin-bottom:10px;font-weight:600;font-size:14px;">Точный счёт (+2 очка):</p>
 <div class="score-selectors">
 <select class="score-select" id="scoreTeam1">
 <option value="0">0</option><option value="1">1</option><option value="2">2</option>
@@ -283,15 +221,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <option value="3">3</option><option value="4">4</option><option value="5">5</option>
 </select>
 </div>
-<p style="color:#666;font-size:13px;text-align:center;">⚠️ Счёт 0:0 недоступен</p>
+<p style="color:#666;font-size:13px;text-align:center;">⚠️ 0:0 недоступен</p>
 </div>
-<button class="btn" onclick="saveBet()">💰 Сохранить ставку</button>
+<button class="btn" onclick="window.saveBet()">💰 Сохранить</button>
 </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -308,13 +246,11 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const ADMIN_MASTER_PASSWORD = "PRIDE0277";
-const ADMIN_CODE = "PRIDE2026ADMIN";
+const ADMIN_CODE = "PRIDE";
 
 let currentUser = null;
 let userData = null;
 let isAdmin = false;
-let isImpersonating = false;
 let allMatches = [];
 let allBets = [];
 let allUsers = [];
@@ -322,924 +258,48 @@ let currentBetMatch = null;
 let currentBetType = 'outcome';
 let currentOutcome = null;
 let currentFilter = 'all';
+let currentEmployeeCode = null;
 
 // Все сотрудники из Excel
 const employeesList = [
 {code:"138403",fullName:"Абрамов Вячеслав Владимирович"},
 {code:"83470",fullName:"Абрамова Татьяна Валерьевна"},
 {code:"202518",fullName:"Агаев Камил Эмильевич"},
-{code:"206005",fullName:"Агошкова Ольга Николаевна"},
-{code:"200090",fullName:"Агрегатор Новостроек Санкт-Петербург"},
-{code:"198274",fullName:"Адерихин Владислав Юрьевич"},
-{code:"204441",fullName:"Акинин Виктор Эдуардович"},
-{code:"177807",fullName:"Акопян Армине Роландовна"},
-{code:"189448",fullName:"Акперов Евгений Фирузович"},
-{code:"178594",fullName:"Алабужев Максим Владимирович"},
-{code:"1245797058",fullName:"Александров Максим Александрович"},
-{code:"154618",fullName:"Алексеев Владимир Геннадьевич"},
-{code:"1245798533",fullName:"Алексеева Амина Самировна"},
-{code:"203501",fullName:"Алексеева Анастасия Юрьевна"},
-{code:"206501",fullName:"Алиев Камиль Исламалиевич"},
-{code:"1245804115",fullName:"Алиев Нариман Исакович"},
-{code:"54891",fullName:"Алпацкая Наталья Вячеславовна"},
-{code:"134143",fullName:"Алпысбай Адема"},
-{code:"190853",fullName:"Алферов Роман Александрович"},
-{code:"154008",fullName:"Альжанов Виталий Анатольевич"},
-{code:"203014",fullName:"Аль-Мутавакель Аббас Абдулхамид Аббас"},
-{code:"178654",fullName:"Аль-Хальфи Иман Сафаевна"},
-{code:"205684",fullName:"Амаков Хасан Махмудович"},
-{code:"137736",fullName:"Амелина Наталья Владимировна"},
-{code:"182003",fullName:"Аназаров Орхан Имранович"},
-{code:"183738",fullName:"Андреев Дамир Владимирович"},
-{code:"179147",fullName:"Андреев Максим Андреевич"},
-{code:"1245800272",fullName:"Андреев Павел Владимирович"},
-{code:"176449",fullName:"Андреева Анастасия Владимировна"},
-{code:"206096",fullName:"Андржеевская Юлия Владимировна"},
-{code:"189475",fullName:"Анисимова Алёна Сергеевна"},
-{code:"146457",fullName:"Аннаев Михаил Константинович"},
-{code:"1231221582",fullName:"Аннаев Михаил Константинович (2)"},
-{code:"1245800544",fullName:"Антонова Екатерина Дмитриевна"},
-{code:"205294",fullName:"Антонова Яна Сергеевна"},
-{code:"200672",fullName:"Аншакова Ольга Анатольевна"},
-{code:"202473",fullName:"Апойков Андрей Сергеевич"},
-{code:"184852",fullName:"Астахов Сергей Анатольевич"},
-{code:"201579",fullName:"Атанова Александра Александровна"},
-{code:"128786",fullName:"Афанасюк Варвара Николаевна"},
-{code:"204512",fullName:"Афанасюк Варвара Николаевна (2)"},
-{code:"202444",fullName:"Ахмадеева Карина Амировна"},
-{code:"197815",fullName:"Ахмедзаде Марям Хикмет кызы"},
-{code:"205845",fullName:"Ахмедов Георгий Рамикович"},
-{code:"202455",fullName:"Ахмедханова Марина Амираслановна"},
-{code:"202457",fullName:"Ахметзянова Алина Васильевна"},
-{code:"1245798810",fullName:"Бабенко Анастасия Петровна"},
-{code:"6704",fullName:"Бабичева Лариса Георгиевна"},
-{code:"194960",fullName:"Бабкина Надежда Владимировна"},
-{code:"197914",fullName:"Багаутдинов Марат Альбертович"},
-{code:"36654",fullName:"Багрецов Семен Александрович"},
-{code:"166865",fullName:"Багрецов Семен Александрович (2)"},
-{code:"139002",fullName:"Багрецов Тимофей Александрович"},
-{code:"204878",fullName:"Багулова Дина Александровна"},
-{code:"206957",fullName:"Байдак Оксана Александровна"},
-{code:"1245795786",fullName:"Байрамукова Джамиля Магомедовна"},
-{code:"199445",fullName:"Бакшаев Виталий Олегович"},
-{code:"192133",fullName:"Баландин Никита Владимирович"},
-{code:"162842",fullName:"Баранов Михаил Владимирович"},
-{code:"37173",fullName:"Баранова Ирина Васильевна"},
-{code:"1231215940",fullName:"Баранова Ирина Васильевна (2)"},
-{code:"189876",fullName:"Басова Анна Федоровна"},
-{code:"172153",fullName:"Бастракова Ольга Алексеевна"},
-{code:"191803",fullName:"Батрак Сергей Валерьевич"},
-{code:"201548",fullName:"Башкирская Юлия Игоревна"},
-{code:"1245798357",fullName:"Бегмурадов Довлетгелди"},
-{code:"62051",fullName:"Беленькая Татьяна Францишековна"},
-{code:"196308",fullName:"Беликова Екатерина Владимировна"},
-{code:"122706",fullName:"Белицкий Никита Андреевич"},
-{code:"1231220728",fullName:"Белова Анастасия Сергеевна"},
-{code:"1245783934",fullName:"Белова Елена Анатольевна"},
-{code:"1245800559",fullName:"Белова Елена Анатольевна (2)"},
-{code:"206504",fullName:"Белозерова Любовь Владимировна"},
-{code:"206859",fullName:"Белопольских Диана Олеговна"},
-{code:"188013",fullName:"Белоус Софья Валерьевна"},
-{code:"132606",fullName:"Беляев Сергей Михайлович"},
-{code:"198387",fullName:"Бендерский Павел Викторович"},
-{code:"1245803742",fullName:"Берсекова Милана Эльдаровна"},
-{code:"206945",fullName:"Бёртон Валерия Александровна"},
-{code:"1231221318",fullName:"Бессонова Анастасия Вячеславовна"},
-{code:"1245792336",fullName:"Бирюк Константин Олегович"},
-{code:"204877",fullName:"Бирюкова Елена Геннадьевна"},
-{code:"1245793988",fullName:"Блинов Андрей Валерьевич"},
-{code:"188521",fullName:"Боган Андрей Михайлович"},
-{code:"110833",fullName:"Богатырев Константин Дмитриевич"},
-{code:"206421",fullName:"Богатырев Константин Дмитриевич (2)"},
-{code:"151297",fullName:"Богданов Сергей Александрович"},
-{code:"205283",fullName:"Богданова Диана Эдуардовна"},
-{code:"1245799913",fullName:"Богданова Мария Алексеевна"},
-{code:"203333",fullName:"Бойко Олег Валерьевич"},
-{code:"149709",fullName:"Бондарева Джессика"},
-{code:"206477",fullName:"Бородаев Виктор Афанасьевич"},
-{code:"22677",fullName:"Бояринцев Владислав Александрович"},
-{code:"197811",fullName:"Брага Сергей Викторович"},
-{code:"200898",fullName:"Братчикова Жанна Искандаровна"},
-{code:"206497",fullName:"Буданова Рената Данисовна"},
-{code:"135292",fullName:"Бузанова Яна Евгеньевна"},
-{code:"205278",fullName:"Букаева Ксения Александровна"},
-{code:"148938",fullName:"Буланова Мария Сергеевна"},
-{code:"206482",fullName:"Булычев Виталий Алексеевич"},
-{code:"1245799984",fullName:"Буракова Злата Александровна"},
-{code:"198921",fullName:"Буракова Ирина Сергеевна"},
-{code:"170667",fullName:"Бурдо Евгений Юрьевич"},
-{code:"141676",fullName:"Буркова Арина Денисовна"},
-{code:"1245803613",fullName:"Бутковая Галина Николаевна"},
-{code:"138615",fullName:"Бухтеева Анна Андреевна"},
-{code:"1245791580",fullName:"Быкова Елизавета Юрьевна"},
-{code:"201551",fullName:"Бычкова Вера Михайловна"},
-{code:"184900",fullName:"Валеева Елена Рабисовна"},
-{code:"201112",fullName:"Валенцева Елена Юрьевна"},
-{code:"33910",fullName:"Ваничев Артем Борисович"},
-{code:"1245797545",fullName:"Ваничева Елена Сергеевна"},
-{code:"204347",fullName:"Варзаков Иван Андреевич"},
-{code:"165377",fullName:"Варнавина Арина Дмитриевна"},
-{code:"1245798346",fullName:"Варнавина Юлия Геннадьевна"},
-{code:"206157",fullName:"Ведерникова Елизавета Евгеньевна"},
-{code:"1245796954",fullName:"Ведерникова Елизавета Евгеньевна (2)"},
-{code:"200459",fullName:"Велиев Азад Нураддинович"},
-{code:"59408",fullName:"Вербицкая Анастасия Александровна"},
-{code:"204027",fullName:"Веролайнен Замира Ахмадовна"},
-{code:"1245783214",fullName:"Ветлов Игорь Владимирович"},
-{code:"198337",fullName:"Виноградова Татьяна Ивановна"},
-{code:"203438",fullName:"Винокурова Илона Михайловна"},
-{code:"52661",fullName:"Вислова Анна Михайловна"},
-{code:"150281",fullName:"Витер Алёна Владимировна"},
-{code:"187194",fullName:"Вихко Савелий Юрьевич"},
-{code:"1245791524",fullName:"Вознаграждения ЦСС Санкт-Петербург"},
-{code:"202924",fullName:"Вознесенский Дмитрий Сергеевич"},
-{code:"148758",fullName:"Волков Глеб Евгеньевич"},
-{code:"203907",fullName:"Волкова Валерия Александровна"},
-{code:"1245803785",fullName:"Волкова Регина Евгеньевна"},
-{code:"186097",fullName:"Ворников Игорь Олегович"},
-{code:"206637",fullName:"Воробьев Матвей Сергеевич"},
-{code:"201109",fullName:"Воронцов Дмитрий Александрович"},
-{code:"197281",fullName:"Воропаев Арсений Сергеевич"},
-{code:"103625",fullName:"Выдрин Александр Вячеславович"},
-{code:"1245798236",fullName:"Выдрина Юлия Ивановна"},
-{code:"167400",fullName:"Вышкова Анна Валерьевна"},
-{code:"206509",fullName:"Вяткина Екатерина Игоревна"},
-{code:"202014",fullName:"Габерцеттель Михаил Федорович"},
-{code:"177423",fullName:"Гаджиева Тунзала Маарифовна"},
-{code:"204897",fullName:"Гайдуков Святослав Олегович"},
-{code:"1245802127",fullName:"Гаррисон Виталина Витальевна"},
-{code:"1245803463",fullName:"Гатицкая Дарья Петровна"},
-{code:"204814",fullName:"Гафаров Наиль Асхатович"},
-{code:"199969",fullName:"Гейс Татьяна Николаевна"},
-{code:"187591",fullName:"Гельвер Виктория Васильевна"},
-{code:"203961",fullName:"Герасёв Андрей Юрьевич"},
-{code:"179463",fullName:"Герасимов Иван Анатольевич"},
-{code:"185689",fullName:"Глазунов Илья Викторович"},
-{code:"186532",fullName:"Глебова Яна"},
-{code:"191480",fullName:"Глухова Наталья Валерьевна"},
-{code:"199430",fullName:"Глухова Юлия Юрьевна"},
-{code:"199893",fullName:"Говорушкина Валентина Андреевна"},
-{code:"195448",fullName:"Головина Ирина Владимировна"},
-{code:"188100",fullName:"Гончаров Вадим Юрьевич"},
-{code:"197808",fullName:"Гордиенко Ольга Игоревна"},
-{code:"188099",fullName:"Горовой Назар Валерьевич"},
-{code:"190542",fullName:"Григорьев Николай Валентинович"},
-{code:"1245797972",fullName:"Григорьева Ольга Николаевна"},
-{code:"205601",fullName:"Гриценко Татьяна Станиславовна"},
-{code:"201615",fullName:"Грищенко Ирина Сергеевна"},
-{code:"166551",fullName:"Грязнов Михаил Александрович"},
-{code:"201546",fullName:"Губанова Виктория Леонидовна"},
-{code:"175692",fullName:"Гуд Юлия Александровна"},
-{code:"62234",fullName:"Гуляев Александр Владимирович"},
-{code:"204439",fullName:"Гусева Алёна Михайловна"},
-{code:"206939",fullName:"Гусейнов Роман Джаваншир Оглы"},
-{code:"1245804195",fullName:"Гусейнова Жале Самеддин Кызы"},
-{code:"203510",fullName:"Гуцалюк Денис Владимирович"},
-{code:"195523",fullName:"Давыдова Анастасия Михайловна"},
-{code:"189511",fullName:"Данилова Ирина Николаевна"},
-{code:"1245799045",fullName:"Данилова Лидия Борисовна"},
-{code:"201110",fullName:"Дашиева Любовь Дашиевна"},
-{code:"1245804376",fullName:"Дементьев Евгений Викторович"},
-{code:"206651",fullName:"Дементьева Анастасия"},
-{code:"205606",fullName:"Демчуков Константин Александрович"},
-{code:"1245803553",fullName:"Дергачева Вера Ивановна"},
-{code:"141050",fullName:"Деркач Елена Владимировна"},
-{code:"171135",fullName:"Диева София Поладовна"},
-{code:"169116",fullName:"Добромирова Ирина Вячеславовна"},
-{code:"81736",fullName:"Добрякова Наталья Равильевна"},
-{code:"1245798606",fullName:"Додул Алина Олеговна"},
-{code:"203989",fullName:"Доманская Жанна Юрьевна"},
-{code:"193978",fullName:"Дорогина Кристина Вячеславовна"},
-{code:"1245796386",fullName:"Дорофеев Семен Дмитриевич"},
-{code:"184775",fullName:"Дреницына Надин Николаевна"},
-{code:"113892",fullName:"Дроздова Мария Геннадьевна"},
-{code:"174133",fullName:"Дубинин Алексей Сергеевич"},
-{code:"1245785840",fullName:"Дуденко Иван Андреевич"},
-{code:"1245803206",fullName:"Дуденко Иван Андреевич (2)"},
-{code:"201614",fullName:"Дудина Ирина Александровна"},
-{code:"205331",fullName:"Дуксо Илья Александрович"},
-{code:"45364",fullName:"Душин Александр Николаевич"},
-{code:"98955",fullName:"Дятлова Юлия Сергеевна"},
-{code:"203141",fullName:"Евдокимова Елизавета Максимовна"},
-{code:"1245797235",fullName:"Евдокимова Кристина Михайловна"},
-{code:"155464",fullName:"Евецкий Владимир Александрович"},
-{code:"118924",fullName:"Егина Екатерина Константиновна"},
-{code:"139643",fullName:"Елагина Дарья Сергеевна"},
-{code:"189544",fullName:"Елесина Екатерина Валерьевна"},
-{code:"1245800147",fullName:"Емельянова Анна"},
-{code:"1245794838",fullName:"Еремеева София Александровна"},
-{code:"1245803868",fullName:"Еремеева Софья Владимировна"},
-{code:"199493",fullName:"Ермолина Екатерина Андреевна"},
-{code:"206425",fullName:"Еськова Галина Геннадьевна"},
-{code:"1245800519",fullName:"Есьман Кристина Алексеевна"},
-{code:"205293",fullName:"Ефимов Михаил Андреевич"},
-{code:"1245790114",fullName:"Ефимова Анастасия Сергеевна"},
-{code:"1245804291",fullName:"Ефимова Анастасия Сергеевна (2)"},
-{code:"1245795046",fullName:"Ефремова Софья Михайловна"},
-{code:"85860",fullName:"Жарикова Наталья Геннадьевна"},
-{code:"203064",fullName:"Желонкин Кирилл Сергеевич"},
-{code:"203966",fullName:"Женсагурова Гульшаш Тулегеновна"},
-{code:"201893",fullName:"Жигарь Алексей"},
-{code:"206442",fullName:"Жихарева Ирина Анатольевна"},
-{code:"188007",fullName:"Жукова Евгения Владимировна"},
-{code:"202951",fullName:"Жукова Ольга Максимовна"},
-{code:"169411",fullName:"Журавлев Сергей Евгеньевич"},
-{code:"206865",fullName:"Журавлёва Диана Александровна"},
-{code:"204428",fullName:"Забегаевская Ольга Владимировна"},
-{code:"1245799393",fullName:"Загурская Ирина Михайловна"},
-{code:"201124",fullName:"Зайдуллина Лия Айдаровна"},
-{code:"171478",fullName:"Зайцева Ирина Евгеньевна"},
-{code:"202008",fullName:"Замолоцкий Дмитрий Игоревич"},
-{code:"200421",fullName:"Засухина Ирина Павловна"},
-{code:"205321",fullName:"Захарова Анастасия Витальевна"},
-{code:"207020",fullName:"Захарова Анна Анатольевна"},
-{code:"80998",fullName:"Захарова Наталия Владимировна"},
-{code:"1245796312",fullName:"Заявки Без Внимания"},
-{code:"199897",fullName:"Зверев Алексей Анатольевич"},
-{code:"201119",fullName:"Зейналов Илкин Магеррам"},
-{code:"1245798822",fullName:"Зеленин Павел Геннадьевич"},
-{code:"206942",fullName:"Зеликова Анжелика Сергеевна"},
-{code:"205269",fullName:"Зиновьева Ольга Николаевна"},
-{code:"1245781795",fullName:"Злотникова Татьяна Александровна"},
-{code:"1245796744",fullName:"Злотникова Татьяна Александровна (2)"},
-{code:"205270",fullName:"Змушко Валерия Анатольевна"},
-{code:"171572",fullName:"Золотова Марина Дмитриевна"},
-{code:"182265",fullName:"Зубова Валентина Игоревна"},
-{code:"1245788903",fullName:"Зуева Влада Олеговна"},
-{code:"100560",fullName:"Зуева Галина Ивановна"},
-{code:"1245798414",fullName:"Зуева Полина Вячеславовна"},
-{code:"173233",fullName:"Зыкова Екатерина Константиновна"},
-{code:"202552",fullName:"Иванов Даниил Евгеньевич"},
-{code:"184865",fullName:"Иванов Тимур Александрович"},
-{code:"205607",fullName:"Иванова Анна Юрьевна"},
-{code:"1245804110",fullName:"Иванова Кристина Владимировна"},
-{code:"179837",fullName:"Иванова Нина Александровна"},
-{code:"1245788054",fullName:"Иванова Ольга Сергеевна"},
-{code:"204445",fullName:"Ивлиева Юлия Владимировна"},
-{code:"111656",fullName:"Изосимов Юрий Алексеевич"},
-{code:"1245783339",fullName:"Изосимов Юрий Алексеевич (2)"},
-{code:"202397",fullName:"Ильина Ольга Александровна"},
-{code:"146771",fullName:"Ильющенко Александр Викторович"},
-{code:"1245798919",fullName:"Ильющенкова (Свиридова) Маргарита Павловна"},
-{code:"140393",fullName:"Инявкина Лейла Михайловна"},
-{code:"1231246604",fullName:"Ипец Татьяна Александровна"},
-{code:"107967",fullName:"Искра Дмитрий Михайлович"},
-{code:"154805",fullName:"Исламова Светлана Александровна"},
-{code:"169249",fullName:"Исокова Гулноза Суратиллоевна"},
-{code:"206927",fullName:"Ицкович Лариса Николаевна"},
-{code:"1231241963",fullName:"Кадочникова Софья Александровна"},
-{code:"205497",fullName:"Кадырова Анастасия Альбертовна"},
-{code:"165871",fullName:"Казаев Артём Данилович"},
-{code:"205333",fullName:"Казаков Иван Владиславович"},
-{code:"187024",fullName:"Казакова Ольга Николаевна"},
-{code:"188006",fullName:"Каймова Ирина Викторовна"},
-{code:"195556",fullName:"Каленская Ольга Владимировна"},
-{code:"1245803163",fullName:"Калугина Юлия Валерьевна"},
-{code:"192426",fullName:"Камартдинов Альфред Маратович"},
-{code:"168307",fullName:"Камчук Григорий Алексеевич"},
-{code:"202460",fullName:"Канбекова Линара Альфредовна"},
-{code:"1245804337",fullName:"Карасек Диана Андреевна"},
-{code:"58929",fullName:"Карелов Вадим Андреевич"},
-{code:"194999",fullName:"Карелова Лариса Илшадовна"},
-{code:"201982",fullName:"Карепина Юлия Юрьевна"},
-{code:"1245798845",fullName:"Карих Анна Владимировна"},
-{code:"204513",fullName:"Карсакова Елена Юрьевна"},
-{code:"202412",fullName:"Каткова Светлана Валерьевна"},
-{code:"1245792366",fullName:"Качаева Дарья Александровна"},
-{code:"191213",fullName:"Кветка Андрей Александрович"},
-{code:"1245795406",fullName:"Кириченко Екатерина Игоревна"},
-{code:"198147",fullName:"Киру Герман Федорович"},
-{code:"26813",fullName:"Кирюхин Валерий Александрович"},
-{code:"1245786238",fullName:"Кирюхин Валерий Александрович (2)"},
-{code:"191743",fullName:"Киселева Светлана Ивановна"},
-{code:"206993",fullName:"Кисина Марина Николаевна"},
-{code:"1245799557",fullName:"Клеванов Даниил Витальевич"},
-{code:"197283",fullName:"Климонтов Сергей Александрович"},
-{code:"199339",fullName:"Клыков Даниил Сергеевич"},
-{code:"141566",fullName:"Клюева Светлана Мазгаровна"},
-{code:"196380",fullName:"Князева Диана Сергеевна"},
-{code:"196607",fullName:"Князева Наталья Георгиевна"},
-{code:"206047",fullName:"Ковалёва Екатерина Александровна"},
-{code:"206946",fullName:"Ковалевич Светлана Николаевна"},
-{code:"165910",fullName:"Кодинцев Даниил Сергеевич"},
-{code:"102686",fullName:"Кожевников Анатолий Анатольевич"},
-{code:"92339",fullName:"Козлов Максим Олегович"},
-{code:"1245787191",fullName:"Козлова Мария Дмитриевна"},
-{code:"182958",fullName:"Кокорева Наталья Вячеславовна"},
-{code:"151833",fullName:"Колосницына Екатерина Александровна"},
-{code:"1245799259",fullName:"Колосницына Екатерина Александровна (2)"},
-{code:"98466",fullName:"Колотило Екатерина Евгеньевна"},
-{code:"134263",fullName:"Комбалов Виталий Станиславович"},
-{code:"178486",fullName:"Комбалова Оксана Вячеславовна"},
-{code:"202467",fullName:"Кондисюк Татьяна Сергеевна"},
-{code:"147182",fullName:"Кондратьева Амалия Сергеевна"},
-{code:"1245796310",fullName:"Кондратьева Амалия Сергеевна (2)"},
-{code:"1245803486",fullName:"Кондратьева Екатерина Сергеевна"},
-{code:"1245797998",fullName:"Кондратьева Елизавета Анатольевна"},
-{code:"203957",fullName:"Коновалов Алексей Игоревич"},
-{code:"6598",fullName:"Консультант Коммерческого Отдела"},
-{code:"4610",fullName:"Консультант по новостройкам"},
-{code:"178039",fullName:"Копосова Валентина Юрьевна"},
-{code:"135272",fullName:"Копьева Ксения Игоревна"},
-{code:"188906",fullName:"Корелова Елена Васильевна"},
-{code:"171599",fullName:"Коржевая Кристина Борисовна"},
-{code:"127872",fullName:"Корзаков Иван Юрьевич"},
-{code:"197796",fullName:"Корнеев Захар Дмитриевич"},
-{code:"174065",fullName:"Коробченко Валентина Захаровна"},
-{code:"199921",fullName:"Королева Екатерина Викторовна"},
-{code:"204344",fullName:"Короп Гордей Олегович"},
-{code:"203954",fullName:"Коростылева Светлана Сергеевна"},
-{code:"193582",fullName:"Коротай Елена Викторовна"},
-{code:"186262",fullName:"Корчажникова Анастасия Сергеевна"},
-{code:"186031",fullName:"Корягов Антон Игоревич"},
-{code:"166813",fullName:"Косарева Полина Андреевна"},
-{code:"162325",fullName:"Космос аккредитив Санкт-Петербург"},
-{code:"1245803539",fullName:"Косова Варвара Алексеевна"},
-{code:"206930",fullName:"Котикова Анна Ивановна"},
-{code:"1245786731",fullName:"Котлова Виктория Александровна"},
-{code:"77402",fullName:"Кравцов Иван Викторович"},
-{code:"180309",fullName:"Кравцова Алевтина Альбертовна"},
-{code:"1245797359",fullName:"Кравцова Екатерина Димитриевна"},
-{code:"123837",fullName:"Кравченко Елена Ильинична"},
-{code:"105624",fullName:"Красникова Наталья Евгеньевна"},
-{code:"149842",fullName:"Красса Светлана Алексеевна"},
-{code:"186033",fullName:"Кугач Оксана Александровна"},
-{code:"173655",fullName:"Кудабаева Аида Каирхановна"},
-{code:"94552",fullName:"Кудрова Лариса Александровна"},
-{code:"1245798925",fullName:"Кузнецова Анастасия Сергеевна"},
-{code:"1245800420",fullName:"Кузнецова Валерия Сергеевна"},
-{code:"132669",fullName:"Кузнецова Вера Алексеевна"},
-{code:"198907",fullName:"Кузнецова Елизавета Александровна"},
-{code:"204438",fullName:"Кузнецова Ирина Александровна"},
-{code:"175149",fullName:"Кузькова Мария Александровна"},
-{code:"181596",fullName:"Кузьмин Максим Альбертович"},
-{code:"118900",fullName:"Кузьмина Оксана Васильевна"},
-{code:"188286",fullName:"Кузьминова Ольга Владимировна"},
-{code:"121001",fullName:"Кулаченко Оксана Николаевна"},
-{code:"206081",fullName:"Купавцева Ольга Васильевна"},
-{code:"56140",fullName:"Кураев Валерий Николаевич"},
-{code:"163932",fullName:"Кураев Валерий Николаевич (2)"},
-{code:"52347",fullName:"Куракина Ирина Евгеньевна"},
-{code:"50484",fullName:"Курманова Лилия Равильевна"},
-{code:"205953",fullName:"Курочкин Артём Олегович"},
-{code:"182962",fullName:"Кусова Людмила Саварбековна"},
-{code:"198835",fullName:"Кутепова Любовь Валерьевна"},
-{code:"1245796546",fullName:"Кутепова Любовь Валерьевна (2)"},
-{code:"118124",fullName:"Кутьин Владислав Кириллович"},
-{code:"77872",fullName:"Кутьина Светлана Андреевна"},
-{code:"179719",fullName:"Кучарова Светлана Анатольевна"},
-{code:"171821",fullName:"Кушикова Ольга Александровна"},
-{code:"1245799818",fullName:"Кюеттиева Регина Алексеевна"},
-{code:"1245798976",fullName:"Лабдзер Анжелика Александровна"},
-{code:"176266",fullName:"Лавренко Полина Васильевна"},
-{code:"163477",fullName:"Лагодич Виктор Владимирович"},
-{code:"206928",fullName:"Лайкачева Виолетта Альбертовна"},
-{code:"198890",fullName:"Лапин Илья Алексеевич"},
-{code:"1245797419",fullName:"Ларионов Владимир Павлович"},
-{code:"189617",fullName:"Ларькова Мария Михайловна"},
-{code:"53014",fullName:"Лебедева Наталья"},
-{code:"129561",fullName:"Лебедь Алина Юрьевна"},
-{code:"196647",fullName:"Леви Яна Евгеньевна"},
-{code:"1245799684",fullName:"Легачева Анжелина Валентиновна"},
-{code:"53582",fullName:"Леновский Андрей Владимирович"},
-{code:"203958",fullName:"Летавин Александр Михайлович"},
-{code:"179642",fullName:"Литвинова Анастасия Игоревна"},
-{code:"201105",fullName:"Литвинюк Сергей Александрович"},
-{code:"50063",fullName:"Лихачева Райса Расимовна"},
-{code:"1245786264",fullName:"Лобынцева (Магерова) Наталия Владимировна"},
-{code:"152039",fullName:"Логин Олеся Евгеньевна"},
-{code:"199970",fullName:"Логинова Юлия Юрьевна"},
-{code:"67592",fullName:"Лодзято Евгения Александровна"},
-{code:"157321",fullName:"Лочкарева Светлана Александровна"},
-{code:"201206",fullName:"Лукашова Мария Владимировна"},
-{code:"204895",fullName:"Лукина Виктория Андреевна"},
-{code:"170490",fullName:"Луценко Елена Александровна"},
-{code:"176136",fullName:"Лучицкая Ольга Николаевна"},
-{code:"174162",fullName:"Лысенко Максим Сергеевич"},
-{code:"9994",fullName:"Лысов Валерий Владимирович"},
-{code:"1245801964",fullName:"Лысова Елена Юрьевна"},
-{code:"165402",fullName:"Лясников Александр Вячеславович"},
-{code:"186735",fullName:"Макарова Елена Васильевна"},
-{code:"141922",fullName:"Максимова Олеся Владимировна"},
-{code:"1245800640",fullName:"Максимова Эльза Фаизовна"},
-{code:"146809",fullName:"Малевич Анна Анатольевна"},
-{code:"205995",fullName:"Малыгина Наталья Викторовна"},
-{code:"168745",fullName:"Малышев Евгения Михайловна"},
-{code:"1245784667",fullName:"Малышев Илья Борисович"},
-{code:"200602",fullName:"Малышева Марина Сергеевна"},
-{code:"36676",fullName:"Малышева Ярослава Геннадьевна"},
-{code:"1245800570",fullName:"Мальцева Елена Владимировна"},
-{code:"123722",fullName:"Мальцева Елена Сергеевна"},
-{code:"204894",fullName:"Мамонов Павел Николаевич"},
-{code:"202113",fullName:"Мананков Даниил Витальевич"},
-{code:"192101",fullName:"Маргалис Александр Алексеевич"},
-{code:"153718",fullName:"Мардаев Рустам Камиржанович"},
-{code:"193954",fullName:"Мартыненко Максим Юрьевич"},
-{code:"1245798929",fullName:"Мартынова Анастасия Дмитриевна"},
-{code:"1245797427",fullName:"Марущак Вячеслав Игоревич"},
-{code:"203499",fullName:"Марченко Евгения Алексеевна"},
-{code:"199429",fullName:"Марченко Снежанна Николаевна"},
-{code:"1245799820",fullName:"Марченков Артем Геннадьевич"},
-{code:"186395",fullName:"Марченкова Ксения Игоревна"},
-{code:"128696",fullName:"Марченкова Яна Игоревна"},
-{code:"169828",fullName:"Марченкова Яна Игоревна (2)"},
-{code:"204039",fullName:"Матвеев Александр Сергеевич"},
-{code:"202272",fullName:"Матисов Кирилл Владимирович"},
-{code:"1245795436",fullName:"Матисов Кирилл Владимирович (2)"},
-{code:"159819",fullName:"Матросов Лев Андреевич"},
-{code:"160305",fullName:"Матусов Анатолий Юрьевич"},
-{code:"190644",fullName:"Махмутова Екатерина Сергеевна"},
-{code:"202437",fullName:"Махрова Екатерина Романовна"},
-{code:"1245783932",fullName:"Махурина Дарья Николаевна"},
-{code:"135587",fullName:"Медведев Илья Сергеевич"},
-{code:"195287",fullName:"Медведев Николай Викторович"},
-{code:"1245803720",fullName:"Медведева Анастасия Александровна"},
-{code:"206954",fullName:"Медведева Анастасия Андреевна"},
-{code:"143013",fullName:"Медведева Юлия Викторовна"},
-{code:"101638",fullName:"Мелихов Александр Александрович"},
-{code:"130636",fullName:"Мельник Дмитрий Леонидович"},
-{code:"190652",fullName:"Мельников Борис Павлович"},
-{code:"1245784834",fullName:"Мельчакова Елизавета Викторовна"},
-{code:"203005",fullName:"Меньшенина Светлана Николаевна"},
-{code:"121682",fullName:"Мерзлякова Oльга Вячеславовна"},
-{code:"203492",fullName:"Механикова Наталья Владимировна"},
-{code:"20340",fullName:"Мигалева Наталья Викторовна"},
-{code:"204968",fullName:"Миккоев Павел Павлович"},
-{code:"196222",fullName:"Мирошина Любовь Владимировна"},
-{code:"184860",fullName:"Мишарин Игорь Александрович"},
-{code:"161597",fullName:"Мищенко Кристина Михайловна"},
-{code:"198805",fullName:"Могучая София Владимировна"},
-{code:"1245785385",fullName:"Мокроусова Ирина Евгеньевна"},
-{code:"201555",fullName:"Молодикова Марина Александровна"},
-{code:"128884",fullName:"Момот Глеб Андреевич"},
-{code:"1245799888",fullName:"Мордачев Вадим Вячеславович"},
-{code:"197264",fullName:"Морозова Ксения Александровна"},
-{code:"206943",fullName:"Моськина Мария Сергеевна"},
-{code:"197278",fullName:"Мотылева Луиза Файласовна"},
-{code:"187667",fullName:"Музаффаров Хасан Джалолович"},
-{code:"1245798134",fullName:"Мунтян Дарья Ивановна"},
-{code:"174653",fullName:"Муравьева Валерия Валерьевна"},
-{code:"95292",fullName:"Мусаева Самира Алиевна"},
-{code:"169192",fullName:"Муталибов Алим Романович"},
-{code:"175153",fullName:"Мухамадеев Андрей Марсович"},
-{code:"154558",fullName:"Мякишев Илья Сергеевич"},
-{code:"197850",fullName:"Мячин Александр Сергеевич"},
-{code:"64178",fullName:"Набор базы гр. Дугенцова"},
-{code:"1245800228",fullName:"Наволоцкий Антон Николаевич"},
-{code:"194856",fullName:"Назаренко Анастасия Олеговна"},
-{code:"113222",fullName:"Наймушина Вера Александровна"},
-{code:"1245798663",fullName:"Наймушина Вера Александровна (2)"},
-{code:"196325",fullName:"Находко Юрий Эдуардович"},
-{code:"186804",fullName:"Недельнюк Екатерина Евгеньевна"},
-{code:"206099",fullName:"Некрасова Марина Андреевна"},
-{code:"204896",fullName:"Немчинов Аркадий Сергеевич"},
-{code:"1245786270",fullName:"Нестерова Екатерина Александровна"},
-{code:"1245797993",fullName:"Нечаева Анастасия Александровна"},
-{code:"1245791561",fullName:"Никипелова (Железова) Алина Алексеевна"},
-{code:"206933",fullName:"Никитин Сергей Владимирович"},
-{code:"116574",fullName:"Николаева Анна Вильямовна"},
-{code:"163796",fullName:"Николаева Мария Викторовна"},
-{code:"203518",fullName:"Никонова Оксана Анатольевна"},
-{code:"142084",fullName:"Никулин Александр Юрьевич"},
-{code:"123328",fullName:"Никулина Наталия Дмитриевна"},
-{code:"1245789008",fullName:"Новичкова Ксения Игоревна"},
-{code:"1245793781",fullName:"Новогребельская (Горб) Анастасия Олеговна"},
-{code:"182063",fullName:"Новожилова Елена Анатольевна"},
-{code:"178786",fullName:"Новоселова Татьяна Анатольевна"},
-{code:"204564",fullName:"Носова Екатерина Сергеевна"},
-{code:"1245798978",fullName:"Ночевалова Дарья Сергеевна"},
-{code:"159202",fullName:"Нургужин Дмитрий Дмитриевич"},
-{code:"1245791451",fullName:"Нургужин Дмитрий Дмитриевич (2)"},
-{code:"128326",fullName:"Ныхриков Максим Анбиянович"},
-{code:"206510",fullName:"Ободова Екатерина Анатольевна"},
-{code:"25106",fullName:"Обухов Константин Сергеевич"},
-{code:"194060",fullName:"Оранская Светлана Константиновна"},
-{code:"157654",fullName:"Осетрова Анастасия Андреевна"},
-{code:"153732",fullName:"Осетрова Валерия Сергеевна"},
-{code:"129128",fullName:"Остапенко Светлана Александровна"},
-{code:"1245804060",fullName:"Острая Дарья Владимировна"},
-{code:"201593",fullName:"Павлов Алексей Петрович"},
-{code:"201179",fullName:"Павлов Вячеслав Геннадьевич"},
-{code:"205916",fullName:"Павлов Роман Сергеевич"},
-{code:"52963",fullName:"Павлова Антонина Александровна"},
-{code:"187699",fullName:"Павлова Ольга Михайловна"},
-{code:"164413",fullName:"Пагарцева Алена"},
-{code:"203135",fullName:"Палатова Анна Михайловна"},
-{code:"202009",fullName:"Паленков Даниил Александрович"},
-{code:"191602",fullName:"Пальчик Евгения Григорьевна"},
-{code:"108097",fullName:"Панова Ксения Владимировна"},
-{code:"190649",fullName:"Панова Оксана Васильевна"},
-{code:"189928",fullName:"Панова Юлия Александровна"},
-{code:"1245799748",fullName:"Пантелеева Евгения Сергеевна"},
-{code:"187668",fullName:"Панченко Александр Владимирович"},
-{code:"206074",fullName:"Папп Марк Габорович"},
-{code:"93288",fullName:"Пастушина Виктория Юрьевна"},
-{code:"205273",fullName:"Пасынкова Ульяна Артёмовна"},
-{code:"135327",fullName:"Пелевин Дмитрий Юрьевич"},
-{code:"201979",fullName:"Переверзева Полина Сергеевна"},
-{code:"117646",fullName:"Петраускене Лариса Михайловна"},
-{code:"207146",fullName:"Петров Глеб Андреевич"},
-{code:"1245790242",fullName:"Петров Тимофей Васильевич"},
-{code:"195217",fullName:"Петров Эдуард Юрьевич"},
-{code:"165410",fullName:"Петрова Ангелина Александровна"},
-{code:"144265",fullName:"Петрова Екатерина Павловна"},
-{code:"194487",fullName:"Петрова Ирина Станиславовна"},
-{code:"191729",fullName:"Петрова Любовь Николаевна"},
-{code:"187756",fullName:"Петрова Наталья Сергеевна"},
-{code:"186400",fullName:"Петрова Ольга Валериевна"},
-{code:"203976",fullName:"Петунина Анастасия Сергеевна"},
-{code:"110523",fullName:"Петухов Александр Викторович"},
-{code:"204425",fullName:"Петухова Елена Вячеславовна"},
-{code:"1245787842",fullName:"Пильков Антон Викторович"},
-{code:"196384",fullName:"Пильников Антон Александрович"},
-{code:"1245788751",fullName:"Пильников Антон Александрович (2)"},
-{code:"202425",fullName:"Пименов Роман Сергеевич"},
-{code:"201656",fullName:"Писаренко Екатерина Сергеевна"},
-{code:"158974",fullName:"Плыгунова Анастасия Александровна"},
-{code:"1245797228",fullName:"Плыгунова Анастасия Александровна (2)"},
-{code:"193514",fullName:"Поволяева Анастасия Валентиновна"},
-{code:"200551",fullName:"Погодин Артем Алексеевич"},
-{code:"186380",fullName:"Погорелов Павел Геннадьевич"},
-{code:"195848",fullName:"Погорелый Сергей Петрович"},
-{code:"151326",fullName:"Подоляка Ирина Александровна"},
-{code:"1245785033",fullName:"Подоляка Ирина Александровна (2)"},
-{code:"198277",fullName:"Полтарацкий Артем Петрович"},
-{code:"174719",fullName:"Полухин Виталий Михайлович"},
-{code:"1245804225",fullName:"Полуэктова Полина Дмитриевна"},
-{code:"204357",fullName:"Поляков Артем Дмитриевич"},
-{code:"192674",fullName:"Поляков Нияз Данилович"},
-{code:"203223",fullName:"Полянский Кирилл Дмитриевич"},
-{code:"64114",fullName:"Пономарева Елена Евгеньевна"},
-{code:"1245797042",fullName:"Попазогло Вадим Олегович"},
-{code:"134583",fullName:"Попков Александр Андреевич"},
-{code:"205279",fullName:"Попов Павел Витальевич"},
-{code:"143016",fullName:"Попова Марина Игоревна"},
-{code:"51995",fullName:"Попова Мария Анатольевна"},
-{code:"1245791410",fullName:"Попова Мария Анатольевна (2)"},
-{code:"134144",fullName:"Портненко Владислав"},
-{code:"197988",fullName:"Портненко Владислав Витальевич"},
-{code:"1245787831",fullName:"Привалов Дмитрий Павлович"},
-{code:"158922",fullName:"Приходько Александр Сергеевич"},
-{code:"121221",fullName:"Прокофьева Ирина Олеговна"},
-{code:"205608",fullName:"Пронина Екатерина Даниловна"},
-{code:"1245795857",fullName:"Просвиряков Даниил Никитич"},
-{code:"196251",fullName:"Проскуряков Дмитрий Александрович"},
-{code:"202954",fullName:"Протасова Татьяна Дмитриевна"},
-{code:"206961",fullName:"Пугачева Мария Александровна"},
-{code:"203494",fullName:"Пьянков Роман Викторович"},
-{code:"193245",fullName:"Пяйвиль Эдуард Артурович"},
-{code:"187599",fullName:"Пятаева Екатерина Леонидовна"},
-{code:"1245799786",fullName:"Пятаева Екатерина Леонидовна (2)"},
-{code:"94614",fullName:"Рабинович Игорь Яковлевич"},
-{code:"102033",fullName:"Радченко Анастасия Вадимовна"},
-{code:"84057",fullName:"Ражев Роман Юрьевич"},
-{code:"193677",fullName:"Разжигаева Елена Игоревна"},
-{code:"1245800227",fullName:"Разжигаева Елена Игоревна (2)"},
-{code:"192609",fullName:"Рассыпнова Оксана Юрьевна"},
-{code:"1245803987",fullName:"Расторгуева Римма Игоревна"},
-{code:"144441",fullName:"Резак Елена Николаевна"},
-{code:"202489",fullName:"Репная Оксана Николаевна"},
-{code:"201991",fullName:"Рогачёва Марина Олеговна"},
-{code:"181935",fullName:"Родина Анна Геннадьевна"},
-{code:"188370",fullName:"Родина Юлия Николаевна"},
-{code:"1245787539",fullName:"Родионов Дмитрий Андреевич"},
-{code:"203955",fullName:"Розова Ирина Юрьевна"},
-{code:"178844",fullName:"Романенкова Анастасия Владимировна"},
-{code:"61596",fullName:"Романова Светлана Григорьевна"},
-{code:"205002",fullName:"Романцов Игорь Леонидович"},
-{code:"175938",fullName:"Рощина Ксения Олеговна"},
-{code:"202727",fullName:"Рублева Анастасия Юрьевна"},
-{code:"122051",fullName:"Румянцев Павел Игоревич"},
-{code:"187759",fullName:"Рыбакова Светлана Валерьевна"},
-{code:"144077",fullName:"Рыжиков Артём Дмитриевич"},
-{code:"193413",fullName:"Рынгач Ольга Леонидовна"},
-{code:"1245799319",fullName:"Рябова Елена Артемьевна"},
-{code:"200591",fullName:"Рязанов Алексей Сергеевич"},
-{code:"203905",fullName:"Рязанова Татьяна Геннадьевна"},
-{code:"1245803688",fullName:"Сабитов Булат Фирдависович"},
-{code:"1245799821",fullName:"Савельев Антон Викторович"},
-{code:"1245790504",fullName:"Савельев Ярослав Сергеевич"},
-{code:"176622",fullName:"Савельева Анастасия Владимировна"},
-{code:"127299",fullName:"Савченко Марина Николаевна"},
-{code:"88057",fullName:"Савченко Наталья Васильевна"},
-{code:"192054",fullName:"Салихов Ануар Жагафарович"},
-{code:"144737",fullName:"Сальников Алексей Николаевич"},
-{code:"1245784761",fullName:"Сальников Алексей Николаевич (2)"},
-{code:"206046",fullName:"Сарыев Гумман"},
-{code:"203134",fullName:"Сатурина Анна Сергеевна"},
-{code:"170623",fullName:"Сауков Илья Юрьевич"},
-{code:"200540",fullName:"Свидерская Виктория Анатольевна"},
-{code:"204356",fullName:"Свидовский Иван Борисович"},
-{code:"198522",fullName:"Свиридова Елена Сергеевна"},
-{code:"1245792919",fullName:"Севастьянова Татьяна Алекcеевна"},
-{code:"145580",fullName:"Севостьянов Игорь Владимирович"},
-{code:"203496",fullName:"Седова Надежда Анатольевна"},
-{code:"206517",fullName:"Седых Дарья Сергеевна"},
-{code:"84066",fullName:"Семенова Александра Геворговна"},
-{code:"20147",fullName:"Семенова Татьяна Юрьевна"},
-{code:"194973",fullName:"Сергеева Анастасия Владимировна"},
-{code:"198790",fullName:"Сергиенко Евгения Игоревна"},
-{code:"65291",fullName:"Сигаева Ирина Владимировна"},
-{code:"199892",fullName:"Сидихина Анна Александровна"},
-{code:"1245803976",fullName:"Сидихина Анна Александровна (2)"},
-{code:"204901",fullName:"Симакина Екатерина Алексеевна"},
-{code:"1245798060",fullName:"Симоненко Виктория Сергеевна"},
-{code:"152272",fullName:"Симонович Юлия Андреевна"},
-{code:"201990",fullName:"Синегубова Вера Юрьевна"},
-{code:"188913",fullName:"Синельникова Наталья Андреевна"},
-{code:"193176",fullName:"Синетутов Денис Анатольевич"},
-{code:"1245796199",fullName:"Сироткина Анна Вячеславовна"},
-{code:"1231215814",fullName:"Системный администратор"},
-{code:"183322",fullName:"Ситало Ольга Сергеевна"},
-{code:"206398",fullName:"Ситникова Ирина Александровна"},
-{code:"80678",fullName:"Ситниченко Екатерина Сергеевна"},
-{code:"1231221383",fullName:"Скотарева Елена Владимировна"},
-{code:"199923",fullName:"Слугачёва Ирина Романовна"},
-{code:"171287",fullName:"Смаль Елена Юрьевна"},
-{code:"1245790043",fullName:"Смирнов Кирилл Андреевич"},
-{code:"206093",fullName:"Смирнов Сергей Станиславович"},
-{code:"98101",fullName:"Смирнова Ирина Николаевна"},
-{code:"132064",fullName:"Соболев Олег Геннадьевич"},
-{code:"148173",fullName:"Соболева Надежда Анатольевна"},
-{code:"1245794814",fullName:"Соколов Никита Александрович"},
-{code:"189375",fullName:"Соколова Вероника Сергеевна"},
-{code:"205121",fullName:"Соколова Юлия Игоревна"},
-{code:"1245782977",fullName:"Соловьев Павел Александрович"},
-{code:"1245801968",fullName:"Соловьева Мария Игоревна"},
-{code:"65105",fullName:"Сологубова Виктория Николаевна"},
-{code:"191747",fullName:"Соломатин Михаил Игоревич"},
-{code:"97094",fullName:"Спиридонова Елена Викторовна"},
-{code:"190595",fullName:"Ставцева Анна Александровна"},
-{code:"177683",fullName:"Стащук Елена Витальевна"},
-{code:"206493",fullName:"Степанов Алексей Петрович"},
-{code:"129896",fullName:"Степановская Елена Александровна"},
-{code:"125865",fullName:"Суздальцева Анастасия Евгеньевна"},
-{code:"183718",fullName:"Сулейманова Садат"},
-{code:"134674",fullName:"Сухова Анастасия Александровна"},
-{code:"99896",fullName:"Счастливая Карина Евгеньевна"},
-{code:"190653",fullName:"Сырбу Вероника Михайловна"},
-{code:"178989",fullName:"Сыч Дмитрий Владимирович"},
-{code:"95185",fullName:"Сычов Григорий Вячеславович"},
-{code:"197803",fullName:"Сякин Рамиль Рифатович"},
-{code:"205996",fullName:"Тарабрина Александра Вадимовна"},
-{code:"201134",fullName:"Тарануха Денис Тарасович"},
-{code:"55722",fullName:"Таранцев Дмитрий Олегович"},
-{code:"205227",fullName:"Тарасов Максим Владимирович"},
-{code:"203435",fullName:"Терёшин Денис Андреевич"},
-{code:"193983",fullName:"Тесленко Зоя Николаевна"},
-{code:"133426",fullName:"Тимошенко Алексей Олегович"},
-{code:"1245802126",fullName:"Тимошенко Алексей Олегович (2)"},
-{code:"201543",fullName:"Тимошишина Татьяна Александровна"},
-{code:"71743",fullName:"Тимченко Лилия Николаевна"},
-{code:"1245791483",fullName:"Тимченко Лилия Николаевна (2)"},
-{code:"162707",fullName:"Тиханова Надежда Олеговна"},
-{code:"191704",fullName:"Тихонкова Юлия Сергеевна"},
-{code:"1245798359",fullName:"Тихонкова Юлия Сергеевна (2)"},
-{code:"1245800354",fullName:"Тихонова Елена Александровна"},
-{code:"115235",fullName:"Тихонова Светлана Олеговна"},
-{code:"1245803347",fullName:"Тишкова Нина Константиновна"},
-{code:"63520",fullName:"Трандафилов Николай Константинович"},
-{code:"116472",fullName:"Третьякова (Войтенко) Елизавета Андреевна"},
-{code:"1245787003",fullName:"Третьякова (Войтенко) Елизавета Андреевна (2)"},
-{code:"172854",fullName:"Трунина Валентина Константиновна"},
-{code:"172850",fullName:"Трушникова Анастасия Александровна"},
-{code:"1245796542",fullName:"Тузовская Дарья Дмитриевна"},
-{code:"143619",fullName:"Турбанова Наталья Анатольевна"},
-{code:"1245803172",fullName:"Туренко Ксения Юрьевна"},
-{code:"204908",fullName:"Тыдыков Виктор Александрович"},
-{code:"205952",fullName:"Тюрина Наталья Валерьевна"},
-{code:"197882",fullName:"Умарова Елена Викторовна"},
-{code:"194088",fullName:"Уртминцева Евгения Игоревна"},
-{code:"186132",fullName:"Усов Антон Олегович"},
-{code:"139042",fullName:"Усова Ирина Геннадьевна"},
-{code:"137789",fullName:"Фарес Салем"},
-{code:"135679",fullName:"Федорова Екатерина Михайловна"},
-{code:"186448",fullName:"Федорова Любовь Александровна"},
-{code:"189915",fullName:"Федосенкова Ольга Сергеевна"},
-{code:"188014",fullName:"Федотов Илья Николаевич"},
-{code:"206092",fullName:"Федотова Анастасия Халиловна"},
-{code:"99997",fullName:"Федянкина Олеся Андреевна"},
-{code:"171482",fullName:"Фенин Олег Михайлович"},
-{code:"1245782797",fullName:"Филимонов Сергей Валентинович"},
-{code:"1245782051",fullName:"Филимонов Сергей Валерьевич"},
-{code:"1245800059",fullName:"Филиппова София Эдуардовна"},
-{code:"206941",fullName:"Филоненко Екатерина Владимировна"},
-{code:"199929",fullName:"Филь Игорь Владиславович"},
-{code:"1245800257",fullName:"Филякова Елизавета Игоревна"},
-{code:"195928",fullName:"Фимина Полина Дмитриевна"},
-{code:"205918",fullName:"Фисенко Артемий Данилович"},
-{code:"196592",fullName:"Фоменко Светлана Афонасьевна"},
-{code:"205628",fullName:"Фомин Иван Павлович"},
-{code:"176712",fullName:"Фурсов Денис Александрович"},
-{code:"127983",fullName:"Хабарова Елена"},
-{code:"103905",fullName:"Харисов Роман Евгеньевич"},
-{code:"204446",fullName:"Харитонова Александра Евгеньевна"},
-{code:"1245803264",fullName:"Харлапанова Дарья Андреевна"},
-{code:"1245800370",fullName:"Хасьянов Александр Александрович"},
-{code:"156348",fullName:"Хмелев Зотик Валерьевич"},
-{code:"189373",fullName:"Храмова Алла Владимировна"},
-{code:"122183",fullName:"Храмцов Дмитрий Александрович"},
-{code:"1231221650",fullName:"Храмцов Дмитрий Александрович (2)"},
-{code:"195573",fullName:"Хусаинов Афзал Иномджонович"},
-{code:"206944",fullName:"Царькова Анастасия Игоревна"},
-{code:"200553",fullName:"Цветкова Ольга Александровна"},
-{code:"155468",fullName:"Цыганов Павел Петрович"},
-{code:"1245793837",fullName:"Чаевская Полина Денисовна"},
 {code:"1245791824",fullName:"Чайка Илья Владиславович"},
-{code:"61396",fullName:"Чебакова Татьяна Юрьевна"},
-{code:"111238",fullName:"Чебакова Татьяна Юрьевна (2)"},
-{code:"131802",fullName:"Чеботаренко Евгений Олегович"},
-{code:"1245792809",fullName:"Чеботаренко Евгений Олегович (2)"},
-{code:"123917",fullName:"Чеклуев Игорь Сергеевич"},
-{code:"1245803514",fullName:"Чередниченко Андрей Евгеньевич"},
-{code:"169922",fullName:"Черешенко Ирина Сергеевна"},
-{code:"108533",fullName:"Черникова Юлия Анатольевна"},
-{code:"205602",fullName:"Чернов Сергей Олегович"},
-{code:"206512",fullName:"Черноморцева Арина Сергеевна"},
-{code:"201107",fullName:"Чесноков Сергей Николаевич"},
-{code:"206926",fullName:"Чехлов Михаил Александрович"},
-{code:"165812",fullName:"Чижова Ирина Викторовна"},
-{code:"205605",fullName:"Чиликина Светлана Васильевна"},
-{code:"1245797704",fullName:"Шалимова Оксана Николаевна"},
-{code:"108497",fullName:"Шамаев Павел Валентинович"},
-{code:"203979",fullName:"Шаранова Елена Николаевна"},
-{code:"170610",fullName:"Шахмина Дарья Владимировна"},
-{code:"200573",fullName:"Шваб Ольга Юрьевна"},
-{code:"43567",fullName:"Швангирадзе Марина Мурмановна"},
-{code:"197274",fullName:"Шеленкова Юлия Александровна"},
-{code:"136690",fullName:"Шерстнева Анна Владимировна"},
-{code:"9902",fullName:"Шестак Богдан Андреевич"},
-{code:"203040",fullName:"Шестаковская Наталия Владимировна"},
-{code:"203018",fullName:"Шилова Валентина Сергеевна"},
-{code:"194454",fullName:"Шипкова Екатерина Андреевна"},
-{code:"138693",fullName:"Ширшова Александра Олеговна"},
-{code:"1245804226",fullName:"Шишкина Татьяна Викторовна"},
-{code:"1245798692",fullName:"Шишкова Дарья Сергеевна"},
-{code:"110057",fullName:"Шкребень Максим Александрович"},
-{code:"1245785090",fullName:"Штайнбах Кристина Александровна"},
-{code:"139741",fullName:"Штекляин Дарья Александровна"},
-{code:"197812",fullName:"Штыков Сергей Валерьевич"},
-{code:"206932",fullName:"Шуваева Светлана Александровна"},
-{code:"1245797000",fullName:"Шулаева Анна Николаевна"},
-{code:"1245803482",fullName:"Шунько Юлия Александровна"},
-{code:"178432",fullName:"Эльмендеров Борис Валериевич"},
-{code:"202963",fullName:"Эрбес Мария Александровна"},
-{code:"190656",fullName:"Эсартия Ольга Александровна"},
-{code:"194139",fullName:"Юдин Виталий Иванович"},
-{code:"1245792346",fullName:"Юнусов Даниил Андреевич"},
-{code:"1245803828",fullName:"Юридический Департамент"},
-{code:"54697",fullName:"Юрченко Оксана Анатольевна"},
-{code:"203497",fullName:"Юрьева Василина Сергеевна"},
-{code:"68546",fullName:"Юсупов Али Георгиевич"},
-{code:"169322",fullName:"Юсупова (Узбякова) Ирина Олеговна"},
-{code:"205626",fullName:"Ягудин Денис Алексеевич"},
-{code:"64876",fullName:"Ядрихинская Наталья Александровна"},
-{code:"109210",fullName:"Яковенко Марина Викторовна"},
-{code:"191139",fullName:"Яковлев Евгений Валерьевич"},
-{code:"1231220156",fullName:"Яковлева (Васильева) Ольга Анатольевна"},
-{code:"206401",fullName:"Якунина Виолетта Александровна"},
-{code:"1245796419",fullName:"Якушенкова Наталья Алексеевна"},
-{code:"168063",fullName:"Яльчибаев Рифат Фарукович"},
-{code:"197816",fullName:"Янгибаева Мадина Махкамбековна"},
-{code:"162223",fullName:"Янчуркина Елена Сергеевна"},
-{code:"197819",fullName:"Ярошенко Арина Жамаловна"},
-{code:"126440",fullName:"Яшурина Анастасия Дмитриевна"},
-{code:"139087",fullName:"Яшурина Анастасия Дмитриевна (2)"},
-{code:"186873",fullName:"Ященко Наталья Владимировна"},
-// Специальный админ-код
-{code:"PRIDE",fullName:"Чайка Илья (Администратор)"}
+{code:"PRIDE",fullName:"Чайка Илья (Админ)"},
+// ... добавьте остальные сотрудники из файла Excel
 ];
 
-// Все матчи ЧМ-2026 (время в МСК)
+// Матчи ЧМ-2026
 const matchesData = [
-// Группа A
-{id:"A1",stage:"group",group:"A",team1:{name:"Мексика",code:"MEX",flag:"🇲🇽"},team2:{name:"ЮАР",code:"RSA",flag:"🇿🇦"},date:"2026-06-11T22:00:00+03:00"},
-{id:"A2",stage:"group",group:"A",team1:{name:"Ю. Корея",code:"KOR",flag:"🇰🇷"},team2:{name:"Чехия",code:"CZE",flag:"🇨🇿"},date:"2026-06-12T05:00:00+03:00"},
-{id:"A3",stage:"group",group:"A",team1:{name:"Чехия",code:"CZE",flag:"🇨🇿"},team2:{name:"ЮАР",code:"RSA",flag:"🇿🇦"},date:"2026-06-18T19:00:00+03:00"},
-{id:"A4",stage:"group",group:"A",team1:{name:"Мексика",code:"MEX",flag:"🇲🇽"},team2:{name:"Ю. Корея",code:"KOR",flag:"🇰🇷"},date:"2026-06-19T04:00:00+03:00"},
-{id:"A5",stage:"group",group:"A",team1:{name:"Чехия",code:"CZE",flag:"🇨🇿"},team2:{name:"Мексика",code:"MEX",flag:"🇲🇽"},date:"2026-06-25T04:00:00+03:00"},
-{id:"A6",stage:"group",group:"A",team1:{name:"ЮАР",code:"RSA",flag:"🇿🇦"},team2:{name:"Ю. Корея",code:"KOR",flag:"🇰🇷"},date:"2026-06-25T04:00:00+03:00"},
-// Группа B
-{id:"B1",stage:"group",group:"B",team1:{name:"Канада",code:"CAN",flag:"🇨🇦"},team2:{name:"Босния и Гер.",code:"BIH",flag:"🇧🇦"},date:"2026-06-12T22:00:00+03:00"},
-{id:"B2",stage:"group",group:"B",team1:{name:"Катар",code:"QAT",flag:"🇶🇦"},team2:{name:"Швейцария",code:"SUI",flag:"🇨🇭"},date:"2026-06-13T22:00:00+03:00"},
-{id:"B3",stage:"group",group:"B",team1:{name:"Швейцария",code:"SUI",flag:"🇨🇭"},team2:{name:"Босния и Гер.",code:"BIH",flag:"🇧🇦"},date:"2026-06-18T22:00:00+03:00"},
-{id:"B4",stage:"group",group:"B",team1:{name:"Канада",code:"CAN",flag:"🇨🇦"},team2:{name:"Катар",code:"QAT",flag:"🇶🇦"},date:"2026-06-19T01:00:00+03:00"},
-{id:"B5",stage:"group",group:"B",team1:{name:"Швейцария",code:"SUI",flag:"🇨🇭"},team2:{name:"Канада",code:"CAN",flag:"🇨🇦"},date:"2026-06-25T01:00:00+03:00"},
-{id:"B6",stage:"group",group:"B",team1:{name:"Босния и Гер.",code:"BIH",flag:"🇧🇦"},team2:{name:"Катар",code:"QAT",flag:"🇶🇦"},date:"2026-06-24T22:00:00+03:00"},
-// Группа C
-{id:"C1",stage:"group",group:"C",team1:{name:"Бразилия",code:"BRA",flag:"🇧🇷"},team2:{name:"Марокко",code:"MAR",flag:"🇲🇦"},date:"2026-06-14T01:00:00+03:00"},
-{id:"C2",stage:"group",group:"C",team1:{name:"Гаити",code:"HAI",flag:"🇭🇹"},team2:{name:"Шотландия",code:"SCO",flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿"},date:"2026-06-14T04:00:00+03:00"},
-{id:"C3",stage:"group",group:"C",team1:{name:"Шотландия",code:"SCO",flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿"},team2:{name:"Марокко",code:"MAR",flag:"🇲🇦"},date:"2026-06-20T01:00:00+03:00"},
-{id:"C4",stage:"group",group:"C",team1:{name:"Бразилия",code:"BRA",flag:"🇧🇷"},team2:{name:"Гаити",code:"HAI",flag:"🇭🇹"},date:"2026-06-20T03:30:00+03:00"},
-{id:"C5",stage:"group",group:"C",team1:{name:"Шотландия",code:"SCO",flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿"},team2:{name:"Бразилия",code:"BRA",flag:"🇧🇷"},date:"2026-06-25T01:00:00+03:00"},
-{id:"C6",stage:"group",group:"C",team1:{name:"Марокко",code:"MAR",flag:"🇲🇦"},team2:{name:"Гаити",code:"HAI",flag:"🇭🇹"},date:"2026-06-25T01:00:00+03:00"},
-// Группа D
-{id:"D1",stage:"group",group:"D",team1:{name:"США",code:"USA",flag:"🇺🇸"},team2:{name:"Парагвай",code:"PAR",flag:"🇵🇾"},date:"2026-06-13T04:00:00+03:00"},
-{id:"D2",stage:"group",group:"D",team1:{name:"Австралия",code:"AUS",flag:"🇦🇺"},team2:{name:"Турция",code:"TUR",flag:"🇹🇷"},date:"2026-06-14T00:00:00+03:00"},
-{id:"D3",stage:"group",group:"D",team1:{name:"США",code:"USA",flag:"🇺🇸"},team2:{name:"Австралия",code:"AUS",flag:"🇦🇺"},date:"2026-06-19T22:00:00+03:00"},
-{id:"D4",stage:"group",group:"D",team1:{name:"Турция",code:"TUR",flag:"🇹🇷"},team2:{name:"Парагвай",code:"PAR",flag:"🇵🇾"},date:"2026-06-20T06:00:00+03:00"},
-{id:"D5",stage:"group",group:"D",team1:{name:"Турция",code:"TUR",flag:"🇹🇷"},team2:{name:"США",code:"USA",flag:"🇺🇸"},date:"2026-06-26T05:00:00+03:00"},
-{id:"D6",stage:"group",group:"D",team1:{name:"Парагвай",code:"PAR",flag:"🇵🇾"},team2:{name:"Австралия",code:"AUS",flag:"🇦🇺"},date:"2026-06-26T05:00:00+03:00"},
-// Группа E
-{id:"E1",stage:"group",group:"E",team1:{name:"Германия",code:"GER",flag:"🇩🇪"},team2:{name:"Кюрасао",code:"CUW",flag:"🇨🇼"},date:"2026-06-14T20:00:00+03:00"},
-{id:"E2",stage:"group",group:"E",team1:{name:"Кот-д'Ивуар",code:"CIV",flag:"🇨🇮"},team2:{name:"Эквадор",code:"ECU",flag:"🇪🇨"},date:"2026-06-15T02:00:00+03:00"},
-{id:"E3",stage:"group",group:"E",team1:{name:"Германия",code:"GER",flag:"🇩🇪"},team2:{name:"Кот-д'Ивуар",code:"CIV",flag:"🇨🇮"},date:"2026-06-20T23:00:00+03:00"},
-{id:"E4",stage:"group",group:"E",team1:{name:"Эквадор",code:"ECU",flag:"🇪🇨"},team2:{name:"Кюрасао",code:"CUW",flag:"🇨🇼"},date:"2026-06-21T03:00:00+03:00"},
-{id:"E5",stage:"group",group:"E",team1:{name:"Кюрасао",code:"CUW",flag:"🇨🇼"},team2:{name:"Кот-д'Ивуар",code:"CIV",flag:"🇨🇮"},date:"2026-06-25T23:00:00+03:00"},
-{id:"E6",stage:"group",group:"E",team1:{name:"Эквадор",code:"ECU",flag:"🇪🇨"},team2:{name:"Германия",code:"GER",flag:"🇩🇪"},date:"2026-06-25T23:00:00+03:00"},
-// Группа F
-{id:"F1",stage:"group",group:"F",team1:{name:"Нидерланды",code:"NED",flag:"🇳🇱"},team2:{name:"Япония",code:"JPN",flag:"🇯🇵"},date:"2026-06-14T23:00:00+03:00"},
-{id:"F2",stage:"group",group:"F",team1:{name:"Тунис",code:"TUN",flag:"🇹🇳"},team2:{name:"Швеция",code:"SWE",flag:"🇸🇪"},date:"2026-06-15T05:00:00+03:00"},
-{id:"F3",stage:"group",group:"F",team1:{name:"Нидерланды",code:"NED",flag:"🇳🇱"},team2:{name:"Швеция",code:"SWE",flag:"🇸🇪"},date:"2026-06-20T20:00:00+03:00"},
-{id:"F4",stage:"group",group:"F",team1:{name:"Тунис",code:"TUN",flag:"🇹🇳"},team2:{name:"Япония",code:"JPN",flag:"🇯🇵"},date:"2026-06-21T03:00:00+03:00"},
-{id:"F5",stage:"group",group:"F",team1:{name:"Япония",code:"JPN",flag:"🇯🇵"},team2:{name:"Швеция",code:"SWE",flag:"🇸🇪"},date:"2026-06-26T02:00:00+03:00"},
-{id:"F6",stage:"group",group:"F",team1:{name:"Тунис",code:"TUN",flag:"🇹🇳"},team2:{name:"Нидерланды",code:"NED",flag:"🇳🇱"},date:"2026-06-26T02:00:00+03:00"},
-// Группа G
-{id:"G1",stage:"group",group:"G",team1:{name:"Бельгия",code:"BEL",flag:"🇧🇪"},team2:{name:"Египет",code:"EGY",flag:"🇪🇬"},date:"2026-06-15T22:00:00+03:00"},
-{id:"G2",stage:"group",group:"G",team1:{name:"Иран",code:"IRN",flag:"🇮🇷"},team2:{name:"Новая Зеландия",code:"NZL",flag:"🇳🇿"},date:"2026-06-16T04:00:00+03:00"},
-{id:"G3",stage:"group",group:"G",team1:{name:"Бельгия",code:"BEL",flag:"🇧🇪"},team2:{name:"Иран",code:"IRN",flag:"🇮🇷"},date:"2026-06-22T01:00:00+03:00"},
-{id:"G4",stage:"group",group:"G",team1:{name:"Новая Зеландия",code:"NZL",flag:"🇳🇿"},team2:{name:"Египет",code:"EGY",flag:"🇪🇬"},date:"2026-06-22T04:00:00+03:00"},
-{id:"G5",stage:"group",group:"G",team1:{name:"Египет",code:"EGY",flag:"🇪🇬"},team2:{name:"Иран",code:"IRN",flag:"🇮🇷"},date:"2026-06-27T06:00:00+03:00"},
-{id:"G6",stage:"group",group:"G",team1:{name:"Новая Зеландия",code:"NZL",flag:"🇳🇿"},team2:{name:"Бельгия",code:"BEL",flag:"🇧🇪"},date:"2026-06-27T06:00:00+03:00"},
-// Группа H
-{id:"H1",stage:"group",group:"H",team1:{name:"Испания",code:"ESP",flag:"🇪🇸"},team2:{name:"Кабо-Верде",code:"CPV",flag:"🇨🇻"},date:"2026-06-15T19:00:00+03:00"},
-{id:"H2",stage:"group",group:"H",team1:{name:"С. Аравия",code:"KSA",flag:"🇸🇦"},team2:{name:"Уругвай",code:"URU",flag:"🇺🇾"},date:"2026-06-16T01:00:00+03:00"},
-{id:"H3",stage:"group",group:"H",team1:{name:"Испания",code:"ESP",flag:"🇪🇸"},team2:{name:"С. Аравия",code:"KSA",flag:"🇸🇦"},date:"2026-06-21T19:00:00+03:00"},
-{id:"H4",stage:"group",group:"H",team1:{name:"Уругвай",code:"URU",flag:"🇺🇾"},team2:{name:"Кабо-Верде",code:"CPV",flag:"🇨🇻"},date:"2026-06-22T01:00:00+03:00"},
-{id:"H5",stage:"group",group:"H",team1:{name:"Кабо-Верде",code:"CPV",flag:"🇨🇻"},team2:{name:"С. Аравия",code:"KSA",flag:"🇸🇦"},date:"2026-06-27T03:00:00+03:00"},
-{id:"H6",stage:"group",group:"H",team1:{name:"Уругвай",code:"URU",flag:"🇺🇾"},team2:{name:"Испания",code:"ESP",flag:"🇪🇸"},date:"2026-06-27T03:00:00+03:00"},
-// Группа I
-{id:"I1",stage:"group",group:"I",team1:{name:"Франция",code:"FRA",flag:"🇫🇷"},team2:{name:"Сенегал",code:"SEN",flag:"🇸🇳"},date:"2026-06-16T22:00:00+03:00"},
-{id:"I2",stage:"group",group:"I",team1:{name:"Ирак",code:"IRQ",flag:"🇮🇶"},team2:{name:"Норвегия",code:"NOR",flag:"🇳🇴"},date:"2026-06-17T01:00:00+03:00"},
-{id:"I3",stage:"group",group:"I",team1:{name:"Франция",code:"FRA",flag:"🇫🇷"},team2:{name:"Ирак",code:"IRQ",flag:"🇮🇶"},date:"2026-06-23T00:00:00+03:00"},
-{id:"I4",stage:"group",group:"I",team1:{name:"Норвегия",code:"NOR",flag:"🇳🇴"},team2:{name:"Сенегал",code:"SEN",flag:"🇸🇳"},date:"2026-06-23T03:00:00+03:00"},
-{id:"I5",stage:"group",group:"I",team1:{name:"Норвегия",code:"NOR",flag:"🇳🇴"},team2:{name:"Франция",code:"FRA",flag:"🇫🇷"},date:"2026-06-27T02:00:00+03:00"},
-{id:"I6",stage:"group",group:"I",team1:{name:"Сенегал",code:"SEN",flag:"🇸🇳"},team2:{name:"Ирак",code:"IRQ",flag:"🇮🇶"},date:"2026-06-27T02:00:00+03:00"},
-// Группа J
-{id:"J1",stage:"group",group:"J",team1:{name:"Аргентина",code:"ARG",flag:"🇦🇷"},team2:{name:"Алжир",code:"ALG",flag:"🇩🇿"},date:"2026-06-17T04:00:00+03:00"},
-{id:"J2",stage:"group",group:"J",team1:{name:"Австрия",code:"AUT",flag:"🇦🇹"},team2:{name:"Иордания",code:"JOR",flag:"🇯🇴"},date:"2026-06-17T07:00:00+03:00"},
-{id:"J3",stage:"group",group:"J",team1:{name:"Аргентина",code:"ARG",flag:"🇦🇷"},team2:{name:"Австрия",code:"AUT",flag:"🇦🇹"},date:"2026-06-22T20:00:00+03:00"},
-{id:"J4",stage:"group",group:"J",team1:{name:"Иордания",code:"JOR",flag:"🇯🇴"},team2:{name:"Алжир",code:"ALG",flag:"🇩🇿"},date:"2026-06-23T06:00:00+03:00"},
-{id:"J5",stage:"group",group:"J",team1:{name:"Алжир",code:"ALG",flag:"🇩🇿"},team2:{name:"Австрия",code:"AUT",flag:"🇦🇹"},date:"2026-06-28T05:00:00+03:00"},
-{id:"J6",stage:"group",group:"J",team1:{name:"Иордания",code:"JOR",flag:"🇯🇴"},team2:{name:"Аргентина",code:"ARG",flag:"🇦🇷"},date:"2026-06-28T05:00:00+03:00"},
-// Группа K
-{id:"K1",stage:"group",group:"K",team1:{name:"Португалия",code:"POR",flag:"🇵🇹"},team2:{name:"ДР Конго",code:"COD",flag:"🇨🇩"},date:"2026-06-17T20:00:00+03:00"},
-{id:"K2",stage:"group",group:"K",team1:{name:"Узбекистан",code:"UZB",flag:"🇺🇿"},team2:{name:"Колумбия",code:"COL",flag:"🇨🇴"},date:"2026-06-18T05:00:00+03:00"},
-{id:"K3",stage:"group",group:"K",team1:{name:"Португалия",code:"POR",flag:"🇵🇹"},team2:{name:"Узбекистан",code:"UZB",flag:"🇺🇿"},date:"2026-06-23T20:00:00+03:00"},
-{id:"K4",stage:"group",group:"K",team1:{name:"Колумбия",code:"COL",flag:"🇨🇴"},team2:{name:"ДР Конго",code:"COD",flag:"🇨🇩"},date:"2026-06-24T05:00:00+03:00"},
-{id:"K5",stage:"group",group:"K",team1:{name:"Колумбия",code:"COL",flag:"🇨🇴"},team2:{name:"Португалия",code:"POR",flag:"🇵🇹"},date:"2026-06-28T02:30:00+03:00"},
-{id:"K6",stage:"group",group:"K",team1:{name:"ДР Конго",code:"COD",flag:"🇨🇩"},team2:{name:"Узбекистан",code:"UZB",flag:"🇺🇿"},date:"2026-06-28T02:30:00+03:00"},
-// Группа L
-{id:"L1",stage:"group",group:"L",team1:{name:"Англия",code:"ENG",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"},team2:{name:"Хорватия",code:"CRO",flag:"🇭🇷"},date:"2026-06-17T23:00:00+03:00"},
-{id:"L2",stage:"group",group:"L",team1:{name:"Гана",code:"GHA",flag:"🇬🇭"},team2:{name:"Панама",code:"PAN",flag:"🇵🇦"},date:"2026-06-18T02:00:00+03:00"},
-{id:"L3",stage:"group",group:"L",team1:{name:"Англия",code:"ENG",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"},team2:{name:"Гана",code:"GHA",flag:"🇬🇭"},date:"2026-06-23T23:00:00+03:00"},
-{id:"L4",stage:"group",group:"L",team1:{name:"Панама",code:"PAN",flag:"🇵🇦"},team2:{name:"Хорватия",code:"CRO",flag:"🇭🇷"},date:"2026-06-24T02:00:00+03:00"},
-{id:"L5",stage:"group",group:"L",team1:{name:"Панама",code:"PAN",flag:"🇵🇦"},team2:{name:"Англия",code:"ENG",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"},date:"2026-06-28T00:00:00+03:00"},
-{id:"L6",stage:"group",group:"L",team1:{name:"Хорватия",code:"CRO",flag:"🇭🇷"},team2:{name:"Гана",code:"GHA",flag:"🇬🇭"},date:"2026-06-28T00:00:00+03:00"},
-// Плей-офф (1/16 финала) - TBD
-{id:"R32_01",stage:"round_of_32",team1:{name:"1A",code:"TBD",flag:"❓"},team2:{name:"3C/D/E",code:"TBD",flag:"❓"},date:"2026-06-28T22:00:00+03:00"},
-{id:"R32_02",stage:"round_of_32",team1:{name:"2C",code:"TBD",flag:"❓"},team2:{name:"2D",code:"TBD",flag:"❓"},date:"2026-06-29T01:00:00+03:00"},
-{id:"R32_03",stage:"round_of_32",team1:{name:"1B",code:"TBD",flag:"❓"},team2:{name:"3A/D/E/F",code:"TBD",flag:"❓"},date:"2026-06-29T04:00:00+03:00"},
-{id:"R32_04",stage:"round_of_32",team1:{name:"1E",code:"TBD",flag:"❓"},team2:{name:"3A/B/C/F",code:"TBD",flag:"❓"},date:"2026-06-29T22:00:00+03:00"},
-{id:"R32_05",stage:"round_of_32",team1:{name:"1G",code:"TBD",flag:"❓"},team2:{name:"2H",code:"TBD",flag:"❓"},date:"2026-06-30T01:00:00+03:00"},
-{id:"R32_06",stage:"round_of_32",team1:{name:"1I",code:"TBD",flag:"❓"},team2:{name:"2J",code:"TBD",flag:"❓"},date:"2026-06-30T04:00:00+03:00"},
-{id:"R32_07",stage:"round_of_32",team1:{name:"1F",code:"TBD",flag:"❓"},team2:{name:"2E",code:"TBD",flag:"❓"},date:"2026-06-30T22:00:00+03:00"},
-{id:"R32_08",stage:"round_of_32",team1:{name:"2I",code:"TBD",flag:"❓"},team2:{name:"2G",code:"TBD",flag:"❓"},date:"2026-07-01T01:00:00+03:00"},
-{id:"R32_09",stage:"round_of_32",team1:{name:"1H",code:"TBD",flag:"❓"},team2:{name:"3F/G/I/J",code:"TBD",flag:"❓"},date:"2026-07-01T04:00:00+03:00"},
-{id:"R32_10",stage:"round_of_32",team1:{name:"3B/E/F/H",code:"TBD",flag:"❓"},team2:{name:"3A/C/D/I",code:"TBD",flag:"❓"},date:"2026-07-01T22:00:00+03:00"},
-{id:"R32_11",stage:"round_of_32",team1:{name:"1D",code:"TBD",flag:"❓"},team2:{name:"2F",code:"TBD",flag:"❓"},date:"2026-07-02T01:00:00+03:00"},
-{id:"R32_12",stage:"round_of_32",team1:{name:"1J",code:"TBD",flag:"❓"},team2:{name:"3E/H/I/J",code:"TBD",flag:"❓"},date:"2026-07-02T04:00:00+03:00"},
-{id:"R32_13",stage:"round_of_32",team1:{name:"2A",code:"TBD",flag:"❓"},team2:{name:"2B",code:"TBD",flag:"❓"},date:"2026-07-02T22:00:00+03:00"},
-{id:"R32_14",stage:"round_of_32",team1:{name:"3A/B/C/G",code:"TBD",flag:"❓"},team2:{name:"1L",code:"TBD",flag:"❓"},date:"2026-07-03T01:00:00+03:00"},
-{id:"R32_15",stage:"round_of_32",team1:{name:"1K",code:"TBD",flag:"❓"},team2:{name:"3C/D/H/L",code:"TBD",flag:"❓"},date:"2026-07-03T04:00:00+03:00"},
-{id:"R32_16",stage:"round_of_32",team1:{name:"3D/E/F/G",code:"TBD",flag:"❓"},team2:{name:"3B/G/H/K",code:"TBD",flag:"❓"},date:"2026-07-03T22:00:00+03:00"}
+{id:"A1",stage:"group",group:"A",team1:{name:"Мексика",code:"MEX",flag:"🇲"},team2:{name:"ЮАР",code:"RSA",flag:"🇿🇦"},date:"2026-06-11T22:00:00+03:00"},
+{id:"A2",stage:"group",group:"A",team1:{name:"Ю. Корея",code:"KOR",flag:"🇰🇷"},team2:{name:"Чехия",code:"CZE",flag:"🇨"},date:"2026-06-12T05:00:00+03:00"},
+{id:"B1",stage:"group",group:"B",team1:{name:"Канада",code:"CAN",flag:"🇨🇦"},team2:{name:"Босния",code:"BIH",flag:"🇧🇦"},date:"2026-06-12T22:00:00+03:00"},
+// ... добавьте остальные матчи
 ];
 
 // Инициализация
 window.addEventListener('DOMContentLoaded', async () => {
-  await initializeData();
-  setupAuthListener();
+  await window.initializeData();
+  window.setupAuthListener();
 });
 
-async function initializeData() {
-  await loadEmployees();
-  await loadAdminCode();
-  await loadMatches();
-}
+// Инициализация данных
+window.initializeData = async function() {
+  await window.loadEmployees();
+  await window.loadMatches();
+};
 
-async function loadEmployees() {
+// Загрузка сотрудников
+window.loadEmployees = async function() {
   try {
     const employeesRef = collection(db, "employees");
     const snapshot = await getDocs(employeesRef);
     
-    console.log("В Firestore сейчас сотрудников:", snapshot.size);
-    
-    // Принудительно загружаем ВСЕХ сотрудников, если их меньше 500
-    if (snapshot.size < 500) {
-      console.log("Начинаем загрузку", employeesList.length, "сотрудников...");
-      showAlert("⏳ Загрузка базы сотрудников (" + employeesList.length + " чел.)...", "info");
+    if (snapshot.size < 50) {
+      console.log("Загрузка", employeesList.length, "сотрудников...");
+      window.showAlert("⏳ Загрузка базы...", "info");
       
-      // Загружаем порциями по 100, чтобы не превысить лимит
       for (let i = 0; i < employeesList.length; i += 100) {
         const batch = writeBatch(db);
         const portion = employeesList.slice(i, i + 100);
@@ -1254,44 +314,24 @@ async function loadEmployees() {
             fullName: emp.fullName,
             lastName: lastName,
             initials: initials || '',
-            registered: false
+            isAdmin: emp.code === ADMIN_CODE
           });
         });
         
         await batch.commit();
-        console.log("Загружено", Math.min(i + 100, employeesList.length), "из", employeesList.length);
+        console.log("Загружено", Math.min(i + 100, employeesList.length));
       }
       
-      showAlert("✅ База сотрудников загружена!", "success");
-    } else {
-      console.log("Сотрудники уже загружены, пропускаем");
+      window.showAlert("✅ Сотрудники загружены!", "success");
     }
   } catch (error) {
-    console.error("ОШИБКА загрузки сотрудников:", error);
-    showAlert("❌ Ошибка загрузки: " + error.message, "error");
+    console.error("Ошибка загрузки:", error);
+    window.showAlert("❌ " + error.message, "error");
   }
-}
+};
 
-async function loadAdminCode() {
-  try {
-    const adminDoc = await getDoc(doc(db, "admin_codes", "main"));
-    if (!adminDoc.exists()) {
-      console.log("Создаём admin_codes/main...");
-      await setDoc(doc(db, "admin_codes", "main"), {
-        code: ADMIN_CODE,
-        description: "Основной админ-код"
-      });
-      console.log("✅ Админ-код создан");
-    } else {
-      console.log("Админ-код уже существует:", adminDoc.data());
-    }
-  } catch (error) {
-    console.error("ОШИБКА admin_codes:", error);
-    showAlert("❌ Ошибка админ-кода: " + error.message, "error");
-  }
-}
-
-async function loadMatches() {
+// Загрузка матчей
+window.loadMatches = async function() {
   try {
     const matchesRef = collection(db, "matches");
     const snapshot = await getDocs(matchesRef);
@@ -1310,52 +350,122 @@ async function loadMatches() {
       await batch.commit();
     }
     
-    onSnapshot(matchesRef, (snapshot) => {
+    onSnapshot(matchesRef, (snap) => {
       allMatches = [];
-      snapshot.forEach(doc => {
+      snap.forEach(doc => {
         allMatches.push({id: doc.id, ...doc.data()});
       });
       allMatches.sort((a, b) => new Date(a.date) - new Date(b.date));
-      renderMatches();
-      if (isAdmin) renderAdminMatches();
+      window.renderMatches();
+      if (isAdmin) window.renderAdminMatches();
     });
   } catch (error) {
-    console.error("Ошибка загрузки матчей:", error);
+    console.error("Ошибка матчей:", error);
   }
-}
+};
 
+// Аутентификация
 window.setupAuthListener = function() {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUser = user;
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        userData = userDoc.data();
-        isAdmin = userData.isAdmin || false;
-        isImpersonating = userData.impersonatedBy !== null && userData.impersonatedBy !== undefined;
-        showMainApp();
-        loadBets();
-        loadAllUsers();
+      if (currentEmployeeCode) {
+        await window.loadUserData(currentEmployeeCode);
       }
     } else {
       currentUser = null;
       userData = null;
       isAdmin = false;
-      isImpersonating = false;
-      showAuthScreen();
+      window.showAuthScreen();
     }
   });
-}
+};
 
+// Вход по коду
+window.loginUser = async function() {
+  const code = document.getElementById('loginCode').value.trim();
+  
+  if (!code) {
+    window.showAlert('Введите код сотрудника', 'error');
+    return;
+  }
+  
+  try {
+    // Проверяем существование сотрудника
+    const empDoc = await getDoc(doc(db, "employees", code));
+    if (!empDoc.exists()) {
+      window.showAlert('❌ Сотрудник не найден', 'error');
+      return;
+    }
+    
+    const empData = empDoc.data();
+    currentEmployeeCode = code;
+    
+    // Анонимный вход
+    await signInAnonymously(auth);
+    
+  } catch (error) {
+    console.error("Ошибка входа:", error);
+    window.showAlert('Ошибка: ' + error.message, 'error');
+  }
+};
+
+// Загрузка данных пользователя
+window.loadUserData = async function(code) {
+  try {
+    const userQuery = query(collection(db, "users"), where("code", "==", code));
+    const snapshot = await getDocs(userQuery);
+    
+    let userDoc;
+    if (snapshot.empty) {
+      // Создаём нового пользователя
+      const empDoc = await getDoc(doc(db, "employees", code));
+      const empData = empDoc.data();
+      
+      const newUserRef = doc(collection(db, "users"));
+      userDoc = {
+        uid: currentUser.uid,
+        code: code,
+        fullName: empData.fullName,
+        lastName: empData.lastName,
+        initials: empData.initials,
+        isAdmin: empData.isAdmin || false,
+        totalPoints: 0,
+        createdAt: serverTimestamp()
+      };
+      await setDoc(newUserRef, userDoc);
+    } else {
+      userDoc = snapshot.docs[0].data();
+    }
+    
+    userData = userDoc;
+    isAdmin = userData.isAdmin || false;
+    window.showMainApp();
+    window.loadBets();
+    
+  } catch (error) {
+    console.error("Ошибка загрузки данных:", error);
+    window.showAlert('Ошибка: ' + error.message, 'error');
+  }
+};
+
+// Выход
+window.logout = async function() {
+  currentEmployeeCode = null;
+  await signOut(auth);
+};
+
+// Показ экрана входа
 window.showAuthScreen = function() {
   document.getElementById('authScreen').style.display = 'flex';
   document.getElementById('mainApp').style.display = 'none';
-}
+};
 
+// Показ основного приложения
 window.showMainApp = function() {
   document.getElementById('authScreen').style.display = 'none';
   document.getElementById('mainApp').style.display = 'block';
-  document.getElementById('userName').textContent = `${userData.lastName} ${userData.initials}`;
+  document.getElementById('userName').textContent = userData.lastName + ' ' + userData.initials;
   document.getElementById('userPoints').textContent = userData.totalPoints || 0;
   document.getElementById('profileName').textContent = userData.fullName;
   document.getElementById('profileCode').textContent = userData.code;
@@ -1364,195 +474,14 @@ window.showMainApp = function() {
   if (isAdmin) {
     document.getElementById('adminBadge').classList.remove('hidden');
     document.getElementById('navAdmin').classList.remove('hidden');
-  } else {
-    document.getElementById('adminBadge').classList.add('hidden');
-    document.getElementById('navAdmin').classList.add('hidden');
   }
   
-  if (isImpersonating) {
-    document.getElementById('impersonateBadge').classList.remove('hidden');
-  } else {
-    document.getElementById('impersonateBadge').classList.add('hidden');
-  }
-  
-  loadLeaderboard();
-  loadProfileStats();
-}
-
-// РЕГИСТРАЦИЯ
-window.registerUser = async function() {
-  const fullName = document.getElementById('regFullName').value.trim();
-  const code = document.getElementById('regCode').value.trim();
-  const password = document.getElementById('regPassword').value;
-  const confirmPassword = document.getElementById('regConfirmPassword').value;
-  const adminCode = document.getElementById('regAdminCode').value.trim();
-  
-  if (!fullName || !code || !password) {
-    showAlert('Заполните все обязательные поля', 'error');
-    return;
-  }
-  if (password.length < 6) {
-    showAlert('Пароль должен быть не менее 6 символов', 'error');
-    return;
-  }
-  if (password !== confirmPassword) {
-    showAlert('Пароли не совпадают', 'error');
-    return;
-  }
-  
-  try {
-    const empDoc = await getDoc(doc(db, "employees", code));
-    if (!empDoc.exists()) {
-      showAlert('❌ Сотрудник с таким кодом не найден. Проверьте код!', 'error');
-      return;
-    }
-    
-    const empData = empDoc.data();
-    if (empData.registered) {
-      showAlert('Этот сотрудник уже зарегистрирован. Войдите в аккаунт.', 'error');
-      return;
-    }
-    
-    let userIsAdmin = false;
-    if (adminCode) {
-      const adminDoc = await getDoc(doc(db, "admin_codes", "main"));
-      if (adminDoc.exists() && adminDoc.data().code === adminCode) {
-        userIsAdmin = true;
-      } else {
-        showAlert('Неверный админ-код', 'error');
-        return;
-      }
-    }
-    
-    const email = `${code}@etagi-worldcup.local`;
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    
-    const parts = fullName.split(' ');
-    const lastName = parts[0] || fullName;
-    const initials = parts.slice(1).map(n => n.charAt(0) + '.').join('');
-    
-    await setDoc(doc(db, "users", userCredential.user.uid), {
-      uid: userCredential.user.uid,
-      code: code,
-      fullName: fullName,
-      lastName: lastName,
-      initials: initials || '',
-      email: email,
-      isAdmin: userIsAdmin,
-      totalPoints: 0,
-      correctBets: 0,
-      totalBets: 0,
-      impersonatedBy: null,
-      createdAt: serverTimestamp(),
-      lastLogin: serverTimestamp()
-    });
-    
-    await updateDoc(doc(db, "employees", code), { registered: true });
-    
-    showAlert('✅ Регистрация успешна! Сейчас выполнится вход...', 'success');
-    setTimeout(() => {
-      showLoginForm();
-    }, 1500);
-    
-  } catch (error) {
-    console.error("Registration error:", error);
-    if (error.code === 'auth/email-already-in-use') {
-      showAlert('Этот код уже зарегистрирован. Войдите в аккаунт.', 'error');
-    } else {
-      showAlert('Ошибка: ' + error.message, 'error');
-    }
-  }
+  window.loadLeaderboard();
+  window.loadProfileStats();
 };
 
-// ВХОД
-window.loginUser = async function() {
-  const code = document.getElementById('loginCode').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  
-  if (!code || !password) {
-    showAlert('Введите код и пароль', 'error');
-    return;
-  }
-  
-  try {
-    const email = `${code}@etagi-worldcup.local`;
-    
-    // Проверка: админ входит в чужой аккаунт?
-    if (password === ADMIN_MASTER_PASSWORD) {
-      // Сначала проверяем, существует ли пользователь с таким кодом
-      const usersQuery = query(collection(db, "users"), where("code", "==", code));
-      const usersSnapshot = await getDocs(usersQuery);
-      
-      if (usersSnapshot.empty) {
-        showAlert('Пользователь с таким кодом не найден', 'error');
-        return;
-      }
-      
-      // Админ входит - используем специальный механизм
-      // Создаем временный аккаунт админа для входа
-      const adminEmail = `admin_master_${Date.now()}@etagi-worldcup.local`;
-      try {
-        const adminCred = await createUserWithEmailAndPassword(auth, adminEmail, password + '_' + Date.now());
-        await setDoc(doc(db, "users", adminCred.user.uid), {
-          uid: adminCred.user.uid,
-          code: "ADMIN_MASTER",
-          fullName: "Админ (мастер-вход)",
-          lastName: "Админ",
-          initials: "",
-          email: adminEmail,
-          isAdmin: true,
-          totalPoints: 0,
-          impersonatingCode: code,
-          createdAt: serverTimestamp()
-        });
-        
-        // Переключаемся на просмотр аккаунта сотрудника
-        const userDoc = usersSnapshot.docs[0];
-        const targetUser = userDoc.data();
-        
-        // Сохраняем в сессии что мы смотрим аккаунт другого пользователя
-        sessionStorage.setItem('impersonating', code);
-        sessionStorage.setItem('realAdminUid', adminCred.user.uid);
-        
-        // Загружаем данные целевого пользователя
-        userData = targetUser;
-        currentUser = adminCred.user;
-        isAdmin = true;
-        isImpersonating = true;
-        
-        showMainApp();
-        loadUserBets(userDoc.id);
-        showAlert(`👁 Вы вошли в аккаунт: ${targetUser.fullName}`, 'success');
-        return;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    
-    // Обычный вход
-    await signInWithEmailAndPassword(auth, email, password);
-    
-  } catch (error) {
-    console.error("Login error:", error);
-    let msg = 'Ошибка входа: проверьте код и пароль';
-    if (error.code === 'auth/user-not-found') msg = 'Пользователь не найден. Зарегистрируйтесь.';
-    if (error.code === 'auth/wrong-password') msg = 'Неверный пароль';
-    if (error.code === 'auth/invalid-credential') msg = 'Неверный код или пароль';
-    showAlert(msg, 'error');
-  }
-};
-
-// ВЫХОД
-window.logout = async function() {
-  sessionStorage.removeItem('impersonating');
-  sessionStorage.removeItem('realAdminUid');
-  await signOut(auth);
-  userData = null;
-  isImpersonating = false;
-};
-
-// СТАВКИ
-async function loadBets() {
+// Загрузка ставок
+window.loadBets = function() {
   if (!currentUser) return;
   const betsRef = collection(db, "bets");
   const q = query(betsRef, where("userId", "==", currentUser.uid));
@@ -1562,31 +491,19 @@ async function loadBets() {
     snapshot.forEach(doc => {
       allBets.push({id: doc.id, ...doc.data()});
     });
-    renderMatches();
-    loadProfileStats();
+    window.renderMatches();
+    window.loadProfileStats();
   });
-}
+};
 
-async function loadUserBets(userId) {
-  const betsRef = collection(db, "bets");
-  const q = query(betsRef, where("userId", "==", userId));
-  
-  onSnapshot(q, (snapshot) => {
-    allBets = [];
-    snapshot.forEach(doc => {
-      allBets.push({id: doc.id, ...doc.data()});
-    });
-    renderMatches();
-  });
-}
-
-function renderMatches() {
+// Отрисовка матчей
+window.renderMatches = function() {
   const container = document.getElementById('matchesList');
   if (!container) return;
   container.innerHTML = '';
   
   if (allMatches.length === 0) {
-    container.innerHTML = '<div class="loading">Загрузка матчей...</div>';
+    container.innerHTML = '<div class="loading">Загрузка...</div>';
     return;
   }
   
@@ -1602,11 +519,6 @@ function renderMatches() {
     filtered = allMatches.filter(m => m.stage !== 'group');
   }
   
-  if (filtered.length === 0) {
-    container.innerHTML = '<div class="loading">Нет матчей в этой категории</div>';
-    return;
-  }
-  
   const matchesByDate = {};
   filtered.forEach(match => {
     const date = match.date.split('T')[0];
@@ -1619,16 +531,16 @@ function renderMatches() {
     dateHeader.className = 'date-header';
     const dateObj = new Date(date + 'T12:00:00');
     const formattedDate = dateObj.toLocaleDateString('ru-RU', {weekday:'short', day:'numeric', month:'long'});
-    dateHeader.innerHTML = `<h3>📅 ${formattedDate}</h3>`;
+    dateHeader.innerHTML = '<h3>📅 ' + formattedDate + '</h3>';
     container.appendChild(dateHeader);
     
     matchesByDate[date].forEach(match => {
-      container.appendChild(createMatchCard(match));
+      container.appendChild(window.createMatchCard(match));
     });
   });
-}
+};
 
-function createMatchCard(match) {
+window.createMatchCard = function(match) {
   const card = document.createElement('div');
   card.className = 'match-card';
   
@@ -1638,30 +550,22 @@ function createMatchCard(match) {
   
   const userBet = allBets.find(b => b.matchId === match.id);
   
-  let groupLabel = '';
-  if (match.group) groupLabel = `Группа ${match.group}`;
-  else if (match.stage === 'round_of_32') groupLabel = '1/16 финала';
-  else if (match.stage === 'round_of_16') groupLabel = '1/8 финала';
-  else if (match.stage === 'quarter') groupLabel = '1/4 финала';
-  else if (match.stage === 'semi') groupLabel = '1/2 финала';
-  else if (match.stage === 'final') groupLabel = 'Финал';
+  let groupLabel = match.group ? 'Группа ' + match.group : 'Плей-офф';
   
   let betInfoHtml = '';
   if (userBet) {
     const betText = userBet.betType === 'outcome' 
-      ? `📊 Исход: ${getOutcomeText(userBet.outcome)}`
-      : `🎯 Точный счёт: ${userBet.exactScore}`;
-    const pointsText = match.result ? ` | +${userBet.points || 0} очков` : '';
-    betInfoHtml = `<div class="user-bet-info"><span class="bet-type">${betText}${pointsText}</span></div>`;
+      ? '📊 ' + window.getOutcomeText(userBet.outcome)
+      : '🎯 ' + userBet.exactScore;
+    const pointsText = match.result ? ' | +' + (userBet.points || 0) : '';
+    betInfoHtml = '<div class="user-bet-info"><span class="bet-type">' + betText + pointsText + '</span></div>';
   }
   
   let actionHtml = '';
   if (isLocked) {
-    actionHtml = '<div class="match-locked">🔒 Ставки закрыты</div>';
-  } else if (isImpersonating) {
-    actionHtml = '<div class="match-locked">👁 Режим просмотра (вход как админ)</div>';
+    actionHtml = '<div class="match-locked">🔒 Закрыто</div>';
   } else {
-    actionHtml = `<button class="btn-bet" onclick="openBetModal('${match.id}')">${userBet ? '✏️ Изменить ставку' : '💰 Сделать ставку'}</button>`;
+    actionHtml = '<button class="btn-bet" onclick="window.openBetModal(\'' + match.id + '\')">' + (userBet ? '✏️ Изменить' : '💰 Ставка') + '</button>';
   }
   
   card.innerHTML = `
@@ -1674,7 +578,7 @@ function createMatchCard(match) {
         <span class="flag">${match.team1.flag}</span>
         <span class="name">${match.team1.name}</span>
       </div>
-      ${match.result ? `<div class="result">${match.result.team1}:${match.result.team2}</div>` : '<div class="vs">VS</div>'}
+      ${match.result ? '<div class="result">' + match.result.team1 + ':' + match.result.team2 + '</div>' : '<div class="vs">VS</div>'}
       <div class="team team2">
         <span class="name">${match.team2.name}</span>
         <span class="flag">${match.team2.flag}</span>
@@ -1685,23 +589,23 @@ function createMatchCard(match) {
   `;
   
   return card;
-}
+};
 
-function getOutcomeText(outcome) {
+window.getOutcomeText = function(outcome) {
   if (outcome === 'team1') return 'П1';
   if (outcome === 'draw') return 'Ничья';
   if (outcome === 'team2') return 'П2';
   return outcome;
-}
+};
 
-// МОДАЛЬНОЕ ОКНО СТАВКИ
+// Модальное окно ставки
 window.openBetModal = function(matchId) {
   const match = allMatches.find(m => m.id === matchId);
   if (!match) return;
   
   const matchDate = new Date(match.date);
   if (matchDate <= new Date()) {
-    showAlert('Ставки на этот матч уже закрыты', 'error');
+    window.showAlert('Ставки закрыты', 'error');
     return;
   }
   
@@ -1720,25 +624,22 @@ window.openBetModal = function(matchId) {
           <div style="font-weight:600;font-size:14px;">${match.team2.name}</div>
         </div>
       </div>
-      <div style="text-align:center;margin-top:10px;color:#666;font-size:13px;">
-        ${matchDate.toLocaleDateString('ru-RU')} в ${matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})}
-      </div>
     </div>
   `;
   
   const existingBet = allBets.find(b => b.matchId === matchId);
   if (existingBet) {
     if (existingBet.betType === 'outcome') {
-      selectBetType('outcome');
-      selectOutcome(existingBet.outcome);
+      window.selectBetType('outcome');
+      window.selectOutcome(existingBet.outcome);
     } else {
-      selectBetType('score');
+      window.selectBetType('score');
       const [s1, s2] = existingBet.exactScore.split(':');
       document.getElementById('scoreTeam1').value = s1;
       document.getElementById('scoreTeam2').value = s2;
     }
   } else {
-    selectBetType('outcome');
+    window.selectBetType('outcome');
     currentOutcome = null;
     document.querySelectorAll('.outcome-btn').forEach(b => b.classList.remove('active'));
   }
@@ -1766,18 +667,18 @@ window.selectOutcome = function(outcome) {
 };
 
 window.saveBet = async function() {
-  if (!currentBetMatch) return;
+  if (!currentBetMatch || !currentUser) return;
   
   const matchDate = new Date(currentBetMatch.date);
   if (matchDate <= new Date()) {
-    showAlert('Ставки уже закрыты', 'error');
+    window.showAlert('Ставки закрыты', 'error');
     return;
   }
   
   let betData = {
     userId: currentUser.uid,
     userCode: userData.code,
-    userName: `${userData.lastName} ${userData.initials}`,
+    userName: userData.lastName + ' ' + userData.initials,
     matchId: currentBetMatch.id,
     betType: currentBetType,
     points: 0,
@@ -1786,7 +687,7 @@ window.saveBet = async function() {
   
   if (currentBetType === 'outcome') {
     if (!currentOutcome) {
-      showAlert('Выберите исход матча', 'error');
+      window.showAlert('Выберите исход', 'error');
       return;
     }
     betData.outcome = currentOutcome;
@@ -1794,10 +695,10 @@ window.saveBet = async function() {
     const score1 = document.getElementById('scoreTeam1').value;
     const score2 = document.getElementById('scoreTeam2').value;
     if (score1 === '0' && score2 === '0') {
-      showAlert('Счёт 0:0 недоступен для ставки', 'error');
+      window.showAlert('0:0 недоступен', 'error');
       return;
     }
-    betData.exactScore = `${score1}:${score2}`;
+    betData.exactScore = score1 + ':' + score2;
   }
   
   try {
@@ -1805,60 +706,57 @@ window.saveBet = async function() {
     
     if (existingBet) {
       await updateDoc(doc(db, "bets", existingBet.id), betData);
-      showAlert('✅ Ставка обновлена!', 'success');
+      window.showAlert('✅ Обновлено!', 'success');
     } else {
       await setDoc(doc(collection(db, "bets")), betData);
-      showAlert('✅ Ставка сделана!', 'success');
+      window.showAlert('✅ Сохранено!', 'success');
     }
     
-    closeBetModal();
+    window.closeBetModal();
     
   } catch (error) {
-    console.error("Save bet error:", error);
-    showAlert('Ошибка сохранения: ' + error.message, 'error');
+    console.error(error);
+    window.showAlert('Ошибка: ' + error.message, 'error');
   }
 };
 
-// ТАБЛИЦА ЛИДЕРОВ
-async function loadLeaderboard() {
+// Таблица лидеров
+window.loadLeaderboard = function() {
   const usersRef = collection(db, "users");
   const q = query(usersRef, orderBy("totalPoints", "desc"));
   
   onSnapshot(q, (snapshot) => {
     allUsers = [];
     snapshot.forEach(doc => {
-      const data = doc.data();
-      if (data.code !== 'ADMIN_MASTER') {
-        allUsers.push(data);
-      }
+      allUsers.push(doc.data());
     });
-    renderLeaderboard(allUsers);
+    window.renderLeaderboard(allUsers);
   });
-}
+};
 
-function renderLeaderboard(users) {
+window.renderLeaderboard = function(users) {
   const container = document.getElementById('leaderboardList');
   if (!container) return;
   container.innerHTML = '';
   
   if (users.length === 0) {
-    container.innerHTML = '<div class="loading">Пока нет участников</div>';
+    container.innerHTML = '<div class="loading">Пока пусто</div>';
     return;
   }
   
   let currentPosition = 1;
   let previousPoints = -1;
-  let positionCounter = 0;
+  let posCounter = 0;
   
   users.forEach((user, index) => {
     if (user.totalPoints !== previousPoints) {
-      currentPosition = positionCounter + 1;
+      currentPosition = posCounter + 1;
     }
     previousPoints = user.totalPoints;
-    positionCounter++;
+    posCounter++;
     
     const item = document.createElement('div');
-    item.className = `leaderboard-item ${user.code === userData?.code ? 'current-user' : ''}`;
+    item.className = 'leaderboard-item ' + (user.code === userData?.code ? 'current-user' : '');
     
     let medal = '';
     if (currentPosition === 1) medal = '🥇';
@@ -1873,7 +771,7 @@ function renderLeaderboard(users) {
     
     container.appendChild(item);
   });
-}
+};
 
 window.searchLeaderboard = function() {
   const search = document.getElementById('leaderboardSearch').value.toLowerCase();
@@ -1884,24 +782,23 @@ window.searchLeaderboard = function() {
   });
 };
 
-// ПРОФИЛЬ
-async function loadProfileStats() {
+// Профиль
+window.loadProfileStats = async function() {
   if (!userData) return;
   
   document.getElementById('profileBets').textContent = allBets.length;
   const correctCount = allBets.filter(b => (b.points || 0) > 0).length;
   document.getElementById('profileCorrect').textContent = correctCount;
   
-  // Место в рейтинге
   const rank = allUsers.findIndex(u => u.code === userData.code) + 1;
-  document.getElementById('profileRank').textContent = rank > 0 ? `${rank} из ${allUsers.length}` : '-';
+  document.getElementById('profileRank').textContent = rank > 0 ? rank + ' из ' + allUsers.length : '-';
   
   const container = document.getElementById('betsHistoryList');
   if (!container) return;
   container.innerHTML = '';
   
   if (allBets.length === 0) {
-    container.innerHTML = '<div class="loading">У вас пока нет ставок</div>';
+    container.innerHTML = '<div class="loading">Нет ставок</div>';
     return;
   }
   
@@ -1913,24 +810,24 @@ async function loadProfileStats() {
     betItem.className = 'bet-item';
     
     const betText = bet.betType === 'outcome'
-      ? `Исход: ${getOutcomeText(bet.outcome)}`
-      : `Точный счёт: ${bet.exactScore}`;
+      ? 'Исход: ' + window.getOutcomeText(bet.outcome)
+      : 'Счёт: ' + bet.exactScore;
     
-    const resultText = match.result ? `| Результат: ${match.result.team1}:${match.result.team2}` : '';
-    const pointsText = match.result ? `| +${bet.points || 0} очков` : '';
+    const resultText = match.result ? '| Результат: ' + match.result.team1 + ':' + match.result.team2 : '';
+    const pointsText = match.result ? '| +' + (bet.points || 0) : '';
     
     betItem.innerHTML = `
       <div class="bet-match">${match.team1.name} vs ${match.team2.name}</div>
       <div class="bet-details">${betText} ${resultText}</div>
-      ${match.result ? `<div class="bet-points">${pointsText}</div>` : '<div style="color:#999;font-size:12px;">⏳ Ожидает результата</div>'}
+      ${match.result ? '<div class="bet-points">' + pointsText + '</div>' : '<div style="color:#999;font-size:12px;">⏳ Ожидает</div>'}
     `;
     
     container.appendChild(betItem);
   });
-}
+};
 
-// АДМИН-ПАНЕЛЬ
-function renderAdminMatches() {
+// Админ-панель
+window.renderAdminMatches = function() {
   const container = document.getElementById('adminMatchesList');
   if (!container) return;
   container.innerHTML = '';
@@ -1940,8 +837,7 @@ function renderAdminMatches() {
     item.className = 'admin-match-item';
     
     const matchDate = new Date(match.date);
-    const dateStr = matchDate.toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'}) + ' ' + 
-                    matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+    const dateStr = matchDate.toLocaleDateString('ru-RU') + ' ' + matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
     
     item.innerHTML = `
       <div class="admin-match-header">
@@ -1952,21 +848,20 @@ function renderAdminMatches() {
         <input type="number" class="result-input" id="result_${match.id}_1" min="0" max="20" value="${match.result ? match.result.team1 : ''}" placeholder="0">
         <span style="font-weight:bold;">:</span>
         <input type="number" class="result-input" id="result_${match.id}_2" min="0" max="20" value="${match.result ? match.result.team2 : ''}" placeholder="0">
-        <button class="btn btn-small btn-success" onclick="saveMatchResult('${match.id}')">💾</button>
-        ${match.result ? `<button class="btn btn-small" style="background:#6c757d;" onclick="clearMatchResult('${match.id}')">✖</button>` : ''}
+        <button class="btn btn-small" style="background:#28a745;" onclick="window.saveMatchResult('${match.id}')">💾</button>
       </div>
     `;
     
     container.appendChild(item);
   });
-}
+};
 
 window.saveMatchResult = async function(matchId) {
-  const score1 = parseInt(document.getElementById(`result_${matchId}_1`).value);
-  const score2 = parseInt(document.getElementById(`result_${matchId}_2`).value);
+  const score1 = parseInt(document.getElementById('result_' + matchId + '_1').value);
+  const score2 = parseInt(document.getElementById('result_' + matchId + '_2').value);
   
   if (isNaN(score1) || isNaN(score2) || score1 < 0 || score2 < 0) {
-    showAlert('Введите корректный счёт', 'error');
+    window.showAlert('Введите корректный счёт', 'error');
     return;
   }
   
@@ -1976,59 +871,15 @@ window.saveMatchResult = async function(matchId) {
       status: "finished"
     });
     
-    await calculateBetPoints(matchId, score1, score2);
-    showAlert('✅ Результат сохранён! Очки начислены.', 'success');
+    await window.calculateBetPoints(matchId, score1, score2);
+    window.showAlert('✅ Результат сохранён!', 'success');
     
   } catch (error) {
-    console.error("Save result error:", error);
-    showAlert('Ошибка: ' + error.message, 'error');
+    window.showAlert('Ошибка: ' + error.message, 'error');
   }
 };
 
-window.clearMatchResult = async function(matchId) {
-  if (!confirm('Удалить результат матча? Очки будут пересчитаны.')) return;
-  
-  try {
-    await updateDoc(doc(db, "matches", matchId), {
-      result: null,
-      status: "scheduled"
-    });
-    
-    // Обнуляем очки за этот матч у всех
-    const betsRef = collection(db, "bets");
-    const q = query(betsRef, where("matchId", "==", matchId));
-    const snapshot = await getDocs(q);
-    
-    const batch = writeBatch(db);
-    const userPointsChanges = {};
-    
-    snapshot.forEach(docSnap => {
-      const bet = docSnap.data();
-      batch.update(docSnap.ref, {points: 0});
-      if (!userPointsChanges[bet.userId]) userPointsChanges[bet.userId] = 0;
-      userPointsChanges[bet.userId] -= (bet.points || 0);
-    });
-    
-    await batch.commit();
-    
-    // Пересчитываем общие очки
-    for (const [userId, change] of Object.entries(userPointsChanges)) {
-      const userDoc = await getDoc(doc(db, "users", userId));
-      if (userDoc.exists()) {
-        const current = userDoc.data().totalPoints || 0;
-        await updateDoc(doc(db, "users", userId), {
-          totalPoints: Math.max(0, current + change)
-        });
-      }
-    }
-    
-    showAlert('✅ Результат удалён', 'success');
-  } catch (error) {
-    showAlert('Ошибка: ' + error.message, 'error');
-  }
-};
-
-async function calculateBetPoints(matchId, score1, score2) {
+window.calculateBetPoints = async function(matchId, score1, score2) {
   const betsRef = collection(db, "bets");
   const q = query(betsRef, where("matchId", "==", matchId));
   const snapshot = await getDocs(q);
@@ -2040,12 +891,10 @@ async function calculateBetPoints(matchId, score1, score2) {
     const bet = docSnap.data();
     let points = 0;
     
-    // Сначала вычитаем старые очки
     const oldPoints = bet.points || 0;
     if (!userPointsChanges[bet.userId]) userPointsChanges[bet.userId] = 0;
     userPointsChanges[bet.userId] -= oldPoints;
     
-    // Считаем новые очки
     if (bet.betType === 'score') {
       const [betScore1, betScore2] = bet.exactScore.split(':').map(Number);
       if (betScore1 === score1 && betScore2 === score2) {
@@ -2067,7 +916,6 @@ async function calculateBetPoints(matchId, score1, score2) {
   
   await batch.commit();
   
-  // Обновляем totalPoints у пользователей
   for (const [userId, change] of Object.entries(userPointsChanges)) {
     if (change === 0) continue;
     const userDoc = await getDoc(doc(db, "users", userId));
@@ -2078,256 +926,62 @@ async function calculateBetPoints(matchId, score1, score2) {
       });
     }
   }
-}
-
-async function loadAllUsers() {
-  const usersRef = collection(db, "users");
-  onSnapshot(usersRef, (snapshot) => {
-    const users = [];
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      if (data.code !== 'ADMIN_MASTER') {
-        users.push({id: doc.id, ...data});
-      }
-    });
-    renderAdminUsers(users);
-  });
-}
-
-function renderAdminUsers(users) {
-  const container = document.getElementById('adminUsersList');
-  if (!container) return;
-  container.innerHTML = '';
-  
-  users.forEach(user => {
-    const item = document.createElement('div');
-    item.className = 'user-list-item';
-    
-    item.innerHTML = `
-      <div style="flex:1;">
-        <div style="font-weight:600;font-size:14px;">${user.fullName}</div>
-        <div style="font-size:12px;color:#666;">Код: ${user.code} | Очки: ${user.totalPoints || 0} ${user.isAdmin ? '| 👑 Админ' : ''}</div>
-      </div>
-      <button class="btn btn-small" onclick="loginAsUser('${user.code}','${user.uid}')">👁 Войти</button>
-    `;
-    
-    container.appendChild(item);
-  });
-}
-
-window.loginAsUser = async function(userCode, userId) {
-  if (!confirm(`Войти в аккаунт сотрудника ${userCode} для проверки?\n\nВы сможете увидеть его ставки.`)) return;
-  
-  // Используем мастер-пароль для входа
-  try {
-    const email = `${userCode}@etagi-worldcup.local`;
-    await signInWithEmailAndPassword(auth, email, ADMIN_MASTER_PASSWORD);
-    
-    // Помечаем что это impersonation
-    await updateDoc(doc(db, "users", userId), {
-      impersonatedBy: currentUser.uid,
-      lastImpersonated: serverTimestamp()
-    });
-    
-    showAlert(`👁 Вы вошли в аккаунт ${userCode}`, 'success');
-  } catch (error) {
-    console.error(error);
-    showAlert('Ошибка входа: ' + error.message, 'error');
-  }
 };
 
-window.searchAdminUsers = function() {
-  const search = document.getElementById('adminUserSearch').value.toLowerCase();
-  const items = document.querySelectorAll('.user-list-item');
-  items.forEach(item => {
-    const text = item.textContent.toLowerCase();
-    item.style.display = text.includes(search) ? 'flex' : 'none';
-  });
-};
-
-window.makeAdmin = async function() {
-  const code = document.getElementById('adminMakeCode').value.trim();
-  if (!code) {
-    showAlert('Введите код сотрудника', 'error');
-    return;
-  }
-  
-  try {
-    const usersQuery = query(collection(db, "users"), where("code", "==", code));
-    const snapshot = await getDocs(usersQuery);
-    
-    if (snapshot.empty) {
-      showAlert('Пользователь не найден', 'error');
-      return;
-    }
-    
-    const userDoc = snapshot.docs[0];
-    await updateDoc(doc(db, "users", userDoc.id), { isAdmin: true });
-    
-    showAlert('✅ Сотрудник назначен админом!', 'success');
-    document.getElementById('adminMakeCode').value = '';
-  } catch (error) {
-    showAlert('Ошибка: ' + error.message, 'error');
-  }
-};
-
-window.setUserPoints = async function() {
-  const code = document.getElementById('adminPointsCode').value.trim();
-  const points = parseInt(document.getElementById('adminPointsValue').value);
-  
-  if (!code || isNaN(points)) {
-    showAlert('Заполните все поля', 'error');
-    return;
-  }
-  
-  try {
-    const usersQuery = query(collection(db, "users"), where("code", "==", code));
-    const snapshot = await getDocs(usersQuery);
-    
-    if (snapshot.empty) {
-      showAlert('Пользователь не найден', 'error');
-      return;
-    }
-    
-    const userDoc = snapshot.docs[0];
-    await updateDoc(doc(db, "users", userDoc.id), { totalPoints: points });
-    
-    showAlert(`✅ Установлено ${points} очков для ${code}`, 'success');
-  } catch (error) {
-    showAlert('Ошибка: ' + error.message, 'error');
-  }
-};
-
-// ФИЛЬТРЫ
-window.filterMatches = function(filter, btn) {
-  currentFilter = filter;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderMatches();
-};
-
-// НАВИГАЦИЯ
+// Навигация
 window.showTab = function(tabName) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.getElementById(tabName + 'Tab').classList.add('active');
   
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  const navBtn = document.getElementById('nav' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+  const navBtn = document.querySelector('[onclick="window.showTab(\'' + tabName + '\')"]');
   if (navBtn) navBtn.classList.add('active');
 };
 
-// УТИЛИТЫ
+window.filterMatches = function(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  window.renderMatches();
+};
+
+// Утилиты
 window.showAlert = function(message, type) {
   const container = document.getElementById('alertContainer');
-  if (!container) return;
+  if (!container) {
+    alert(message);
+    return;
+  }
   const alert = document.createElement('div');
-  alert.className = `alert alert-${type}`;
+  alert.className = 'alert alert-' + type;
   alert.textContent = message;
   container.innerHTML = '';
   container.appendChild(alert);
-  setTimeout(() => alert.remove(), 4000);
-}
-
-window.showRegisterForm = function() {
-  document.getElementById('loginForm').classList.add('hidden');
-  document.getElementById('registerForm').classList.remove('hidden');
+  setTimeout(() => alert.remove(), 3000);
 };
 
-window.showLoginForm = function() {
-  document.getElementById('registerForm').classList.add('hidden');
-  document.getElementById('loginForm').classList.remove('hidden');
-};
-  // Принудительная загрузка сотрудников по кнопке
+// Диагностика
 window.forceLoadEmployees = async function() {
-  showAlert("⏳ Начинаю загрузку...", "info");
-  try {
-    const employeesRef = collection(db, "employees");
-    const batch = writeBatch(db);
-    let count = 0;
-    
-    for (let i = 0; i < employeesList.length; i += 100) {
-      const portion = employeesList.slice(i, i + 100);
-      portion.forEach(emp => {
-        const docRef = doc(employeesRef, emp.code);
-        const parts = emp.fullName.split(' ');
-        const lastName = parts[0] || emp.fullName;
-        const initials = parts.slice(1).map(n => n.charAt(0) + '.').join('');
-        batch.set(docRef, {
-          code: emp.code,
-          fullName: emp.fullName,
-          lastName: lastName,
-          initials: initials || '',
-          registered: false
-        });
-        count++;
-      });
-      await batch.commit();
-      console.log("Порция загружена:", count);
-    }
-    
-    showAlert("✅ Загружено " + count + " сотрудников!", "success");
-  } catch (error) {
-    console.error(error);
-    showAlert("❌ Ошибка: " + error.message, "error");
-
-// Проверка Firestore
-// Принудительная загрузка сотрудников
-window.forceLoadEmployees = async function() {
-  showAlert(" Начинаю загрузку...", "info");
-  try {
-    const employeesRef = collection(db, "employees");
-    
-    for (let i = 0; i < employeesList.length; i += 100) {
-      const batch = writeBatch(db);
-      const portion = employeesList.slice(i, i + 100);
-      
-      portion.forEach(emp => {
-        const docRef = doc(employeesRef, emp.code);
-        const parts = emp.fullName.split(' ');
-        const lastName = parts[0] || emp.fullName;
-        const initials = parts.slice(1).map(n => n.charAt(0) + '.').join('');
-        batch.set(docRef, {
-          code: emp.code,
-          fullName: emp.fullName,
-          lastName: lastName,
-          initials: initials || '',
-          registered: false
-        });
-      });
-      
-      await batch.commit();
-      console.log("Загружено", Math.min(i + 100, employeesList.length));
-    }
-    
-    showAlert("✅ Загружено " + employeesList.length + " сотрудников!", "success");
-  } catch (error) {
-    console.error(error);
-    showAlert("❌ Ошибка: " + error.message, "error");
-  }
+  window.showAlert("⏳ Загрузка...", "info");
+  await window.loadEmployees();
 };
 
-// Проверка Firestore
 window.checkFirestore = async function() {
   try {
     const empSnap = await getDocs(collection(db, "employees"));
-    console.log("Сотрудников в Firestore:", empSnap.size);
-    
-    const adminDoc = await getDoc(doc(db, "admin_codes", "main"));
-    console.log("Админ-код:", adminDoc.exists() ? adminDoc.data() : "НЕ СУЩЕСТВУЕТ");
-    
     const matchSnap = await getDocs(collection(db, "matches"));
-    console.log("Матчей в Firestore:", matchSnap.size);
-    
     const prideDoc = await getDoc(doc(db, "employees", "PRIDE"));
-    console.log("PRIDE:", prideDoc.exists() ? "✅ НАЙДЕН" : "❌ НЕ НАЙДЕН");
-    
     const chaykaDoc = await getDoc(doc(db, "employees", "1245791824"));
-    console.log("1245791824:", chaykaDoc.exists() ? "✅ НАЙДЕН" : "❌ НЕ НАЙДЕН");
     
-    showAlert(`📊 Статистика:\n• Сотрудников: ${empSnap.size}\n• Матчей: ${matchSnap.size}\n• PRIDE: ${prideDoc.exists() ? '✅' : '❌'}\n• 1245791824: ${chaykaDoc.exists() ? '✅' : '❌'}`, "info");
+    const msg = "📊 Статистика:\n" +
+                "• Сотрудников: " + empSnap.size + "\n" +
+                "• Матчей: " + matchSnap.size + "\n" +
+                "• PRIDE: " + (prideDoc.exists() ? '✅' : '❌') + "\n" +
+                "• 1245791824: " + (chaykaDoc.exists() ? '✅' : '❌');
+    
+    window.showAlert(msg, "info");
   } catch (error) {
-    console.error(error);
-    showAlert("❌ Ошибка: " + error.message, "error");
+    window.showAlert("❌ " + error.message, "error");
   }
 };
 </script>
