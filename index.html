@@ -1533,15 +1533,16 @@ document.getElementById('userName').textContent = displayName;
   document.getElementById('profilePoints').textContent = userData.totalPoints || 0;
   
   // Только PRIDE видит админку
-document.getElementById('adminBadge').classList.add('hidden');
-    document.getElementById('navAdmin').classList.remove('hidden');
-    setTimeout(() => {
-      window.renderAdminMatches();
-    }, 100);
-  } else {
-    document.getElementById('adminBadge').classList.add('hidden');
-    document.getElementById('navAdmin').classList.add('hidden');
-  }
+if (isAdmin) {
+  document.getElementById('adminBadge').classList.remove('hidden');
+  document.getElementById('navAdmin').classList.remove('hidden');
+  setTimeout(() => {
+    window.renderAdminMatches();
+  }, 100);
+} else {
+  document.getElementById('adminBadge').classList.add('hidden');
+  document.getElementById('navAdmin').classList.add('hidden');
+}
   
   window.loadLeaderboard();
   window.loadProfileStats();
