@@ -244,9 +244,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div id="outcomeSection">
       <p style="margin-bottom:10px;font-weight:600;font-size:14px;">Исход (+1 очко):</p>
       <div class="outcome-options">
-        <button class="outcome-btn" onclick="window.selectOutcome('team1')" id="outcomeTeam1">П1</button>
-        <button class="outcome-btn" onclick="window.selectOutcome('draw')" id="outcomeDraw">Ничья</button>
-        <button class="outcome-btn" onclick="window.selectOutcome('team2')" id="outcomeTeam2">П2</button>
+       <button class="outcome-btn" onclick="window.selectOutcome('team1')" id="outcomeTeam1">${match.team1.name}</button>
+<button class="outcome-btn" onclick="window.selectOutcome('draw')" id="outcomeDraw">Ничья</button>
+<button class="outcome-btn" onclick="window.selectOutcome('team2')" id="outcomeTeam2">${match.team2.name}</button>
       </div>
     </div>
     <div id="scoreSection" class="hidden">
@@ -271,7 +271,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, writeBatch, deleteDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCV3qfYaqrJ2CCfuxkR3gEDLRizIpWjJbs",
@@ -1234,6 +1234,11 @@ const matchesData = [
 window.addEventListener('DOMContentLoaded', async () => {
   await window.initializeData();
   window.setupAuthListener();
+  
+  // 🔥 Проверяем сохранённую сессию через 1 секунду
+  setTimeout(() => {
+    window.loadSession();
+  }, 1000);
 });
 
 // Инициализация данных
@@ -1282,7 +1287,50 @@ window.loadEmployees = async function() {
   }
 };
 
-// Загрузка матчей
+window.renderMatches = function() {
+  const container = document.getElementById('matchesList');
+  if (!container) return;
+  container.innerHTML = '';
+  
+  if (allMatches.length === 0) {
+    container.innerHTML = '<div class="loading">Загрузка матчей...</div>';
+    return;
+  }
+  
+  let filtered = allMatches;
+  const now = new Date();
+  
+  if (currentFilter === 'today') {
+    const today = now.toISOString().split('T')[0];
+    filtered = allMatches.filter(m => m.date.startsWith(today));
+  } else if (currentFilter === 'group') {
+    filtered = allMatches.filter(m => m.stage === 'group');
+  } else if (currentFilter === 'playoff') {
+    filtered = allMatches.filter(m => m.stage !== 'group');
+  }
+  
+  const matchesByDate = {};
+  filtered.forEach(match => {
+    const date = match.date.split('T')[0];
+    if (!matchesByDate[date]) matchesByDate[date] = [];
+    matchesByDate[date].push(match);
+  });
+  
+  Object.keys(matchesByDate).sort().forEach(date => {
+    const dateHeader = document.createElement('div');
+    dateHeader.className = 'date-header';
+    const dateObj = new Date(date + 'T12:00:00');
+    const formattedDate = dateObj.toLocaleDateString('ru-RU', {weekday:'short', day:'numeric', month:'long'});
+    dateHeader.innerHTML = '<h3>📅 ' + formattedDate + '</h3>';
+    container.appendChild(dateHeader);
+    
+    matchesByDate[date].forEach(match => {
+      container.appendChild(window.createMatchCard(match));
+    });
+  });
+};
+  
+  // Загрузка матчей
 window.loadMatches = async function() {
   try {
     const matchesRef = collection(db, "matches");
@@ -1340,6 +1388,18 @@ window.setupAuthListener = function() {
   });
 };
 
+  window.cancelBet = async function(betId) {
+  if (!confirm('Отменить ставку?')) return;
+  
+  try {
+    await deleteDoc(doc(db, "bets", betId));
+    window.showAlert('✅ Ставка отменена', 'success');
+  } catch (error) {
+    console.error(error);
+    window.showAlert('❌ Ошибка: ' + error.message, 'error');
+  }
+};
+  
 // Вход по коду
 window.loginUser = async function() {
   const code = document.getElementById('loginCode').value.trim();
@@ -1358,7 +1418,7 @@ window.loginUser = async function() {
     
     if (!empDoc.exists()) {
       console.error("❌ Сотрудник не найден:", code);
-      window.showAlert('❌ Сотрудник с кодом "' + code + '" не найден. Нажмите "📥 Загрузить сотрудников"', 'error');
+      window.showAlert('❌ Сотрудник с кодом "' + code + '" не найден', 'error');
       return;
     }
     
@@ -1371,6 +1431,9 @@ window.loginUser = async function() {
     const userCredential = await signInAnonymously(auth);
     console.log("✅ Анонимный вход успешен, UID:", userCredential.user.uid);
     
+    // 🔥 СОХРАНЯЕМ СЕССИЮ
+    window.saveSession(code);
+    
     // Шаг 3: Загружаем данные пользователя
     console.log("📥 Загружаем данные пользователя...");
     await window.loadUserData(code);
@@ -1381,11 +1444,9 @@ window.loginUser = async function() {
     let message = 'Ошибка: ' + error.message;
     
     if (error.code === 'auth/admin-restricted-operation') {
-      message = '❌ Anonymous Auth отключён в Firebase!\n\nЗайдите в Firebase Console → Authentication → Sign-in method → включите Anonymous';
+      message = '❌ Anonymous Auth отключён в Firebase!';
     } else if (error.code === 'auth/network-request-failed') {
       message = '❌ Нет интернета или проблема с сетью';
-    } else if (error.code === 'auth/api-key-not-valid') {
-      message = '❌ Неверный API ключ Firebase';
     }
     
     window.showAlert(message, 'error');
@@ -1676,13 +1737,20 @@ window.createMatchCard = function(match) {
   
   let groupLabel = match.group ? 'Группа ' + match.group : 'Плей-офф';
   
-  let betInfoHtml = '';
+ let betInfoHtml = '';
   if (userBet) {
     const betText = userBet.betType === 'outcome' 
       ? '📊 ' + window.getOutcomeText(userBet.outcome)
       : '🎯 ' + userBet.exactScore;
     const pointsText = match.result ? ' | +' + (userBet.points || 0) : '';
-    betInfoHtml = '<div class="user-bet-info"><span class="bet-type">' + betText + pointsText + '</span></div>';
+    
+    // 🔥 Добавляем кнопку отмены
+    const matchDate = new Date(match.date);
+    const canCancel = matchDate > new Date();
+    const cancelButton = canCancel ? 
+      `<button onclick="window.cancelBet('${userBet.id}')" style="background:#dc3545;color:white;border:none;padding:4px 8px;border-radius:5px;margin-left:10px;font-size:12px;cursor:pointer;">✖ Отменить</button>` : '';
+    
+    betInfoHtml = `<div class="user-bet-info"><span class="bet-type">${betText}${pointsText}</span>${cancelButton}</div>`;
   }
   
   let actionHtml = '';
@@ -1715,10 +1783,14 @@ window.createMatchCard = function(match) {
   return card;
 };
 
-window.getOutcomeText = function(outcome) {
-  if (outcome === 'team1') return 'П1';
+window.getOutcomeText = function(outcome, match) {
+  if (outcome === 'team1') {
+    return match ? 'Победа: ' + match.team1.name : 'П1';
+  }
   if (outcome === 'draw') return 'Ничья';
-  if (outcome === 'team2') return 'П2';
+  if (outcome === 'team2') {
+    return match ? 'Победа: ' + match.team2.name : 'П2';
+  }
   return outcome;
 };
 
@@ -1748,6 +1820,15 @@ window.openBetModal = function(matchId) {
           <div style="font-weight:600;font-size:14px;">${match.team2.name}</div>
         </div>
       </div>
+    </div>
+  `;
+
+  document.getElementById('outcomeSection').innerHTML = `
+    <p style="margin-bottom:10px;font-weight:600;font-size:14px;">Выберите исход (+1 очко):</p>
+    <div class="outcome-options">
+      <button class="outcome-btn" onclick="window.selectOutcome('team1')" id="outcomeTeam1">${match.team1.flag} ${match.team1.name}</button>
+      <button class="outcome-btn" onclick="window.selectOutcome('draw')" id="outcomeDraw">Ничья</button>
+      <button class="outcome-btn" onclick="window.selectOutcome('team2')" id="outcomeTeam2">${match.team2.flag} ${match.team2.name}</button>
     </div>
   `;
   
@@ -1856,10 +1937,45 @@ window.loadLeaderboard = function() {
       allUsers.push(doc.data());
     });
     window.renderLeaderboard(allUsers);
-    // ДОБАВЬТЕ ЭТУ СТРОКУ:
+    
+    //  Обновляем очки текущего пользователя в шапке
+    if (userData) {
+      const currentUser = allUsers.find(u => u.code === userData.code);
+      if (currentUser) {
+        const newPoints = currentUser.totalPoints || 0;
+        document.getElementById('userPoints').textContent = newPoints;
+        document.getElementById('profilePoints').textContent = newPoints;
+        userData.totalPoints = newPoints;
+      }
+    }
+    
     if (isAdmin) window.renderAdminUsers(allUsers);
   });
 };
+
+  // Сохранение сессии
+window.saveSession = function(code) {
+  localStorage.setItem('etagi_user_code', code);
+  console.log("💾 Сессия сохранена для:", code);
+};
+
+// Загрузка сессии
+window.loadSession = function() {
+  const savedCode = localStorage.getItem('etagi_user_code');
+  if (savedCode) {
+    console.log("🔄 Найдена сохранённая сессия:", savedCode);
+    document.getElementById('loginCode').value = savedCode;
+    window.loginUser();
+  }
+};
+
+// Очистка сессии при выходе
+window.logout = async function() {
+  localStorage.removeItem('etagi_user_code');
+  currentEmployeeCode = null;
+  await signOut(auth);
+};
+  
 
 window.renderLeaderboard = function(users) {
   const container = document.getElementById('leaderboardList');
@@ -2005,9 +2121,9 @@ window.loadProfileStats = async function() {
       const dateStr = matchDate.toLocaleDateString('ru-RU', {day:'numeric', month:'long'}) + ' в ' + 
                       matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
       
-      const betText = bet.betType === 'outcome'
-        ? '📊 Исход: ' + window.getOutcomeText(bet.outcome)
-        : '🎯 Точный счёт: ' + bet.exactScore;
+     const betText = bet.betType === 'outcome'
+  ? '📊 Исход: ' + window.getOutcomeText(bet.outcome, match)
+  : '🎯 Точный счёт: ' + bet.exactScore;
       
       const groupLabel = match.group ? 'Группа ' + match.group : 
                          (match.stage === 'round_of_32' ? '1/16' : 
@@ -2737,6 +2853,36 @@ window.createAdminMatchItem = function(match) {
   
   return item;
 };
+
+  // Сохранение сессии
+window.saveSession = function(code) {
+  localStorage.setItem('etagi_user_code', code);
+  console.log("💾 Сессия сохранена для:", code);
+};
+
+// Загрузка сессии
+window.loadSession = function() {
+  const savedCode = localStorage.getItem('etagi_user_code');
+  if (savedCode) {
+    console.log("🔄 Найдена сохранённая сессия:", savedCode);
+    document.getElementById('loginCode').value = savedCode;
+    window.loginUser();
+  }
+};
+
+// Отмена ставки
+window.cancelBet = async function(betId) {
+  if (!confirm('Отменить ставку?')) return;
+  
+  try {
+    await deleteDoc(doc(db, "bets", betId));
+    window.showAlert('✅ Ставка отменена', 'success');
+  } catch (error) {
+    console.error(error);
+    window.showAlert('❌ Ошибка: ' + error.message, 'error');
+  }
+};
+  
 </script>
 </body>
 </html>
