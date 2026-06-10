@@ -2477,38 +2477,41 @@ window.saveMatchResult = async function(matchId) {
   try {
     const match = allMatches.find(m => m.id === matchId);
     
+    // 1. Сохраняем результат матча
     await updateDoc(doc(db, "matches", matchId), {
       result: {team1: score1, team2: score2},
       status: "finished"
     });
     
-    // Пересчитываем очки за ставки
+    // 2. Получаем все ставки на этот матч
     const betsRef = collection(db, "bets");
     const q = query(betsRef, where("matchId", "==", matchId));
     const snapshot = await getDocs(q);
-
+    
+    // 3. Собираем всех пользователей, кто делал ставки
     const affectedUsers = new Set();
     snapshot.forEach(docSnap => {
       const bet = docSnap.data();
       if (bet.userCode) affectedUsers.add(bet.userCode);
     });
-
+    
+    // 4. Пересчитываем очки для каждого пользователя
     for (const userCode of affectedUsers) {
       await window.recalculateUserPoints(userCode);
-    }    
-    
-    // 🔥 Обновляем таблицу лидеров и профиль текущего пользователя
-    window.loadLeaderboard();
-    if (userData && userData.code) {
-      window.loadProfileStats(); // Обновляем историю ставок
     }
     
-    // Если это групповой матч
+    // 5. Обновляем таблицу лидеров и профиль текущего пользователя
+    window.loadLeaderboard();
+    if (userData && userData.code) {
+      await window.loadProfileStats(); // Ждём обновления профиля
+    }
+    
+    // 6. Если это групповой матч - обновляем сетку плей-офф
     if (match.stage === 'group') {
       await window.updatePlayoffMatches();
     }
     
-    // Если это матч плей-офф
+    // 7. Если это матч плей-офф - продвигаем победителя
     if (match.stage !== 'group' && match.nextMatch) {
       await window.advanceWinner(matchId);
     }
@@ -2517,7 +2520,7 @@ window.saveMatchResult = async function(matchId) {
     
   } catch (error) {
     console.error(error);
-    window.showAlert('❌ ' + error.message, 'error');
+    window.showAlert('❌ Ошибка: ' + error.message, 'error');
   }
 };
   
