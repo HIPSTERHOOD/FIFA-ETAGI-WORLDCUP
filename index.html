@@ -3017,7 +3017,7 @@ window.renderBracket = function() {
   });
 };
 
-  window.renderAdminUsers = function(users) {
+window.renderAdminUsers = function(users) {
   console.log("👥 renderAdminUsers вызван. Пользователей:", users ? users.length : 0);
   
   const container = document.getElementById('adminUsersList');
@@ -3034,42 +3034,321 @@ window.renderBracket = function() {
     return;
   }
   
-  users.forEach(user => {
-    // 🔒 Не показываем самого себя
+  // Сортируем по ФИО
+  const sortedUsers = [...users].sort((a, b) => {
+    const nameA = a.fullName || a.lastName + ' ' + a.initials;
+    const nameB = b.fullName || b.lastName + ' ' + b.initials;
+    return nameA.localeCompare(nameB);
+  });
+  
+  sortedUsers.forEach(user => {
+    // Не показываем самого себя
     if (user.code === userData.code) {
-      console.log("🚫 Пропускаем самого себя:", user.code);
       return;
     }
     
     const item = document.createElement('div');
     item.className = 'user-list-item';
+    item.style.cursor = 'pointer';
+    item.style.transition = 'all 0.2s';
     
-    // 🔒 Показываем только ФИО и очки, БЕЗ КОДА
+    const userName = user.fullName || user.lastName + ' ' + user.initials;
+    
     item.innerHTML = `
       <div style="flex:1;">
-        <div style="font-weight:600;font-size:14px;">${user.fullName || user.lastName + ' ' + user.initials}</div>
+        <div style="font-weight:600;font-size:14px;">${userName}</div>
         <div style="font-size:12px;color:#666;">
-          Очки: ${user.totalPoints || 0} 
+          🏆 Очки: ${user.totalPoints || 0} 
           ${user.isAdmin ? '| 👑 Админ' : ''}
         </div>
       </div>
-      <button class="btn btn-small" onclick="window.loginAsUser('${user.code}', '${user.uid || ''}')">👁 Войти</button>
+      <button class="btn btn-small" onclick="event.stopPropagation(); window.loginAsUser('${user.code}', '${user.uid || ''}')">👁 Войти</button>
+      <button class="btn btn-small" onclick="event.stopPropagation(); window.toggleUserBets('${user.code}')" style="background:#17a2b8;">📋 Ставки</button>
     `;
     
+    // Добавляем контейнер для ставок (скрытый изначально)
+    const betsContainer = document.createElement('div');
+    betsContainer.id = `userBets_${user.code}`;
+    betsContainer.style.display = 'none';
+    betsContainer.style.width = '100%';
+    betsContainer.style.marginTop = '10px';
+    betsContainer.style.paddingTop = '10px';
+    betsContainer.style.borderTop = '2px solid #e0e0e0';
+    betsContainer.innerHTML = '<div class="loading">Загрузка ставок...</div>';
+    
+    item.appendChild(betsContainer);
     container.appendChild(item);
   });
   
   console.log("✅ Админ-панель пользователей отрисована");
 };
+
+
+// Переключение видимости ставок пользователя
+window.toggleUserBets = async function(userCode) {
+  const container = document.getElementById(`userBets_${userCode}`);
+  if (!container) return;
   
-  window.searchAdminUsers = function() {
-  const search = document.getElementById('adminUserSearch').value.toLowerCase();
-  const items = document.querySelectorAll('.user-list-item');
-  items.forEach(item => {
-    const text = item.textContent.toLowerCase();
-    item.style.display = text.includes(search) ? 'flex' : 'none';
-  });
+  if (container.style.display === 'none') {
+    container.style.display = 'block';
+    await window.loadUserBets(userCode);
+  } else {
+    container.style.display = 'none';
+  }
 };
+
+// Загрузка всех ставок пользователя
+window.loadUserBets = async function(userCode) {
+  const container = document.getElementById(`userBets_${userCode}`);
+  if (!container) return;
+  
+  try {
+    const betsRef = collection(db, "bets");
+    const q = query(betsRef, where("userCode", "==", userCode));
+    const snapshot = await getDocs(q);
+    
+    const bets = [];
+    snapshot.forEach(doc => {
+      bets.push({ id: doc.id, ...doc.data() });
+    });
+    
+    window.renderUserBets(userCode, bets);
+    
+  } catch (error) {
+    console.error("Ошибка загрузки ставок:", error);
+    container.innerHTML = '<div style="color:#dc3545; padding:10px;">❌ Ошибка загрузки ставок</div>';
+  }
+};
+
+// Отображение ставок пользователя
+window.renderUserBets = function(userCode, bets) {
+  const container = document.getElementById(`userBets_${userCode}`);
+  if (!container) return;
+  
+  // Получаем информацию о пользователе
+  const user = allUsers.find(u => u.code === userCode);
+  const userName = user ? (user.fullName || user.lastName + ' ' + user.initials) : userCode;
+  
+  if (!bets || bets.length === 0) {
+    container.innerHTML = `
+      <div style="background:#f8f9fa; border-radius:8px; padding:15px;">
+        <div style="font-weight:600; margin-bottom:10px;">👤 ${userName}</div>
+        <div style="color:#999; text-align:center; padding:20px;">📭 У пользователя нет ставок</div>
+      </div>
+    `;
+    return;
+  }
+  
+  // Сортируем по дате (новые сверху)
+  const sortedBets = [...bets].sort((a, b) => {
+    const dateA = a.createdAt?.toDate?.() || new Date(a.createdAtISO || 0);
+    const dateB = b.createdAt?.toDate?.() || new Date(b.createdAtISO || 0);
+    return dateB - dateA;
+  });
+  
+  // Разделяем на активные и завершённые
+  const activeBets = [];
+  const finishedBets = [];
+  
+  sortedBets.forEach(bet => {
+    const match = allMatches.find(m => m.id === bet.matchId);
+    if (match && match.result) {
+      finishedBets.push({ bet, match });
+    } else {
+      activeBets.push({ bet, match });
+    }
+  });
+  
+  let html = `
+    <div style="background:#f8f9fa; border-radius:8px; padding:15px;">
+      <div style="font-weight:600; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+        <span>👤 ${userName} (${userCode})</span>
+        <span style="font-size:12px; background:#E31E24; color:white; padding:2px 10px; border-radius:10px;">
+          🏆 ${user?.totalPoints || 0} очков
+        </span>
+      </div>
+      
+      <div style="margin-bottom:10px; display:flex; gap:10px;">
+        <button onclick="window.filterUserBets('${userCode}', 'all')" id="userBetsFilterAll_${userCode}" style="padding:4px 12px; background:#E31E24; color:white; border:none; border-radius:15px; cursor:pointer;">Все (${bets.length})</button>
+        <button onclick="window.filterUserBets('${userCode}', 'active')" id="userBetsFilterActive_${userCode}" style="padding:4px 12px; background:#6c757d; color:white; border:none; border-radius:15px; cursor:pointer;">Активные (${activeBets.length})</button>
+        <button onclick="window.filterUserBets('${userCode}', 'finished')" id="userBetsFilterFinished_${userCode}" style="padding:4px 12px; background:#6c757d; color:white; border:none; border-radius:15px; cursor:pointer;">Завершённые (${finishedBets.length})</button>
+      </div>
+      
+      <div id="userBetsContent_${userCode}" style="max-height:500px; overflow-y:auto;">
+  `;
+  
+  // Показываем все ставки
+  html += window.renderUserBetsTable(activeBets, finishedBets, 'all');
+  
+  html += `
+      </div>
+    </div>
+  `;
+  
+  container.innerHTML = html;
+  
+  // Сохраняем данные для фильтрации
+  window.userBetsData = window.userBetsData || {};
+  window.userBetsData[userCode] = { activeBets, finishedBets };
+};
+
+// Отрисовка таблицы ставок (с фильтром)
+window.renderUserBetsTable = function(activeBets, finishedBets, filter = 'all') {
+  let betsToShow = [];
+  
+  if (filter === 'active') {
+    betsToShow = activeBets;
+  } else if (filter === 'finished') {
+    betsToShow = finishedBets;
+  } else {
+    betsToShow = [...activeBets, ...finishedBets];
+  }
+  
+  if (betsToShow.length === 0) {
+    return '<div style="color:#999; text-align:center; padding:20px;">📭 Нет ставок</div>';
+  }
+  
+  let tableHtml = `
+    <table style="width:100%; border-collapse:collapse; font-size:12px;">
+      <thead>
+        <tr style="background:#e9ecef;">
+          <th style="padding:8px; text-align:left;">🏆 Матч</th>
+          <th style="padding:8px; text-align:left;">📅 Дата ставки</th>
+          <th style="padding:8px; text-align:left;">🎯 Ставка</th>
+          <th style="padding:8px; text-align:center;">📊 Результат</th>
+          <th style="padding:8px; text-align:center;">⭐ Очки</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+  
+  for (const item of betsToShow) {
+    const bet = item.bet;
+    const match = item.match;
+    
+    const betDate = bet.createdAt?.toDate?.() || new Date(bet.createdAtISO);
+    const dateStr = betDate.toLocaleString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    // Текст ставки
+    let betText = '';
+    let betIcon = '📊';
+    if (bet.betType === 'outcome') {
+      if (bet.outcome === 'team1') {
+        betText = `Победа: ${match?.team1?.name || '?'}`;
+      } else if (bet.outcome === 'team2') {
+        betText = `Победа: ${match?.team2?.name || '?'}`;
+      } else {
+        betText = 'Ничья';
+      }
+    } else {
+      betIcon = '🎯';
+      betText = `Точный счёт: ${bet.exactScore}`;
+    }
+    
+    // Название матча
+    const matchName = match ? `${match.team1?.flag || ''} ${match.team1?.name || '?'} vs ${match.team2?.name || '?'} ${match.team2?.flag || ''}` : bet.matchId;
+    
+    // Группа/стадия
+    let stageLabel = '';
+    if (match) {
+      if (match.group) {
+        stageLabel = `Группа ${match.group}`;
+      } else if (match.stage === 'round_of_32') {
+        stageLabel = '1/16 финала';
+      } else if (match.stage === 'round_of_16') {
+        stageLabel = '1/8 финала';
+      } else if (match.stage === 'quarter') {
+        stageLabel = '1/4 финала';
+      } else if (match.stage === 'semi') {
+        stageLabel = '1/2 финала';
+      } else if (match.stage === 'final') {
+        stageLabel = 'Финал';
+      } else {
+        stageLabel = match.stage || 'Плей-офф';
+      }
+    }
+    
+    // Результат матча (если есть)
+    let resultText = '—';
+    if (match && match.result) {
+      resultText = `${match.result.team1}:${match.result.team2}`;
+    }
+    
+    // Очки и цвет
+    let pointsColor = '#dc3545';
+    let pointsText = `${bet.points || 0}`;
+    if (bet.points === 2) {
+      pointsColor = '#28a745';
+      pointsText = '+2 🎯';
+    } else if (bet.points === 1) {
+      pointsColor = '#17a2b8';
+      pointsText = '+1 ✅';
+    } else if (bet.points === 0 && match && match.result) {
+      pointsColor = '#dc3545';
+      pointsText = '0 ❌';
+    } else if (!match || !match.result) {
+      pointsColor = '#ffc107';
+      pointsText = '? ⏳';
+    }
+    
+    tableHtml += `
+      <tr style="border-bottom:1px solid #dee2e6;">
+        <td style="padding:8px;">
+          <div style="font-weight:500;">${matchName}</div>
+          <div style="font-size:10px; color:#666;">${stageLabel}</div>
+        </td>
+        <td style="padding:8px; font-size:11px; white-space:nowrap;">${dateStr}</td>
+        <td style="padding:8px; font-weight:bold; color:#E31E24;">${betIcon} ${betText}</td>
+        <td style="padding:8px; text-align:center; font-weight:500;">${resultText}</td>
+        <td style="padding:8px; text-align:center;">
+          <span style="background:${pointsColor}; color:white; padding:2px 8px; border-radius:10px; font-size:11px;">${pointsText}</span>
+         </td>
+       </tr>
+    `;
+  }
+  
+  tableHtml += `
+      </tbody>
+     </table>
+  `;
+  
+  return tableHtml;
+};
+
+// Фильтрация ставок пользователя
+window.filterUserBets = function(userCode, filter) {
+  const data = window.userBetsData?.[userCode];
+  if (!data) return;
+  
+  const { activeBets, finishedBets } = data;
+  const contentContainer = document.getElementById(`userBetsContent_${userCode}`);
+  if (!contentContainer) return;
+  
+  // Обновляем стиль кнопок
+  const allBtn = document.getElementById(`userBetsFilterAll_${userCode}`);
+  const activeBtn = document.getElementById(`userBetsFilterActive_${userCode}`);
+  const finishedBtn = document.getElementById(`userBetsFilterFinished_${userCode}`);
+  
+  if (allBtn) {
+    allBtn.style.background = filter === 'all' ? '#E31E24' : '#6c757d';
+  }
+  if (activeBtn) {
+    activeBtn.style.background = filter === 'active' ? '#E31E24' : '#6c757d';
+  }
+  if (finishedBtn) {
+    finishedBtn.style.background = filter === 'finished' ? '#E31E24' : '#6c757d';
+  }
+  
+  // Отображаем таблицу с нужным фильтром
+  contentContainer.innerHTML = window.renderUserBetsTable(activeBets, finishedBets, filter);
+};
+
+  
   
 window.checkFirestore = async function() {
   try {
