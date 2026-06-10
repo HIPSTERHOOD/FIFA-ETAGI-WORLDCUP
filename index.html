@@ -2234,7 +2234,8 @@ window.loadProfileStats = async function() {
 window.createAdminMatchItem = function(match) {
   const item = document.createElement('div');
   item.className = 'admin-match-item';
-    const matchDate = new Date(match.date);
+  
+  const matchDate = new Date(match.date);
   const dateStr = matchDate.toLocaleDateString('ru-RU') + ' ' + 
                   matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
   
@@ -2258,8 +2259,19 @@ window.createAdminMatchItem = function(match) {
              value="${match.result ? match.result.team2 : ''}" placeholder="0">
       <button class="btn btn-small" style="background:#28a745;" onclick="window.saveMatchResult('${match.id}')">💾</button>
       ${match.result ? `<button class="btn btn-small" style="background:#dc3545;" onclick="window.clearMatchResult('${match.id}')">✖</button>` : ''}
+      ${match.result ? `<button class="btn btn-small" style="background:#17a2b8; margin-left:5px;" onclick="window.toggleBetsList('${match.id}')">📋 Показать ставки</button>` : ''}
+    </div>
+    <div id="betsList_${match.id}" style="display:none; margin-top:15px; border-top:1px solid #e0e0e0; padding-top:10px;">
+      <div style="font-weight:600; margin-bottom:10px;">📊 Ставки сотрудников:</div>
+      <div id="betsListContent_${match.id}" style="max-height:400px; overflow-y:auto;">
+        <div class="loading">Загрузка ставок...</div>
+      </div>
     </div>
   `;
+  
+  if (match.result) {
+    window.loadBetsForMatch(match.id);
+  }
   
   return item;
 };
@@ -2275,23 +2287,17 @@ window.clearMatchResult = async function(matchId) {
       return;
     }
     
-    // 1. Сохраняем старые очки перед удалением
-    const oldResult = match.result;
-    
-    // 2. Удаляем результат матча
     await updateDoc(doc(db, "matches", matchId), {
       result: null,
       status: "scheduled"
     });
     
-    // 3. Получаем все ставки на этот матч
     const betsRef = collection(db, "bets");
     const q = query(betsRef, where("matchId", "==", matchId));
     const snapshot = await getDocs(q);
     
-    // 4. Обнуляем очки в ставках и собираем пользователей
     const batch = writeBatch(db);
-    const affectedUsers = new Set(); // Set для уникальных пользователей
+    const affectedUsers = new Set();
     
     snapshot.forEach(docSnap => {
       const bet = docSnap.data();
@@ -2303,14 +2309,20 @@ window.clearMatchResult = async function(matchId) {
     
     await batch.commit();
     
-    // 5. ПЕРЕСЧИТЫВАЕМ ОЧКИ ДЛЯ КАЖДОГО ПОЛЬЗОВАТЕЛЯ ЗАНОВО
     for (const userCode of affectedUsers) {
       await window.recalculateUserPoints(userCode);
     }
     
-    window.showAlert('✅ Результат удалён, очки пересчитаны', 'success');
+    // 🔥 Очищаем кэш и скрываем список ставок
+    if (window.matchBetsCache && window.matchBetsCache[matchId]) {
+      delete window.matchBetsCache[matchId];
+    }
+    const betsListDiv = document.getElementById(`betsList_${matchId}`);
+    if (betsListDiv) {
+      betsListDiv.style.display = 'none';
+    }
     
-    // 6. Обновляем UI
+    window.showAlert('✅ Результат удалён, очки пересчитаны', 'success');
     window.loadLeaderboard();
     if (userData && userData.code) {
       window.loadProfileStats();
@@ -2322,6 +2334,154 @@ window.clearMatchResult = async function(matchId) {
   }
 };
 
+  // Загрузка ставок для конкретного матча
+window.loadBetsForMatch = async function(matchId) {
+  try {
+    const betsRef = collection(db, "bets");
+    const q = query(betsRef, where("matchId", "==", matchId));
+    const snapshot = await getDocs(q);
+    
+    const bets = [];
+    snapshot.forEach(doc => {
+      bets.push({ id: doc.id, ...doc.data() });
+    });
+    
+    if (!window.matchBetsCache) window.matchBetsCache = {};
+    window.matchBetsCache[matchId] = bets;
+    
+    const container = document.getElementById(`betsListContent_${matchId}`);
+    if (container) {
+      window.renderBetsForMatch(matchId, bets);
+    }
+    
+  } catch (error) {
+    console.error("Ошибка загрузки ставок:", error);
+  }
+};
+
+// Отображение ставок для матча
+window.renderBetsForMatch = function(matchId, bets) {
+  const container = document.getElementById(`betsListContent_${matchId}`);
+  if (!container) return;
+  
+  const match = allMatches.find(m => m.id === matchId);
+  if (!match) return;
+  
+  if (!bets || bets.length === 0) {
+    container.innerHTML = '<div style="color:#999; padding:10px; text-align:center;">📭 Нет ставок на этот матч</div>';
+    return;
+  }
+  
+  const sortedBets = [...bets].sort((a, b) => {
+    const dateA = a.createdAt?.toDate?.() || new Date(a.createdAtISO || 0);
+    const dateB = b.createdAt?.toDate?.() || new Date(b.createdAtISO || 0);
+    return dateB - dateA;
+  });
+  
+  let html = '<table style="width:100%; border-collapse:collapse; font-size:12px;">';
+  html += `
+    <thead>
+      <tr style="background:#e9ecef;">
+        <th style="padding:8px; text-align:left;">👤 Сотрудник</th>
+        <th style="padding:8px; text-align:left;">📅 Дата ставки</th>
+        <th style="padding:8px; text-align:left;">🎯 Ставка</th>
+        <th style="padding:8px; text-align:center;">⭐ Очки</th>
+       </tr>
+    </thead>
+    <tbody>
+  `;
+  
+  for (const bet of sortedBets) {
+    const betDate = bet.createdAt?.toDate?.() || new Date(bet.createdAtISO);
+    const dateStr = betDate.toLocaleString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    let betText = '';
+    let betIcon = '📊';
+    
+    if (bet.betType === 'outcome') {
+      betIcon = '📊';
+      if (bet.outcome === 'team1') {
+        betText = `Победа: ${match.team1.name}`;
+      } else if (bet.outcome === 'team2') {
+        betText = `Победа: ${match.team2.name}`;
+      } else {
+        betText = 'Ничья';
+      }
+    } else {
+      betIcon = '🎯';
+      betText = `Точный счёт: ${bet.exactScore}`;
+    }
+    
+    const userName = bet.userFullName || bet.userName || bet.userCode;
+    
+    let pointsColor = '#dc3545';
+    let pointsText = `${bet.points || 0}`;
+    if (bet.points === 2) {
+      pointsColor = '#28a745';
+      pointsText = '+2 🎯';
+    } else if (bet.points === 1) {
+      pointsColor = '#17a2b8';
+      pointsText = '+1 ✅';
+    } else if (bet.points === 0 && match.result) {
+      pointsColor = '#dc3545';
+      pointsText = '0 ❌';
+    } else {
+      pointsColor = '#ffc107';
+      pointsText = '? ⏳';
+    }
+    
+    html += `
+      <tr style="border-bottom:1px solid #dee2e6;">
+        <td style="padding:8px;">${userName}</td>
+        <td style="padding:8px; font-size:11px;">${dateStr}</td>
+        <td style="padding:8px; font-weight:bold; color:#E31E24;">${betIcon} ${betText}</td>
+        <td style="padding:8px; text-align:center;">
+          <span style="background:${pointsColor}; color:white; padding:2px 8px; border-radius:10px; font-size:11px;">${pointsText}</span>
+        </td>
+       </tr>
+    `;
+  }
+  
+  html += '</tbody>赶';
+  
+  const totalBets = bets.length;
+  const totalPoints = bets.reduce((sum, bet) => sum + (bet.points || 0), 0);
+  const correctBets = bets.filter(b => (b.points || 0) > 0).length;
+  
+  html += `
+    <div style="margin-top:10px; padding:8px; background:#e9ecef; border-radius:8px; font-size:12px;">
+      📊 <strong>Статистика:</strong> 
+      Всего ставок: ${totalBets} | 
+      Угадано: ${correctBets} | 
+      Всего очков: ${totalPoints}
+    </div>
+  `;
+  
+  container.innerHTML = html;
+};
+
+// Переключение видимости списка ставок
+window.toggleBetsList = function(matchId) {
+  const container = document.getElementById(`betsList_${matchId}`);
+  if (!container) return;
+  
+  if (container.style.display === 'none') {
+    container.style.display = 'block';
+    if (!window.matchBetsCache || !window.matchBetsCache[matchId]) {
+      window.loadBetsForMatch(matchId);
+    } else {
+      window.renderBetsForMatch(matchId, window.matchBetsCache[matchId]);
+    }
+  } else {
+    container.style.display = 'none';
+  }
+};
+  
   // Полная синхронизация всех пользователей (только для админа)
 window.syncAllUsersPoints = async function() {
   if (!isAdmin) {
@@ -2489,50 +2649,49 @@ window.saveMatchResult = async function(matchId) {
   try {
     const match = allMatches.find(m => m.id === matchId);
     
-    // 1. Сохраняем результат матча
     await updateDoc(doc(db, "matches", matchId), {
       result: {team1: score1, team2: score2},
       status: "finished"
     });
     
-    // 2. Получаем все ставки на этот матч
     const betsRef = collection(db, "bets");
     const q = query(betsRef, where("matchId", "==", matchId));
     const snapshot = await getDocs(q);
     
-    // 3. Собираем всех пользователей, кто делал ставки
     const affectedUsers = new Set();
     snapshot.forEach(docSnap => {
       const bet = docSnap.data();
       if (bet.userCode) affectedUsers.add(bet.userCode);
     });
     
-    // 4. Пересчитываем очки для каждого пользователя
     for (const userCode of affectedUsers) {
       await window.recalculateUserPoints(userCode);
     }
     
-    // 5. Обновляем таблицу лидеров и профиль текущего пользователя
     window.loadLeaderboard();
     if (userData && userData.code) {
-      await window.loadProfileStats(); // Ждём обновления профиля
+      await window.loadProfileStats();
     }
     
-    // 6. Если это групповой матч - обновляем сетку плей-офф
     if (match.stage === 'group') {
       await window.updatePlayoffMatches();
     }
     
-    // 7. Если это матч плей-офф - продвигаем победителя
     if (match.stage !== 'group' && match.nextMatch) {
       await window.advanceWinner(matchId);
     }
+    
+    // 🔥 Очищаем кэш и перезагружаем ставки для этого матча
+    if (window.matchBetsCache && window.matchBetsCache[matchId]) {
+      delete window.matchBetsCache[matchId];
+    }
+    window.loadBetsForMatch(matchId);
     
     window.showAlert('✅ Результат сохранён! Очки начислены.', 'success');
     
   } catch (error) {
     console.error(error);
-    window.showAlert('❌ Ошибка: ' + error.message, 'error');
+    window.showAlert('❌ ' + error.message, 'error');
   }
 };
   
@@ -2985,7 +3144,7 @@ window.checkFirestore = async function() {
   }
 };
 
-  window.renderAdminMatches = function() {
+window.renderAdminMatches = function() {
   console.log("🎯 renderAdminMatches вызван. Матчей:", allMatches.length);
   
   const container = document.getElementById('adminMatchesList');
