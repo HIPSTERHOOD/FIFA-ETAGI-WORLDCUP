@@ -1739,9 +1739,9 @@ window.createMatchCard = function(match) {
   
  let betInfoHtml = '';
   if (userBet) {
-    const betText = userBet.betType === 'outcome' 
-      ? '📊 ' + window.getOutcomeText(userBet.outcome)
-      : '🎯 ' + userBet.exactScore;
+   const betText = userBet.betType === 'outcome' 
+  ? '📊 ' + window.getOutcomeText(userBet.outcome, match)  // ← добавь match
+  : '🎯 ' + userBet.exactScore;
     const pointsText = match.result ? ' | +' + (userBet.points || 0) : '';
     
     // 🔥 Добавляем кнопку отмены
@@ -1793,7 +1793,7 @@ window.getOutcomeText = function(outcome, match) {
   }
   return outcome;
 };
-
+  
 // Модальное окно ставки
 window.openBetModal = function(matchId) {
   const match = allMatches.find(m => m.id === matchId);
@@ -2121,8 +2121,8 @@ window.loadProfileStats = async function() {
       const dateStr = matchDate.toLocaleDateString('ru-RU', {day:'numeric', month:'long'}) + ' в ' + 
                       matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
       
-     const betText = bet.betType === 'outcome'
-  ? '📊 Исход: ' + window.getOutcomeText(bet.outcome, match)
+  const betText = bet.betType === 'outcome'
+  ? '📊 Исход: ' + window.getOutcomeText(bet.outcome, match)  // ← добавь match
   : '🎯 Точный счёт: ' + bet.exactScore;
       
       const groupLabel = match.group ? 'Группа ' + match.group : 
