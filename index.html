@@ -287,8 +287,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const ADMIN_CODE = "PRIDE";
-
 let currentUser = null;
 let userData = null;
 let isAdmin = false;
@@ -1271,7 +1269,7 @@ window.loadEmployees = async function() {
             fullName: emp.fullName,
             lastName: lastName,
             initials: initials || '',
-            isAdmin: emp.code === ADMIN_CODE
+            isAdmin: emp.code === 'PRIDE'
           });
         });
         
@@ -1518,7 +1516,12 @@ window.showAuthScreen = function() {
 window.showMainApp = function() {
   document.getElementById('authScreen').style.display = 'none';
   document.getElementById('mainApp').style.display = 'block';
-  document.getElementById('userName').textContent = userData.lastName + ' ' + userData.initials;
+ // Убираем "(Админ)" из имени и показываем полное ФИО
+let displayName = userData.fullName;
+if (displayName.includes('(Админ)')) {
+  displayName = displayName.replace('(Админ)', '').trim();
+}
+document.getElementById('userName').textContent = displayName;
   document.getElementById('userPoints').textContent = userData.totalPoints || 0;
   document.getElementById('profileName').textContent = userData.fullName;
   
@@ -1532,8 +1535,7 @@ window.showMainApp = function() {
   document.getElementById('profilePoints').textContent = userData.totalPoints || 0;
   
   // Только PRIDE видит админку
-  if (userData.code === 'PRIDE') {
-    document.getElementById('adminBadge').classList.remove('hidden');
+document.getElementById('adminBadge').classList.add('hidden');
     document.getElementById('navAdmin').classList.remove('hidden');
     setTimeout(() => {
       window.renderAdminMatches();
@@ -2166,7 +2168,7 @@ window.loadProfileStats = async function() {
       const dateStr = matchDate.toLocaleDateString('ru-RU', {day:'numeric', month:'long'});
       
       const betText = bet.betType === 'outcome'
-        ? '📊 Исход: ' + window.getOutcomeText(bet.outcome)
+        ? '📊 Исход: ' + window.getOutcomeText(bet.outcome, match)
         : ' Точный счёт: ' + bet.exactScore;
       
       const resultText = 'Результат: ' + match.result.team1 + ':' + match.result.team2;
