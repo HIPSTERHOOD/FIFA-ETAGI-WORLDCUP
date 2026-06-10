@@ -3063,15 +3063,15 @@ window.loadSession = function() {
 // Отмена ставки
 window.cancelBet = async function(betId) {
   // Находим ставку и матч
-  const bet = allBets.find(b => b.id === betId);
-  if (!bet) {
-    window.showAlert('❌ Ставка не найдена', 'error');
-    return;
-  }
+ const bet = allBets.find(b => b.id === betId);
+  if (!bet) return;
   
   const match = allMatches.find(m => m.id === bet.matchId);
-  if (!match) {
-    window.showAlert('❌ Матч не найден', 'error');
+  if (!match) return;
+  
+  // 🔥 ГЛАВНАЯ ЗАЩИТА
+  if (new Date(match.date) <= new Date()) {
+    window.showAlert('❌ Нельзя отменить ставку - матч уже начался!', 'error');
     return;
   }
   
