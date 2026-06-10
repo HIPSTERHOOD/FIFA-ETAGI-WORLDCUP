@@ -155,7 +155,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <input type="text" id="loginCode" placeholder="Введите ваш код" autocomplete="off">
     </div>
 
-    <button class="btn" onclick="window.loginUser()">🔐 Войти</button>
+    <button class="btn" onclick="window.loginUser()">🚪 Войти</button>
   </div>
 </div>
 
@@ -264,7 +264,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       </div>
       <p style="color:#666;font-size:13px;text-align:center;">⚠️ 0:0 недоступен</p>
     </div>
-    <button class="btn" onclick="window.saveBet()">💰 Сохранить</button>
+    <button class="btn" onclick="window.saveBet()">✔️ Сохранить</button>
   </div>
 </div>
 
@@ -1424,7 +1424,7 @@ window.loginUser = async function() {
     currentEmployeeCode = code;
     
     // Шаг 2: Анонимный вход
-    console.log("🔐 Выполняем анонимный вход...");
+    console.log("🚪 Выполняем анонимный вход...");
     const userCredential = await signInAnonymously(auth);
     console.log("✅ Анонимный вход успешен, UID:", userCredential.user.uid);
     
@@ -1757,7 +1757,7 @@ window.createMatchCard = function(match) {
   if (isLocked) {
     actionHtml = '<div class="match-locked">🔒 Закрыто</div>';
   } else {
-    actionHtml = '<button class="btn-bet" onclick="window.openBetModal(\'' + match.id + '\')">' + (userBet ? '✏️ Изменить' : '💰 Ставка') + '</button>';
+    actionHtml = '<button class="btn-bet" onclick="window.openBetModal(\'' + match.id + '\')">' + (userBet ? '✏️ Изменить' : '✔️ Ставка') + '</button>';
   }
   
   card.innerHTML = `
@@ -2388,7 +2388,7 @@ window.calculateBetPoints = async function(matchId, score1, score2) {
         totalPoints: newTotal
       });
       
-      console.log(`💰 ${userCode}: ${current} → ${newTotal} (+${change})`);
+      console.log(`✔️ ${userCode}: ${current} → ${newTotal} (+${change})`);
     }
   }
   
