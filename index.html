@@ -1421,7 +1421,6 @@ window.loginUser = async function() {
     }
     
     console.log("✅ Сотрудник найден:", empDoc.data().fullName);
-    const empData = empDoc.data();
     currentEmployeeCode = code;
     
     // Шаг 2: Анонимный вход
@@ -1429,7 +1428,7 @@ window.loginUser = async function() {
     const userCredential = await signInAnonymously(auth);
     console.log("✅ Анонимный вход успешен, UID:", userCredential.user.uid);
     
-    // 🔥 СОХРАНЯЕМ СЕССИЮ
+    //  СОХРАНЯЕМ СЕССИЮ
     window.saveSession(code);
     
     // Шаг 3: Загружаем данные пользователя
@@ -1450,7 +1449,6 @@ window.loginUser = async function() {
     window.showAlert(message, 'error');
   }
 };
-
 // Загрузка данных пользователя
 window.loadUserData = async function(code) {
   try {
