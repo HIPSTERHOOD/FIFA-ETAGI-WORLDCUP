@@ -1757,7 +1757,7 @@ window.createMatchCard = function(match) {
   if (isLocked) {
     actionHtml = '<div class="match-locked">🔒 Закрыто</div>';
   } else {
-    actionHtml = '<button class="btn-bet" onclick="window.openBetModal(\'' + match.id + '\')">' + (userBet ? '✏️ Изменить' : '✔️ Ставка') + '</button>';
+    actionHtml = '<button class="btn-bet" onclick="window.openBetModal(\'' + match.id + '\')">' + (userBet ? '✏️ Изменить' : '📊 Ставка') + '</button>';
   }
   
   card.innerHTML = `
