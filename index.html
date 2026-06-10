@@ -2189,26 +2189,25 @@ window.saveMatchResult = async function(matchId) {
       status: "finished"
     });
     
-    // Пересчитываем очки
+    // Пересчитываем очки за ставки
     await window.calculateBetPoints(matchId, score1, score2);
     
     // 🔥 Обновляем таблицу лидеров
     window.loadLeaderboard();
     
-    // Групповой матч
+    // Если это групповой матч
     if (match.stage === 'group') {
       await window.updatePlayoffMatches();
     }
     
-    // Плей-офф
+    // Если это матч плей-офф
     if (match.stage !== 'group' && match.nextMatch) {
       await window.advanceWinner(matchId);
     }
     
     window.showAlert('✅ Результат сохранён! Очки начислены.', 'success');
     
-    // Перерисовываем админку
-    window.renderAdminMatches();
+    // 🔥 НЕ вызываем renderAdminMatches здесь - он вызывается автоматически через onSnapshot
     
   } catch (error) {
     console.error(error);
@@ -2663,6 +2662,80 @@ window.checkFirestore = async function() {
   } catch (error) {
     window.showAlert("❌ " + error.message, "error");
   }
+};
+
+  window.renderAdminMatches = function() {
+  console.log("🎯 renderAdminMatches вызван. Матчей:", allMatches.length);
+  
+  const container = document.getElementById('adminMatchesList');
+  if (!container) {
+    console.error("❌ Контейнер adminMatchesList не найден!");
+    return;
+  }
+  
+  if (allMatches.length === 0) {
+    container.innerHTML = '<div class="loading">⏳ Загрузка матчей...</div>';
+    return;
+  }
+  
+  container.innerHTML = '';
+  
+  const finished = allMatches.filter(m => m.result !== null);
+  const scheduled = allMatches.filter(m => m.result === null);
+  
+  if (scheduled.length > 0) {
+    const section = document.createElement('div');
+    section.innerHTML = '<h4 style="margin:15px 0 10px;color:#28a745;">📝 Ожидают результата (' + scheduled.length + ')</h4>';
+    container.appendChild(section);
+    
+    scheduled.forEach(match => {
+      container.appendChild(window.createAdminMatchItem(match));
+    });
+  }
+  
+  if (finished.length > 0) {
+    const section = document.createElement('div');
+    section.innerHTML = '<h4 style="margin:15px 0 10px;color:#6c757d;">✅ Завершённые (' + finished.length + ')</h4>';
+    container.appendChild(section);
+    
+    finished.forEach(match => {
+      container.appendChild(window.createAdminMatchItem(match));
+    });
+  }
+};
+
+window.createAdminMatchItem = function(match) {
+  const item = document.createElement('div');
+  item.className = 'admin-match-item';
+  
+  const matchDate = new Date(match.date);
+  const dateStr = matchDate.toLocaleDateString('ru-RU') + ' ' + 
+                  matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+  
+  const groupLabel = match.group ? 'Группа ' + match.group : 
+                     (match.stage === 'round_of_32' ? '1/16' : 
+                      match.stage === 'round_of_16' ? '1/8' :
+                      match.stage === 'quarter' ? '1/4' :
+                      match.stage === 'semi' ? '1/2' :
+                      match.stage === 'final' ? 'Финал' : match.stage);
+  
+  item.innerHTML = `
+    <div class="admin-match-header">
+      <span>${match.team1.flag} ${match.team1.name} vs ${match.team2.name} ${match.team2.flag}</span>
+      <span style="color:#666;font-size:11px;">${groupLabel} | ${dateStr}</span>
+    </div>
+    <div class="result-inputs">
+      <input type="number" class="result-input" id="result_${match.id}_1" min="0" max="20" 
+             value="${match.result ? match.result.team1 : ''}" placeholder="0">
+      <span style="font-weight:bold;font-size:18px;">:</span>
+      <input type="number" class="result-input" id="result_${match.id}_2" min="0" max="20" 
+             value="${match.result ? match.result.team2 : ''}" placeholder="0">
+      <button class="btn btn-small" style="background:#28a745;" onclick="window.saveMatchResult('${match.id}')">💾</button>
+      ${match.result ? `<button class="btn btn-small" style="background:#dc3545;" onclick="window.clearMatchResult('${match.id}')">✖</button>` : ''}
+    </div>
+  `;
+  
+  return item;
 };
 </script>
 </body>
