@@ -1897,9 +1897,10 @@ window.saveBet = async function() {
   
   const matchDate = new Date(currentBetMatch.date);
   if (matchDate <= new Date()) {
-    window.showAlert('Ставки закрыты', 'error');
+    window.showAlert('❌ Нельзя изменить ставку - матч уже начался!', 'error');
     return;
   }
+  
   
   let betData = {
   // 🔑 userCode - ГЛАВНЫЙ идентификатор!
@@ -3061,16 +3062,41 @@ window.loadSession = function() {
 
 // Отмена ставки
 window.cancelBet = async function(betId) {
+  // Находим ставку и матч
+  const bet = allBets.find(b => b.id === betId);
+  if (!bet) {
+    window.showAlert('❌ Ставка не найдена', 'error');
+    return;
+  }
+  
+  const match = allMatches.find(m => m.id === bet.matchId);
+  if (!match) {
+    window.showAlert('❌ Матч не найден', 'error');
+    return;
+  }
+  
+  // 🔥 ГЛАВНАЯ ПРОВЕРКА: нельзя отменить ставку, если матч уже начался
+  const matchDate = new Date(match.date);
+  if (matchDate <= new Date()) {
+    window.showAlert('❌ Нельзя отменить ставку - матч уже начался!', 'error');
+    return;
+  }
+  
   if (!confirm('Отменить ставку?')) return;
   
   try {
     await deleteDoc(doc(db, "bets", betId));
     window.showAlert('✅ Ставка отменена', 'success');
+    
+    // Обновляем UI
+    window.loadProfileStats();
+    window.renderMatches();
   } catch (error) {
     console.error(error);
     window.showAlert('❌ Ошибка: ' + error.message, 'error');
   }
 };
+  
   
 </script>
 </body>
