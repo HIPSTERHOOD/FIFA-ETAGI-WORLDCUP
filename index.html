@@ -1934,17 +1934,30 @@ window.loadProfileStats = async function() {
   
   console.log("📋 loadProfileStats вызван. Ставок в памяти:", allBets.length, "Матчей:", allMatches.length);
   
-  // Обновляем базовую статистику
-  document.getElementById('profileBets').textContent = allBets.length;
-  const correctCount = allBets.filter(b => (b.points || 0) > 0).length;
-  document.getElementById('profileCorrect').textContent = correctCount;
+  // Безопасное обновление элементов (проверяем существование)
+  const safeSetText = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  };
   
+  // Обновляем базовую статистику
+  safeSetText('profileBets', allBets.length);
+  const correctCount = allBets.filter(b => (b.points || 0) > 0).length;
+  safeSetText('profileCorrect', correctCount);
+  safeSetText('profilePoints', userData.totalPoints || 0);
+  safeSetText('profileName', userData.fullName);
+  safeSetText('profileCode', userData.code === 'PRIDE' ? '••••••••' : userData.code);
+  
+  // Рейтинг (если элемент есть)
   const rank = allUsers.findIndex(u => u.code === userData.code) + 1;
-  document.getElementById('profileRank').textContent = rank > 0 ? rank + ' из ' + allUsers.length : '-';
+  safeSetText('profileRank', rank > 0 ? rank + ' из ' + allUsers.length : '-');
   
   // Контейнер истории ставок
   const container = document.getElementById('betsHistoryList');
-  if (!container) return;
+  if (!container) {
+    console.warn("⚠️ Контейнер betsHistoryList не найден!");
+    return;
+  }
   container.innerHTML = '';
   
   if (allBets.length === 0) {
@@ -1980,7 +1993,7 @@ window.loadProfileStats = async function() {
   // === АКТИВНЫЕ СТАВКИ ===
   if (activeBets.length > 0) {
     const section = document.createElement('div');
-    section.innerHTML = '<h4 style="margin:15px 0 10px;color:#28a745;">⏳ Активные ставки (' + activeBets.length + ')</h4>';
+    section.innerHTML = '<h4 style="margin:15px 0 10px;color:#28a745;"> Активные ставки (' + activeBets.length + ')</h4>';
     container.appendChild(section);
     
     activeBets.forEach(({bet, match}) => {
@@ -2007,7 +2020,7 @@ window.loadProfileStats = async function() {
         <div class="bet-match">${match.team1.flag} ${match.team1.name} vs ${match.team2.name} ${match.team2.flag}</div>
         <div class="bet-details">${groupLabel} | ${dateStr}</div>
         <div class="bet-details" style="color:#E31E24;font-weight:600;">${betText}</div>
-        <div style="color:#666;font-size:12px;margin-top:5px;"> Ожидает матча</div>
+        <div style="color:#666;font-size:12px;margin-top:5px;">⏳ Ожидает матча</div>
       `;
       
       container.appendChild(betItem);
@@ -2026,11 +2039,11 @@ window.loadProfileStats = async function() {
       
       // Цвет рамки в зависимости от результата
       if (bet.points === 2) {
-        betItem.style.borderLeft = '4px solid #28a745'; // Точный счёт - зелёный
+        betItem.style.borderLeft = '4px solid #28a745';
       } else if (bet.points === 1) {
-        betItem.style.borderLeft = '4px solid #17a2b8'; // Исход - синий
+        betItem.style.borderLeft = '4px solid #17a2b8';
       } else {
-        betItem.style.borderLeft = '4px solid #dc3545'; // Не угадал - красный
+        betItem.style.borderLeft = '4px solid #dc3545';
       }
       
       const matchDate = new Date(match.date);
@@ -2048,7 +2061,7 @@ window.loadProfileStats = async function() {
       } else if (bet.points === 1) {
         pointsBadge = '<span style="background:#17a2b8;color:white;padding:3px 8px;border-radius:10px;font-size:12px;font-weight:bold;">+1 очко ✅</span>';
       } else {
-        pointsBadge = '<span style="background:#dc3545;color:white;padding:3px 8px;border-radius:10px;font-size:12px;font-weight:bold;">0 очков </span>';
+        pointsBadge = '<span style="background:#dc3545;color:white;padding:3px 8px;border-radius:10px;font-size:12px;font-weight:bold;">0 очков ❌</span>';
       }
       
       betItem.innerHTML = `
@@ -2062,55 +2075,9 @@ window.loadProfileStats = async function() {
     });
   }
   
-  // Если нет ни активных, ни завершённых (но ставки есть) - значит матчи не найдены
+  // Если нет ни активных, ни завершённых
   if (activeBets.length === 0 && finishedBets.length === 0) {
     container.innerHTML = '<div class="loading">⚠️ Ставки есть, но матчи не найдены. Обновите страницу.</div>';
-  }
-};
-// Админ-панель
-window.renderAdminMatches = function() {
-  console.log("🎯 renderAdminMatches вызван. Матчей:", allMatches.length);
-  
-  const container = document.getElementById('adminMatchesList');
-  if (!container) {
-    console.error("❌ Контейнер adminMatchesList не найден!");
-    return;
-  }
-  
-  if (allMatches.length === 0) {
-    container.innerHTML = '<div class="loading">⏳ Загрузка матчей...</div>';
-    console.warn("⚠️ Матчи ещё не загружены");
-    return;
-  }
-  
-  container.innerHTML = '';
-  
-  // Группируем по статусу
-  const finished = allMatches.filter(m => m.result !== null);
-  const scheduled = allMatches.filter(m => m.result === null);
-  
-  console.log("✅ Завершено:", finished.length, "| Ожидается:", scheduled.length);
-  
-  // Сначала матчи, которые можно заполнить (запланированные)
-  if (scheduled.length > 0) {
-    const section = document.createElement('div');
-    section.innerHTML = '<h4 style="margin:15px 0 10px;color:#28a745;">📝 Ожидают результата (' + scheduled.length + ')</h4>';
-    container.appendChild(section);
-    
-    scheduled.forEach(match => {
-      container.appendChild(window.createAdminMatchItem(match));
-    });
-  }
-  
-  // Потом завершённые
-  if (finished.length > 0) {
-    const section = document.createElement('div');
-    section.innerHTML = '<h4 style="margin:15px 0 10px;color:#6c757d;">✅ Завершённые (' + finished.length + ')</h4>';
-    container.appendChild(section);
-    
-    finished.forEach(match => {
-      container.appendChild(window.createAdminMatchItem(match));
-    });
   }
 };
 
