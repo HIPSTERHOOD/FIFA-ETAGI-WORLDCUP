@@ -202,7 +202,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <input type="text" class="search-input" id="leaderboardSearch" placeholder="🔍 Поиск..." oninput="window.searchLeaderboard()">
     <div id="leaderboardList"><div class="loading">Загрузка...</div></div>
   </div>
-
+  
+  
   <div id="profileTab" class="tab-content">
     <h2 style="margin-bottom:20px;color:#E31E24;"> Профиль</h2>
     <div class="profile-card">
@@ -218,6 +219,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
   <div id="adminTab" class="tab-content">
     <h2 style="margin-bottom:20px;color:#E31E24;">⚙️ Админ-панель</h2>
+
+    <div class="admin-section">
+    <h3>🔄 Синхронизация данных</h3>
+    <button class="btn btn-secondary" onclick="window.syncAllUsersPoints()" style="background:#28a745; margin-bottom:10px;">
+      🔄 Пересчитать очки всех пользователей
+    </button>
+      
+      <button class="btn btn-secondary" onclick="window.syncUserPoints()" style="background:#ffc107; color:#000;">
+  🔄 Пересчитать очки сотрудника
+</button>
+      
+    <button class="btn btn-secondary" onclick="window.checkFirestore()" style="background:#17a2b8;">
+      📊 Статистика БД
+    </button>
+    <p style="font-size:12px;color:#666;margin-top:10px;">
+      Используйте после удаления результатов матчей для полной синхронизации
+    </p>
+  </div>
+
+    
     <div class="admin-section">
       <h3>📊 Результаты матчей</h3>
       <div id="adminMatchesList"></div>
@@ -2236,50 +2257,205 @@ window.clearMatchResult = async function(matchId) {
   
   try {
     const match = allMatches.find(m => m.id === matchId);
+    if (!match) {
+      window.showAlert('❌ Матч не найден', 'error');
+      return;
+    }
+    
+    // 1. Сохраняем старые очки перед удалением
     const oldResult = match.result;
     
+    // 2. Удаляем результат матча
     await updateDoc(doc(db, "matches", matchId), {
       result: null,
       status: "scheduled"
     });
     
-    // Обнуляем очки за этот матч
+    // 3. Получаем все ставки на этот матч
     const betsRef = collection(db, "bets");
     const q = query(betsRef, where("matchId", "==", matchId));
     const snapshot = await getDocs(q);
     
+    // 4. Обнуляем очки в ставках и собираем пользователей
     const batch = writeBatch(db);
-    const userPointsChanges = {};    
+    const affectedUsers = new Set(); // Set для уникальных пользователей
+    
     snapshot.forEach(docSnap => {
       const bet = docSnap.data();
-      batch.update(docSnap.ref, {points: 0});
-      if (!userPointsChanges[bet.userCode]) userPointsChanges[bet.userCode] = 0;
-      userPointsChanges[bet.userCode] -= (bet.points || 0);
+      if (bet.userCode) {
+        affectedUsers.add(bet.userCode);
+      }
+      batch.update(docSnap.ref, { points: 0 });
     });
     
     await batch.commit();
     
-    // Обновляем очки пользователей
-    for (const [userCode, change] of Object.entries(userPointsChanges)) {
-      if (change === 0) continue;
-      const usersQuery = query(collection(db, "users"), where("code", "==", userCode));
-      const usersSnap = await getDocs(usersQuery);
-      if (!usersSnap.empty) {
-        const userDoc = usersSnap.docs[0];
-        const current = userDoc.data().totalPoints || 0;
-        await updateDoc(userDoc.ref, {
-          totalPoints: Math.max(0, current + change)
-        });
-      }
+    // 5. ПЕРЕСЧИТЫВАЕМ ОЧКИ ДЛЯ КАЖДОГО ПОЛЬЗОВАТЕЛЯ ЗАНОВО
+    for (const userCode of affectedUsers) {
+      await window.recalculateUserPoints(userCode);
     }
     
-    window.showAlert('✅ Результат удалён', 'success');
+    window.showAlert('✅ Результат удалён, очки пересчитаны', 'success');
+    
+    // 6. Обновляем UI
+    window.loadLeaderboard();
+    if (userData && userData.code) {
+      window.loadProfileStats();
+    }
+    
   } catch (error) {
     console.error(error);
     window.showAlert('❌ ' + error.message, 'error');
   }
 };
 
+  // Полная синхронизация всех пользователей (только для админа)
+window.syncAllUsersPoints = async function() {
+  if (!isAdmin) {
+    window.showAlert('❌ Только для админа', 'error');
+    return;
+  }
+  
+  if (!confirm('Пересчитать очки для ВСЕХ пользователей? Это может занять время.')) return;
+  
+  window.showAlert('⏳ Начинаю синхронизацию...', 'info');
+  
+  try {
+    // Получаем всех пользователей
+    const usersRef = collection(db, "users");
+    const usersSnap = await getDocs(usersRef);
+    
+    let processed = 0;
+    let total = usersSnap.size;
+    
+    for (const userDoc of usersSnap.docs) {
+      const userCode = userDoc.data().code;
+      if (userCode && userCode !== 'PRIDE') { // Пропускаем админа для скорости
+        await window.recalculateUserPoints(userCode);
+        processed++;
+        if (processed % 10 === 0) {
+          console.log(`📊 Прогресс: ${processed}/${total}`);
+        }
+      }
+    }
+    
+    // Пересчитываем для админа тоже
+    if (userData && userData.code === 'PRIDE') {
+      await window.recalculateUserPoints('PRIDE');
+    }
+    
+    window.showAlert(`✅ Синхронизация завершена! Обработано ${processed} пользователей.`, 'success');
+    window.loadLeaderboard();
+    
+  } catch (error) {
+    console.error(error);
+    window.showAlert('❌ Ошибка: ' + error.message, 'error');
+  }
+};
+
+// Пересчёт очков для конкретного пользователя по коду
+window.syncUserPoints = async function() {
+  if (!isAdmin) {
+    window.showAlert('❌ Только для админа', 'error');
+    return;
+  }
+  
+  const userCode = prompt('Введите код сотрудника для пересчёта очков:');
+  if (!userCode) return;
+  
+  window.showAlert(`⏳ Пересчитываю очки для ${userCode}...`, 'info');
+  
+  try {
+    const points = await window.recalculateUserPoints(userCode);
+    window.showAlert(`✅ Готово! ${userCode} набрал ${points} очков`, 'success');
+    window.loadLeaderboard();
+  } catch (error) {
+    window.showAlert('❌ Ошибка: ' + error.message, 'error');
+  }
+};
+  
+  // Функция пересчёта очков пользователя на основе всех его ставок
+window.recalculateUserPoints = async function(userCode) {
+  try {
+    console.log(`🔄 Пересчёт очков для пользователя: ${userCode}`);
+    
+    // 1. Находим пользователя в БД
+    const usersQuery = query(collection(db, "users"), where("code", "==", userCode));
+    const usersSnap = await getDocs(usersQuery);
+    
+    if (usersSnap.empty) {
+      console.warn(`⚠️ Пользователь ${userCode} не найден`);
+      return;
+    }
+    
+    const userDoc = usersSnap.docs[0];
+    const userId = userDoc.id;
+    
+    // 2. Получаем ВСЕ ставки пользователя
+    const betsRef = collection(db, "bets");
+    const betsQuery = query(betsRef, where("userCode", "==", userCode));
+    const betsSnap = await getDocs(betsQuery);
+    
+    // 3. Считаем общую сумму очков
+    let totalPoints = 0;
+    const betsToUpdate = [];
+    
+    for (const betDoc of betsSnap.docs) {
+      const bet = betDoc.data();
+      const match = allMatches.find(m => m.id === bet.matchId);
+      
+      // Если матч завершён и есть результат - проверяем ставку
+      if (match && match.result) {
+        let points = 0;
+        
+        if (bet.betType === 'score') {
+          const [betScore1, betScore2] = bet.exactScore.split(':').map(Number);
+          if (betScore1 === match.result.team1 && betScore2 === match.result.team2) {
+            points = 2;
+          }
+        } else if (bet.betType === 'outcome') {
+          let actualOutcome = 'draw';
+          if (match.result.team1 > match.result.team2) actualOutcome = 'team1';
+          else if (match.result.team2 > match.result.team1) actualOutcome = 'team2';
+          
+          if (bet.outcome === actualOutcome) {
+            points = 1;
+          }
+        }
+        
+        // Если очки изменились - обновляем ставку
+        if (bet.points !== points) {
+          await updateDoc(betDoc.ref, { points: points });
+          console.log(`  📊 Ставка ${bet.matchId}: ${bet.points} → ${points}`);
+        }
+        
+        totalPoints += points;
+      }
+      // Если матч не завершён - ставка не приносит очков
+    }
+    
+    // 4. Обновляем общие очки пользователя
+    console.log(`  💯 Итого очков для ${userCode}: ${totalPoints}`);
+    await updateDoc(doc(db, "users", userId), {
+      totalPoints: totalPoints
+    });
+    
+    // 5. Если это текущий пользователь - обновляем UI
+    if (userData && userData.code === userCode) {
+      userData.totalPoints = totalPoints;
+      document.getElementById('userPoints').textContent = totalPoints;
+      document.getElementById('profilePoints').textContent = totalPoints;
+    }
+    
+    return totalPoints;
+    
+  } catch (error) {
+    console.error(`❌ Ошибка пересчёта для ${userCode}:`, error);
+    window.showAlert(`Ошибка пересчёта: ${error.message}`, 'error');
+  }
+};
+
+  
 window.saveMatchResult = async function(matchId) {
   const score1Input = document.getElementById('result_' + matchId + '_1');
   const score2Input = document.getElementById('result_' + matchId + '_2');
@@ -2306,10 +2482,25 @@ window.saveMatchResult = async function(matchId) {
     });
     
     // Пересчитываем очки за ставки
-    await window.calculateBetPoints(matchId, score1, score2);
+    const betsRef = collection(db, "bets");
+    const q = query(betsRef, where("matchId", "==", matchId));
+    const snapshot = await getDocs(q);
+
+    const affectedUsers = new Set();
+    snapshot.forEach(docSnap => {
+      const bet = docSnap.data();
+      if (bet.userCode) affectedUsers.add(bet.userCode);
+    });
+
+    for (const userCode of affectedUsers) {
+      await window.recalculateUserPoints(userCode);
+    }    
     
-    // 🔥 Обновляем таблицу лидеров
+    // 🔥 Обновляем таблицу лидеров и профиль текущего пользователя
     window.loadLeaderboard();
+    if (userData && userData.code) {
+      window.loadProfileStats(); // Обновляем историю ставок
+    }
     
     // Если это групповой матч
     if (match.stage === 'group') {
@@ -2322,8 +2513,6 @@ window.saveMatchResult = async function(matchId) {
     }
     
     window.showAlert('✅ Результат сохранён! Очки начислены.', 'success');
-    
-    // 🔥 НЕ вызываем renderAdminMatches здесь - он вызывается автоматически через onSnapshot
     
   } catch (error) {
     console.error(error);
