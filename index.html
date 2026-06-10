@@ -145,126 +145,127 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <body>
 
 <div id="authScreen" class="auth-container">
-<div class="auth-box">
-<div class="auth-title">🏆 ЧМ-2026</div>
-<div class="auth-subtitle">Конкурс «ЭТАЖИ»</div>
-<div id="alertContainer"></div>
+  <div class="auth-box">
+    <div class="auth-title">🏆 ЧМ-2026</div>
+    <div class="auth-subtitle">Конкурс «ЭТАЖИ»</div>
+    <div id="alertContainer"></div>
 
-<div class="form-group">
-<label>Код сотрудника</label>
-<input type="text" id="loginCode" placeholder="Введите ваш код" autocomplete="off">
-</div>
+    <div class="form-group">
+      <label>Код сотрудника</label>
+      <input type="text" id="loginCode" placeholder="Введите ваш код" autocomplete="off">
+    </div>
 
-<button class="btn" onclick="window.loginUser()">🔐 Войти</button>
-</div>
-</div>
+    <button class="btn" onclick="window.loginUser()">🔐 Войти</button>
+  </div>
 </div>
 
 <div id="mainApp">
-<div class="header">
-<div class="header-top">
-<div class="header-title">🏆 ЧМ-2026</div>
-<div class="user-info">
-<div class="user-points">🔴 <span id="userPoints">0</span></div>
-<div class="user-name">
-<span id="userName"></span>
-<span id="adminBadge" class="admin-badge hidden">АДМИН</span>
-</div>
-<button onclick="window.logout()" style="background:none;border:none;color:white;cursor:pointer;font-size:20px;">🚪</button>
-</div>
-</div>
-<div class="nav-tabs">
-<button class="nav-btn active" onclick="window.showTab('matches')">Матчи</button>
-<button class="nav-btn" onclick="window.showTab('bracket')">Сетка</button>
-<button class="nav-btn" onclick="window.showTab('leaderboard')">Таблица</button>
-<button class="nav-btn" onclick="window.showTab('profile')">Профиль</button>
-<button class="nav-btn hidden" id="navAdmin" onclick="window.showTab('admin')">Админ</button>
-</div>
-</div>
-</div>
-<div id="bracketTab" class="tab-content">
-<h2 style="margin-bottom:20px;color:#E31E24;">🏆 Сетка плей-офф</h2>
-<div id="bracketContainer"><div class="loading">Загрузка...</div></div>
-</div>
-<div id="matchesTab" class="tab-content active">
-<div class="filter-tabs">
-<button class="filter-btn active" onclick="window.filterMatches('all',this)">Все</button>
-<button class="filter-btn" onclick="window.filterMatches('today',this)">Сегодня</button>
-<button class="filter-btn" onclick="window.filterMatches('group',this)">Группы</button>
-<button class="filter-btn" onclick="window.filterMatches('playoff',this)">Плей-офф</button>
-</div>
-<div id="matchesList"><div class="loading">Загрузка матчей...</div></div>
-</div>
+  <div class="header">
+    <div class="header-top">
+      <div class="header-title">🏆 ЧМ-2026</div>
+      <div class="user-info">
+        <div class="user-points">🔴 <span id="userPoints">0</span></div>
+        <div class="user-name">
+          <span id="userName"></span>
+          <span id="adminBadge" class="admin-badge hidden">АДМИН</span>
+        </div>
+        <button onclick="window.logout()" style="background:none;border:none;color:white;cursor:pointer;font-size:20px;">🚪</button>
+      </div>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-btn active" onclick="window.showTab('matches')">Матчи</button>
+      <button class="nav-btn" onclick="window.showTab('bracket')">Сетка</button>
+      <button class="nav-btn" onclick="window.showTab('leaderboard')">Таблица</button>
+      <button class="nav-btn" onclick="window.showTab('profile')">Профиль</button>
+      <button class="nav-btn hidden" id="navAdmin" onclick="window.showTab('admin')">Админ</button>
+    </div>
+  </div>
 
-<div id="leaderboardTab" class="tab-content">
-<h2 style="margin-bottom:20px;color:#E31E24;">🏆 Таблица лидеров</h2>
-<input type="text" class="search-input" id="leaderboardSearch" placeholder="🔍 Поиск..." oninput="window.searchLeaderboard()">
-<div id="leaderboardList"><div class="loading">Загрузка...</div></div>
-</div>
+  <!-- ВСЕ ВКЛАДКИ ВНУТРИ mainApp -->
+  <div id="bracketTab" class="tab-content">
+    <h2 style="margin-bottom:20px;color:#E31E24;">🏆 Сетка плей-офф</h2>
+    <div id="bracketContainer"><div class="loading">Загрузка...</div></div>
+  </div>
 
-<div id="profileTab" class="tab-content">
-<h2 style="margin-bottom:20px;color:#E31E24;">👤 Профиль</h2>
-<div class="profile-card">
-<div class="profile-stat"><span class="stat-label">ФИО:</span><span class="stat-value" id="profileName"></span></div>
-<div class="profile-stat"><span class="stat-label">Код:</span><span class="stat-value" id="profileCode"></span></div>
-<div class="profile-stat"><span class="stat-label">Очков:</span><span class="stat-value" id="profilePoints"></span></div>
-<div class="profile-stat"><span class="stat-label">Ставок:</span><span class="stat-value" id="profileBets"></span></div>
-<div class="profile-stat"><span class="stat-label">Угадано:</span><span class="stat-value" id="profileCorrect"></span></div>
-</div>
-<h3 style="margin-bottom:15px;color:#E31E24;">📋 История ставок</h3>
-<div id="betsHistoryList"></div>
-</div>
+  <div id="matchesTab" class="tab-content active">
+    <div class="filter-tabs">
+      <button class="filter-btn active" onclick="window.filterMatches('all',this)">Все</button>
+      <button class="filter-btn" onclick="window.filterMatches('today',this)">Сегодня</button>
+      <button class="filter-btn" onclick="window.filterMatches('group',this)">Группы</button>
+      <button class="filter-btn" onclick="window.filterMatches('playoff',this)">Плей-офф</button>
+    </div>
+    <div id="matchesList"><div class="loading">Загрузка матчей...</div></div>
+  </div>
 
-<div id="adminTab" class="tab-content">
-<h2 style="margin-bottom:20px;color:#E31E24;">⚙️ Админ-панель</h2>
-<div class="admin-section">
-<h3>📊 Результаты матчей</h3>
-<div id="adminMatchesList"></div>
-</div>
-<div class="admin-section">
-<h3>👥 Пользователи</h3>
-<input type="text" class="search-input" id="adminUserSearch" placeholder="🔍 Поиск..." oninput="window.searchAdminUsers()">
-<div id="adminUsersList"></div>
-</div>
-</div>
-</div>
+  <div id="leaderboardTab" class="tab-content">
+    <h2 style="margin-bottom:20px;color:#E31E24;"> Таблица лидеров</h2>
+    <input type="text" class="search-input" id="leaderboardSearch" placeholder="🔍 Поиск..." oninput="window.searchLeaderboard()">
+    <div id="leaderboardList"><div class="loading">Загрузка...</div></div>
+  </div>
+
+  <div id="profileTab" class="tab-content">
+    <h2 style="margin-bottom:20px;color:#E31E24;"> Профиль</h2>
+    <div class="profile-card">
+      <div class="profile-stat"><span class="stat-label">ФИО:</span><span class="stat-value" id="profileName"></span></div>
+      <div class="profile-stat"><span class="stat-label">Код:</span><span class="stat-value" id="profileCode"></span></div>
+      <div class="profile-stat"><span class="stat-label">Очков:</span><span class="stat-value" id="profilePoints"></span></div>
+      <div class="profile-stat"><span class="stat-label">Ставок:</span><span class="stat-value" id="profileBets"></span></div>
+      <div class="profile-stat"><span class="stat-label">Угадано:</span><span class="stat-value" id="profileCorrect"></span></div>
+    </div>
+    <h3 style="margin-bottom:15px;color:#E31E24;">📋 История ставок</h3>
+    <div id="betsHistoryList"></div>
+  </div>
+
+  <div id="adminTab" class="tab-content">
+    <h2 style="margin-bottom:20px;color:#E31E24;">⚙️ Админ-панель</h2>
+    <div class="admin-section">
+      <h3>📊 Результаты матчей</h3>
+      <div id="adminMatchesList"></div>
+    </div>
+    <div class="admin-section">
+      <h3> Пользователи</h3>
+      <input type="text" class="search-input" id="adminUserSearch" placeholder="🔍 Поиск..." oninput="window.searchAdminUsers()">
+      <div id="adminUsersList"></div>
+    </div>
+  </div>
+</div> <!-- ЗАКРЫВАЕМ mainApp ЗДЕСЬ -->
 
 <div id="betModal" class="modal">
-<div class="modal-content">
-<div class="modal-header">
-<div class="modal-title">📝 Ставка</div>
-<button class="modal-close" onclick="window.closeBetModal()">×</button>
-</div>
-<div id="betMatchInfo"></div>
-<div class="bet-type-selector">
-<button class="bet-type-btn active" onclick="window.selectBetType('outcome')" id="betTypeOutcome">📊 Исход</button>
-<button class="bet-type-btn" onclick="window.selectBetType('score')" id="betTypeScore">🎯 Точный счёт</button>
-</div>
-<div id="outcomeSection">
-<p style="margin-bottom:10px;font-weight:600;font-size:14px;">Исход (+1 очко):</p>
-<div class="outcome-options">
-<button class="outcome-btn" onclick="window.selectOutcome('team1')" id="outcomeTeam1">П1</button>
-<button class="outcome-btn" onclick="window.selectOutcome('draw')" id="outcomeDraw">Ничья</button>
-<button class="outcome-btn" onclick="window.selectOutcome('team2')" id="outcomeTeam2">П2</button>
-</div>
-</div>
-<div id="scoreSection" class="hidden">
-<p style="margin-bottom:10px;font-weight:600;font-size:14px;">Точный счёт (+2 очка):</p>
-<div class="score-selectors">
-<select class="score-select" id="scoreTeam1">
-<option value="0">0</option><option value="1">1</option><option value="2">2</option>
-<option value="3">3</option><option value="4">4</option><option value="5">5</option>
-</select>
-<span style="font-size:24px;font-weight:bold;">:</span>
-<select class="score-select" id="scoreTeam2">
-<option value="0">0</option><option value="1">1</option><option value="2">2</option>
-<option value="3">3</option><option value="4">4</option><option value="5">5</option>
-</select>
-</div>
-<p style="color:#666;font-size:13px;text-align:center;">⚠️ 0:0 недоступен</p>
-</div>
-<button class="btn" onclick="window.saveBet()">💰 Сохранить</button>
-</div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">📝 Ставка</div>
+      <button class="modal-close" onclick="window.closeBetModal()">×</button>
+    </div>
+    <div id="betMatchInfo"></div>
+    <div class="bet-type-selector">
+      <button class="bet-type-btn active" onclick="window.selectBetType('outcome')" id="betTypeOutcome">📊 Исход</button>
+      <button class="bet-type-btn" onclick="window.selectBetType('score')" id="betTypeScore">🎯 Точный счёт</button>
+    </div>
+    <div id="outcomeSection">
+      <p style="margin-bottom:10px;font-weight:600;font-size:14px;">Исход (+1 очко):</p>
+      <div class="outcome-options">
+        <button class="outcome-btn" onclick="window.selectOutcome('team1')" id="outcomeTeam1">П1</button>
+        <button class="outcome-btn" onclick="window.selectOutcome('draw')" id="outcomeDraw">Ничья</button>
+        <button class="outcome-btn" onclick="window.selectOutcome('team2')" id="outcomeTeam2">П2</button>
+      </div>
+    </div>
+    <div id="scoreSection" class="hidden">
+      <p style="margin-bottom:10px;font-weight:600;font-size:14px;">Точный счёт (+2 очка):</p>
+      <div class="score-selectors">
+        <select class="score-select" id="scoreTeam1">
+          <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+          <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+        </select>
+        <span style="font-size:24px;font-weight:bold;">:</span>
+        <select class="score-select" id="scoreTeam2">
+          <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+          <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+        </select>
+      </div>
+      <p style="color:#666;font-size:13px;text-align:center;">⚠️ 0:0 недоступен</p>
+    </div>
+    <button class="btn" onclick="window.saveBet()">💰 Сохранить</button>
+  </div>
 </div>
 
 <script type="module">
