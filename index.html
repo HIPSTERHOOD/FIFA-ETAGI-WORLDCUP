@@ -3390,7 +3390,6 @@ window.renderAdminUsers = function(users) {
           ${user.isAdmin ? '| 👑 Админ' : ''}
         </div>
       </div>
-      <button class="btn btn-small" onclick="event.stopPropagation(); window.loginAsUser('${user.code}', '${user.uid || ''}')">👁 Войти</button>
       <button class="btn btn-small" onclick="event.stopPropagation(); window.toggleUserBets('${user.code}')" style="background:#17a2b8;">📋 Ставки</button>
     `;
     
