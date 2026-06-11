@@ -141,6 +141,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .bracket-team .name{flex:1;font-size:14px;color:#1a1a1a}
 .bracket-team .score{font-weight:bold;color:#E31E24;margin-left:10px}
 </style>
+  <script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js"></script>
 </head>
 <body>
 
@@ -369,10 +372,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, writeBatch, deleteDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+<script>
 
 const firebaseConfig = {
   apiKey: "AIzaSyCV3qfYaqrJ2CCfuxkR3gEDLRizIpWjJbs",
@@ -384,9 +384,9 @@ const firebaseConfig = {
   measurementId: "G-4ZNYHFVE51"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
 let currentUser = null;
 let userData = null;
@@ -3884,76 +3884,6 @@ window.closeRulesModal = function() {
 }; 
 
 
-  // Сброс пароля пользователя (только для админа)
-
-// Экспорт всех функций в window (для onclick)
-// ==========================================
-// ЭКСПОРТ ФУНКЦИЙ В ГЛОБАЛЬНУЮ ОБЛАСТЬ ВИДИМОСТИ
-// ==========================================
-
-// Явно перечисляем все функции, которые нужны в onclick
-window.loginUser = loginUser;
-window.logout = logout;
-window.showTab = showTab;
-window.filterMatches = filterMatches;
-window.openBetModal = openBetModal;
-window.closeBetModal = closeBetModal;
-window.selectBetType = selectBetType;
-window.selectOutcome = selectOutcome;
-window.saveBet = saveBet;
-window.searchLeaderboard = searchLeaderboard;
-window.cancelBet = cancelBet;
-window.saveMatchResult = saveMatchResult;
-window.clearMatchResult = clearMatchResult;
-window.checkFirestore = checkFirestore;
-window.forceLoadEmployees = forceLoadEmployees;
-window.resetMatches = resetMatches;
-window.searchAdminUsers = searchAdminUsers;
-window.syncAllUsersPoints = syncAllUsersPoints;
-window.syncUserPoints = syncUserPoints;
-window.recalculateUserPoints = recalculateUserPoints;
-window.cleanDuplicateUsers = cleanDuplicateUsers;
-window.changeMyPassword = changeMyPassword;
-window.resetUserPassword = resetUserPassword;
-window.showRulesModal = showRulesModal;
-window.closeRulesModal = closeRulesModal;
-window.loadSession = loadSession;
-window.saveSession = saveSession;
-window.toggleBetsList = toggleBetsList;
-window.loadBetsForMatch = loadBetsForMatch;
-window.toggleUserBets = toggleUserBets;
-window.loadUserBets = loadUserBets;
-window.filterUserBets = filterUserBets;
-window.getSimpleIP = getSimpleIP;
-window.hashPassword = hashPassword;
-window.verifyPassword = verifyPassword;
-window.initializeData = initializeData;
-window.loadEmployees = loadEmployees;
-window.loadMatches = loadMatches;
-window.setupAuthListener = setupAuthListener;
-window.loadUserData = loadUserData;
-window.showAuthScreen = showAuthScreen;
-window.showMainApp = showMainApp;
-window.subscribeToUserPoints = subscribeToUserPoints;
-window.removeDuplicateUsers = removeDuplicateUsers;
-window.loadBets = loadBets;
-window.renderMatches = renderMatches;
-window.createMatchCard = createMatchCard;
-window.getOutcomeText = getOutcomeText;
-window.renderLeaderboard = renderLeaderboard;
-window.loadProfileStats = loadProfileStats;
-window.createAdminMatchItem = createAdminMatchItem;
-window.renderAdminMatches = renderAdminMatches;
-window.renderAdminUsers = renderAdminUsers;
-window.renderBracket = renderBracket;
-window.calculateGroupStandings = calculateGroupStandings;
-window.updatePlayoffMatches = updatePlayoffMatches;
-window.advanceWinner = advanceWinner;
-window.calculateBetPoints = calculateBetPoints;
-
-console.log("✅ Все функции экспортированы в window");
-console.log("typeof window.loginUser:", typeof window.loginUser);
-  
 
 </script>
 
