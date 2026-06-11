@@ -1174,21 +1174,20 @@ const matchesData = [
   // ========== ГРУППОВОЙ ЭТАП (72 матча) ==========
   // Группа A
   {id:"A1",stage:"group",group:"A",team1:{name:"Мексика",code:"MEX",flag:"🇲🇽"},team2:{name:"ЮАР",code:"RSA",flag:"🇿🇦"},date:"2026-06-11T22:00:00+03:00",nextMatch:"A_winner"},
-  {id:"A2",stage:"group",group:"A",team1:{name:"Ю. Корея",code:"KOR",flag:"🇰🇷"},team2:{name:"Чехия",code:"CZE",flag:"🇨"},date:"2026-06-12T05:00:00+03:00",nextMatch:"A_winner"},
+  {id:"A2",stage:"group",group:"A",team1:{name:"Ю. Корея",code:"KOR",flag:"🇰🇷"},team2:{name:"Чехия",code:"CZE",flag:"🇨🇿"},date:"2026-06-12T05:00:00+03:00",nextMatch:"A_winner"},
   {id:"A3",stage:"group",group:"A",team1:{name:"Чехия",code:"CZE",flag:"🇨🇿"},team2:{name:"ЮАР",code:"RSA",flag:"🇿🇦"},date:"2026-06-18T19:00:00+03:00",nextMatch:"A_winner"},
   {id:"A4",stage:"group",group:"A",team1:{name:"Мексика",code:"MEX",flag:"🇲🇽"},team2:{name:"Ю. Корея",code:"KOR",flag:"🇰🇷"},date:"2026-06-19T04:00:00+03:00",nextMatch:"A_winner"},
   {id:"A5",stage:"group",group:"A",team1:{name:"Чехия",code:"CZE",flag:"🇨🇿"},team2:{name:"Мексика",code:"MEX",flag:"🇲🇽"},date:"2026-06-25T04:00:00+03:00",nextMatch:"A_winner"},
   {id:"A6",stage:"group",group:"A",team1:{name:"ЮАР",code:"RSA",flag:"🇿🇦"},team2:{name:"Ю. Корея",code:"KOR",flag:"🇰🇷"},date:"2026-06-25T04:00:00+03:00",nextMatch:"A_winner"},
   
   // Группа B
-  {id:"B1",stage:"group",group:"B",team1:{name:"Канада",code:"CAN",flag:"🇨"},team2:{name:"Босния",code:"BIH",flag:"🇧🇦"},date:"2026-06-12T22:00:00+03:00",nextMatch:"B_winner"},
+  {id:"B1",stage:"group",group:"B",team1:{name:"Канада",code:"CAN",flag:"🇨🇦"},team2:{name:"Босния",code:"BIH",flag:"🇧🇦"},date:"2026-06-12T22:00:00+03:00",nextMatch:"B_winner"},
   {id:"B2",stage:"group",group:"B",team1:{name:"Катар",code:"QAT",flag:"🇶🇦"},team2:{name:"Швейцария",code:"SUI",flag:"🇨🇭"},date:"2026-06-13T22:00:00+03:00",nextMatch:"B_winner"},
   {id:"B3",stage:"group",group:"B",team1:{name:"Швейцария",code:"SUI",flag:"🇨🇭"},team2:{name:"Босния",code:"BIH",flag:"🇧🇦"},date:"2026-06-18T22:00:00+03:00",nextMatch:"B_winner"},
   {id:"B4",stage:"group",group:"B",team1:{name:"Канада",code:"CAN",flag:"🇨🇦"},team2:{name:"Катар",code:"QAT",flag:"🇶🇦"},date:"2026-06-19T01:00:00+03:00",nextMatch:"B_winner"},
-  {id:"B5",stage:"group",group:"B",team1:{name:"Швейцария",code:"SUI",flag:"🇨🇭"},team2:{name:"Канада",code:"CAN",flag:"🇨"},date:"2026-06-25T01:00:00+03:00",nextMatch:"B_winner"},
-  {id:"B6",stage:"group",group:"B",team1:{name:"Босния",code:"BIH",flag:"🇧"},team2:{name:"Катар",code:"QAT",flag:"🇶🇦"},date:"2026-06-24T22:00:00+03:00",nextMatch:"B_winner"},
+  {id:"B5",stage:"group",group:"B",team1:{name:"Швейцария",code:"SUI",flag:"🇨🇭"},team2:{name:"Канада",code:"CAN",flag:"🇨🇦"},date:"2026-06-25T01:00:00+03:00",nextMatch:"B_winner"},
+  {id:"B6",stage:"group",group:"B",team1:{name:"Босния",code:"BIH",flag:"🇧🇦"},team2:{name:"Катар",code:"QAT",flag:"🇶🇦"},date:"2026-06-24T22:00:00+03:00",nextMatch:"B_winner"},
   
-  // ... (добавьте остальные группы C-L по аналогии)
     // Группа C
   {id:"C1",stage:"group",group:"C",team1:{name:"Бразилия",code:"BRA",flag:"🇧🇷"},team2:{name:"Марокко",code:"MAR",flag:"🇲🇦"},date:"2026-06-14T01:00:00+03:00"},
   {id:"C2",stage:"group",group:"C",team1:{name:"Гаити",code:"HAI",flag:"🇭🇹"},team2:{name:"Шотландия",code:"SCO",flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿"},date:"2026-06-14T04:00:00+03:00"},
@@ -1904,7 +1903,7 @@ window.createMatchCard = function(match) {
   let betsStatsHtml = '';
   if (betCounts.total > 0) {
     betsStatsHtml = `
-      <div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e0e0e0; font-size: 12px;">
+<div style="display: flex; justify-content: space-between; margin-top: 18px; padding-top: 10px; border-top: 1px dashed #e0e0e0; font-size: 12px;">
         <div style="text-align: center; flex: 1;">
           <span style="background: #28a745; color: white; padding: 4px 8px; border-radius: 15px; font-weight: bold;">${betCounts.team1Count}</span>
           <span style="color: #666; margin-left: 5px;">ставок</span>
