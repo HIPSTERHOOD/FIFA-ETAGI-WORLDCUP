@@ -177,25 +177,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   padding-bottom: 100px;
 }
 
-
- {
-  outline: none;
-  box-sizing: border-box;
-}
-
 html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
 }
 
-  @media (max-width: 480px) {
+/* Убираем рамки у всего - ИСПРАВЛЕНО (добавлена звёздочка) */
+* {
+  outline: none;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
   .header {
     padding: 10px 15px;
   }
   .user-name {
     font-size: 16px;
   }
+}
   .user-points {
     font-size: 12px;
     padding: 4px 10px;
