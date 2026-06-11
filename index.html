@@ -203,16 +203,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <input type="text" id="loginCode" placeholder="Введите ваш код" autocomplete="off">
     </div>
 
+      <div class="form-group">
+      <label>🔑 Пароль</label>
+      <input type="password" id="loginPassword" placeholder="Введите пароль" autocomplete="off">
+      <small style="color:#666; font-size:11px; display:block; margin-top:5px;">
+        ℹ️ При первом входе установите пароль (мин. 4 символа)
+      </small>
+    </div>
+
     <button class="btn" onclick="window.loginUser()">🚪 Войти</button>
   </div>
-</div>
-
-  <div class="form-group">
-  <label>🔑 Пароль</label>
-  <input type="password" id="loginPassword" placeholder="Введите пароль" autocomplete="off">
-  <small style="color:#666; font-size:11px; display:block; margin-top:5px;">
-    ℹ️ При первом входе установите пароль (мин. 4 символа)
-  </small>
 </div>
 
   
@@ -1329,7 +1329,7 @@ const matchesData = [
   {id:"FINAL",stage:"final",team1:{name:"TBD_SF_1",code:"TBD",flag:"❓"},team2:{name:"TBD_SF_2",code:"TBD",flag:"❓"},date:"2026-07-19T22:00:00+03:00",dependsOn:["SF_1","SF_2"]}
 ];
 
-/// Простое хеширование паролей (можно заменить на bcrypt, но для простоты используем SHA-256)
+// Простое хеширование паролей (можно заменить на bcrypt, но для простоты используем SHA-256)
 window.hashPassword = async function(password) {
   const encoder = new TextEncoder();
   const data = encoder.encode(password + "salt_etagi_2026"); // соль для усиления
@@ -1501,29 +1501,7 @@ window.setupAuthListener = function() {
   });
 };
 
-window.cancelBet = async function(betId) {
-  const bet = allBets.find(b => b.id === betId);
-  if (!bet) return;
-  const match = allMatches.find(m => m.id === bet.matchId);
-  if (!match) return;
 
-  // Одна проверка
-  if (new Date(match.date) <= new Date()) {
-    window.showAlert('❌ Нельзя отменить ставку - матч уже начался!', 'error');
-    return;
-  }
-
-  if (!confirm('Отменить ставку?')) return;
-  try {
-    await deleteDoc(doc(db, "bets", betId));
-    window.showAlert('✅ Ставка отменена', 'success');
-    window.loadProfileStats();
-    window.renderMatches();
-  } catch (error) {
-    console.error(error);
-    window.showAlert('❌ Ошибка: ' + error.message, 'error');
-  }
-};
   
 // Вход по коду
 window.loginUser = async function() {
@@ -1730,7 +1708,7 @@ window.showMainApp = function() {
   }
   document.getElementById('userName').textContent = displayName;
   document.getElementById('userPoints').textContent = userData.totalPoints || 0;
-  document.getElementById('profileName').textContent = userData.fullName;
+  document.getElementById('profileName').textContent = displayName;
   
   // Скрываем код для PRIDE
   if (userData.code === 'PRIDE') {
@@ -1774,32 +1752,6 @@ window.subscribeToUserPoints = function() {
       // Обновляем глобальную переменную
       userData.totalPoints = newPoints;
       
-      // Обновляем отображение везде
-      document.getElementById('userPoints').textContent = newPoints;
-      document.getElementById('profilePoints').textContent = newPoints;
-      
-      // Обновляем таблицу лидеров
-      window.loadLeaderboard();
-    }
-  });
-};
-
-// Подписка на обновление очков в реальном времени
-window.subscribeToUserPoints = function() {
-  if (!userData || !userData.code) return;
-  
-  const userRef = doc(db, "users", currentUser.uid);
-  
-  onSnapshot(userRef, (docSnap) => {
-    if (docSnap.exists()) {
-      const updatedData = docSnap.data();
-      const newPoints = updatedData.totalPoints || 0;
-      
-      console.log("📊 Очки обновились:", userData.totalPoints, "→", newPoints);
-      
-      // Обновляем глобальную переменную
-      userData.totalPoints = newPoints;
-      
       // 🔥 Обновляем ВСЕ места где показываются очки
       document.getElementById('userPoints').textContent = newPoints;
       document.getElementById('profilePoints').textContent = newPoints;
@@ -1811,6 +1763,9 @@ window.subscribeToUserPoints = function() {
     console.error("❌ Ошибка подписки на очки:", error);
   });
 };
+
+// Подписка на обновление очков в реальном времени
+
 
   // Очистка дубликатов пользователей
 window.removeDuplicateUsers = async function() {
@@ -2465,6 +2420,82 @@ window.clearMatchResult = async function(matchId) {
   }
 };
 
+ window.resetUserPassword = async function(userCode) {
+  if (!isAdmin) {
+    window.showAlert('❌ Только для админа', 'error');
+    return;
+  }
+  
+  const newPassword = prompt(`Введите новый пароль для сотрудника ${userCode}:`);
+  if (!newPassword || newPassword.length < 4) {
+    window.showAlert('❌ Пароль должен быть не менее 4 символов', 'error');
+    return;
+  }
+  
+  try {
+    const usersQuery = query(collection(db, "users"), where("code", "==", userCode));
+    const usersSnap = await getDocs(usersQuery);
+    
+    if (usersSnap.empty) {
+      window.showAlert('❌ Пользователь не найден', 'error');
+      return;
+    }
+    
+    const passwordHash = await window.hashPassword(newPassword);
+    await updateDoc(usersSnap.docs[0].ref, { passwordHash: passwordHash });
+    
+    window.showAlert(`✅ Пароль для ${userCode} сброшен`, 'success');
+  } catch (error) {
+    window.showAlert('❌ ' + error.message, 'error');
+  }
+};
+  
+// В профиле пользователя - кнопка смены пароля
+window.changeMyPassword = async function() {
+  const oldPassword = prompt('Введите текущий пароль:');
+  if (!oldPassword) return;
+  
+  const newPassword = prompt('Введите новый пароль (мин. 4 символа):');
+  if (!newPassword || newPassword.length < 4) {
+    window.showAlert('❌ Пароль должен быть не менее 4 символов', 'error');
+    return;
+  }
+  
+  const confirmPassword = prompt('Подтвердите новый пароль:');
+  if (newPassword !== confirmPassword) {
+    window.showAlert('❌ Пароли не совпадают', 'error');
+    return;
+  }
+  
+  try {
+    // Проверяем старый пароль
+    const usersQuery = query(collection(db, "users"), where("code", "==", userData.code));
+    const usersSnap = await getDocs(usersQuery);
+    
+    if (usersSnap.empty) {
+      window.showAlert('❌ Ошибка: пользователь не найден', 'error');
+      return;
+    }
+    
+    const userDoc = usersSnap.docs[0];
+    const currentHash = userDoc.data().passwordHash;
+    
+    const isValid = await window.verifyPassword(oldPassword, currentHash);
+    if (!isValid) {
+      window.showAlert('❌ Неверный текущий пароль', 'error');
+      return;
+    }
+    
+    // Устанавливаем новый пароль
+    const newHash = await window.hashPassword(newPassword);
+    await updateDoc(userDoc.ref, { passwordHash: newHash });
+    
+    window.showAlert('✅ Пароль успешно изменён!', 'success');
+  } catch (error) {
+    window.showAlert('❌ ' + error.message, 'error');
+  }
+};
+  
   // Загрузка ставок для конкретного матча
 window.loadBetsForMatch = async function(matchId) {
   try {
@@ -3240,7 +3271,6 @@ item.innerHTML = `
     </div>
   </div>
   <div style="display:flex; gap:5px;">
-    <button class="btn btn-small" onclick="window.loginAsUser('${user.code}', '${user.uid || ''}')">👁 Войти</button>
     <button class="btn btn-small" style="background:#ffc107; color:#000;" onclick="window.resetUserPassword('${user.code}')">🔄 Сброс пароля</button>
   </div>
 `;
@@ -3497,52 +3527,6 @@ window.renderUserBetsTable = function(activeBets, finishedBets, filter = 'all') 
   `;
   
   return tableHtml;
-};
-
-// В профиле пользователя - кнопка смены пароля
-window.changeMyPassword = async function() {
-  const oldPassword = prompt('Введите текущий пароль:');
-  if (!oldPassword) return;
-  
-  const newPassword = prompt('Введите новый пароль (мин. 4 символа):');
-  if (!newPassword || newPassword.length < 4) {
-    window.showAlert('❌ Пароль должен быть не менее 4 символов', 'error');
-    return;
-  }
-  
-  const confirmPassword = prompt('Подтвердите новый пароль:');
-  if (newPassword !== confirmPassword) {
-    window.showAlert('❌ Пароли не совпадают', 'error');
-    return;
-  }
-  
-  try {
-    // Проверяем старый пароль
-    const usersQuery = query(collection(db, "users"), where("code", "==", userData.code));
-    const usersSnap = await getDocs(usersQuery);
-    
-    if (usersSnap.empty) {
-      window.showAlert('❌ Ошибка: пользователь не найден', 'error');
-      return;
-    }
-    
-    const userDoc = usersSnap.docs[0];
-    const currentHash = userDoc.data().passwordHash;
-    
-    const isValid = await window.verifyPassword(oldPassword, currentHash);
-    if (!isValid) {
-      window.showAlert('❌ Неверный текущий пароль', 'error');
-      return;
-    }
-    
-    // Устанавливаем новый пароль
-    const newHash = await window.hashPassword(newPassword);
-    await updateDoc(userDoc.ref, { passwordHash: newHash });
-    
-    window.showAlert('✅ Пароль успешно изменён!', 'success');
-  } catch (error) {
-    window.showAlert('❌ ' + error.message, 'error');
-  }
 };
   
   // Фильтрация ставок пользователя
@@ -3901,35 +3885,7 @@ window.closeRulesModal = function() {
 
 
   // Сброс пароля пользователя (только для админа)
-window.resetUserPassword = async function(userCode) {
-  if (!isAdmin) {
-    window.showAlert('❌ Только для админа', 'error');
-    return;
-  }
-  
-  const newPassword = prompt(`Введите новый пароль для сотрудника ${userCode}:`);
-  if (!newPassword || newPassword.length < 4) {
-    window.showAlert('❌ Пароль должен быть не менее 4 символов', 'error');
-    return;
-  }
-  
-  try {
-    const usersQuery = query(collection(db, "users"), where("code", "==", userCode));
-    const usersSnap = await getDocs(usersQuery);
-    
-    if (usersSnap.empty) {
-      window.showAlert('❌ Пользователь не найден', 'error');
-      return;
-    }
-    
-    const passwordHash = await window.hashPassword(newPassword);
-    await updateDoc(usersSnap.docs[0].ref, { passwordHash: passwordHash });
-    
-    window.showAlert(`✅ Пароль для ${userCode} сброшен`, 'success');
-  } catch (error) {
-    window.showAlert('❌ ' + error.message, 'error');
-  }
-};
+
 
   
   
