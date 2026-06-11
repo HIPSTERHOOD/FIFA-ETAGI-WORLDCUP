@@ -1355,8 +1355,7 @@ window.loadEmployees = async function() {
             fullName: emp.fullName,
             lastName: lastName,
             initials: initials || '',
-            isAdmin: emp.code === 'PRIDE' || emp.code === '000001' || emp.code === '000002'
-          });
+isAdmin: emp.code === 'PRIDE' || emp.code === '111656' || emp.code === '1245783339' || emp.code === '1245800519' || emp.code === '000001' || emp.code === '000002'          });
         });
         
         await batch.commit();
@@ -1598,8 +1597,7 @@ window.loadUserData = async function(code) {
     userData.code = code;
     
     // 🔒 Жёсткая проверка админа
-    isAdmin = (userData.code === 'PRIDE' || userData.code === '000001' || userData.code === '000002');
-    
+isAdmin = (userData.code === 'PRIDE' || userData.code === '111656' || userData.code === '1245783339' || userData.code === '1245800519' || userData.code === '000001' || userData.code === '000002');    
     console.log("👤 Пользователь:", userData.code, "| Админ:", isAdmin);
     
     window.showMainApp();
