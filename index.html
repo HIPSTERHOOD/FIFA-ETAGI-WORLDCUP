@@ -3887,23 +3887,72 @@ window.closeRulesModal = function() {
   // Сброс пароля пользователя (только для админа)
 
 // Экспорт всех функций в window (для onclick)
-const functionsToExport = [
-  'loginUser', 'logout', 'showTab', 'filterMatches', 'openBetModal', 
-  'closeBetModal', 'selectBetType', 'selectOutcome', 'saveBet', 
-  'searchLeaderboard', 'cancelBet', 'saveMatchResult', 'clearMatchResult', 
-  'checkFirestore', 'forceLoadEmployees', 'resetMatches', 'searchAdminUsers',
-  'syncAllUsersPoints', 'syncUserPoints', 'recalculateUserPoints', 
-  'cleanDuplicateUsers', 'changeMyPassword', 'resetUserPassword',
-  'showRulesModal', 'closeRulesModal', 'loadSession', 'saveSession',
-  'toggleBetsList', 'loadBetsForMatch', 'toggleUserBets', 'loadUserBets',
-  'filterUserBets', 'getSimpleIP', 'hashPassword', 'verifyPassword'
-];
+// ==========================================
+// ЭКСПОРТ ФУНКЦИЙ В ГЛОБАЛЬНУЮ ОБЛАСТЬ ВИДИМОСТИ
+// ==========================================
 
-functionsToExport.forEach(funcName => {
-  if (typeof eval(funcName) === 'function') {
-    window[funcName] = eval(funcName);
-  }
-});
+// Явно перечисляем все функции, которые нужны в onclick
+window.loginUser = loginUser;
+window.logout = logout;
+window.showTab = showTab;
+window.filterMatches = filterMatches;
+window.openBetModal = openBetModal;
+window.closeBetModal = closeBetModal;
+window.selectBetType = selectBetType;
+window.selectOutcome = selectOutcome;
+window.saveBet = saveBet;
+window.searchLeaderboard = searchLeaderboard;
+window.cancelBet = cancelBet;
+window.saveMatchResult = saveMatchResult;
+window.clearMatchResult = clearMatchResult;
+window.checkFirestore = checkFirestore;
+window.forceLoadEmployees = forceLoadEmployees;
+window.resetMatches = resetMatches;
+window.searchAdminUsers = searchAdminUsers;
+window.syncAllUsersPoints = syncAllUsersPoints;
+window.syncUserPoints = syncUserPoints;
+window.recalculateUserPoints = recalculateUserPoints;
+window.cleanDuplicateUsers = cleanDuplicateUsers;
+window.changeMyPassword = changeMyPassword;
+window.resetUserPassword = resetUserPassword;
+window.showRulesModal = showRulesModal;
+window.closeRulesModal = closeRulesModal;
+window.loadSession = loadSession;
+window.saveSession = saveSession;
+window.toggleBetsList = toggleBetsList;
+window.loadBetsForMatch = loadBetsForMatch;
+window.toggleUserBets = toggleUserBets;
+window.loadUserBets = loadUserBets;
+window.filterUserBets = filterUserBets;
+window.getSimpleIP = getSimpleIP;
+window.hashPassword = hashPassword;
+window.verifyPassword = verifyPassword;
+window.initializeData = initializeData;
+window.loadEmployees = loadEmployees;
+window.loadMatches = loadMatches;
+window.setupAuthListener = setupAuthListener;
+window.loadUserData = loadUserData;
+window.showAuthScreen = showAuthScreen;
+window.showMainApp = showMainApp;
+window.subscribeToUserPoints = subscribeToUserPoints;
+window.removeDuplicateUsers = removeDuplicateUsers;
+window.loadBets = loadBets;
+window.renderMatches = renderMatches;
+window.createMatchCard = createMatchCard;
+window.getOutcomeText = getOutcomeText;
+window.renderLeaderboard = renderLeaderboard;
+window.loadProfileStats = loadProfileStats;
+window.createAdminMatchItem = createAdminMatchItem;
+window.renderAdminMatches = renderAdminMatches;
+window.renderAdminUsers = renderAdminUsers;
+window.renderBracket = renderBracket;
+window.calculateGroupStandings = calculateGroupStandings;
+window.updatePlayoffMatches = updatePlayoffMatches;
+window.advanceWinner = advanceWinner;
+window.calculateBetPoints = calculateBetPoints;
+
+console.log("✅ Все функции экспортированы в window");
+console.log("typeof window.loginUser:", typeof window.loginUser);
   
 
 </script>
