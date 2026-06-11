@@ -344,6 +344,26 @@ html, body {
 button {
   color: inherit;
 }
+
+  /* Запрещаем перенос блока очков */
+.points-badge, .points-badge span, 
+.user-bets-table td:last-child span,
+.user-bets-table td:last-child {
+  white-space: nowrap !important;
+  display: inline-block !important;
+}
+
+/* Компактный блок очков */
+.user-bets-table td:last-child {
+  text-align: center;
+  min-width: 65px;
+}
+
+.user-bets-table td:last-child span {
+  padding: 2px 6px;
+  font-size: 10px;
+}
+
   
 </style>
 </head>
