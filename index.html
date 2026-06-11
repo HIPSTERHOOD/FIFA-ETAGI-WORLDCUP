@@ -3886,9 +3886,26 @@ window.closeRulesModal = function() {
 
   // Сброс пароля пользователя (только для админа)
 
+// Экспорт всех функций в window (для onclick)
+const functionsToExport = [
+  'loginUser', 'logout', 'showTab', 'filterMatches', 'openBetModal', 
+  'closeBetModal', 'selectBetType', 'selectOutcome', 'saveBet', 
+  'searchLeaderboard', 'cancelBet', 'saveMatchResult', 'clearMatchResult', 
+  'checkFirestore', 'forceLoadEmployees', 'resetMatches', 'searchAdminUsers',
+  'syncAllUsersPoints', 'syncUserPoints', 'recalculateUserPoints', 
+  'cleanDuplicateUsers', 'changeMyPassword', 'resetUserPassword',
+  'showRulesModal', 'closeRulesModal', 'loadSession', 'saveSession',
+  'toggleBetsList', 'loadBetsForMatch', 'toggleUserBets', 'loadUserBets',
+  'filterUserBets', 'getSimpleIP', 'hashPassword', 'verifyPassword'
+];
 
+functionsToExport.forEach(funcName => {
+  if (typeof eval(funcName) === 'function') {
+    window[funcName] = eval(funcName);
+  }
+});
   
-  
+
 </script>
 
   <!-- Модальное окно с правилами -->
