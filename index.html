@@ -386,6 +386,8 @@ let currentEmployeeCode = null;
 
 // Все сотрудники из Excel
 const employeesList = [
+{code:"000001", fullName:"Изосимов Юрий Алексеевич"},
+{code:"000002", fullName:"Есьман Кристина Алексеевна"},
 {code:"138403",fullName:"Абрамов Вячеслав Владимирович"},
 {code:"83470",fullName:"Абрамова Татьяна Валерьевна"},
 {code:"202518",fullName:"Агаев Камил Эмильевич"},
@@ -1353,7 +1355,7 @@ window.loadEmployees = async function() {
             fullName: emp.fullName,
             lastName: lastName,
             initials: initials || '',
-            isAdmin: emp.code === 'PRIDE'
+            isAdmin: emp.code === 'PRIDE' || emp.code === '000001' || emp.code === '000002'
           });
         });
         
@@ -1596,7 +1598,7 @@ window.loadUserData = async function(code) {
     userData.code = code;
     
     // 🔒 Жёсткая проверка админа
-    isAdmin = (userData.code === 'PRIDE');
+    isAdmin = (userData.code === 'PRIDE' || userData.code === '000001' || userData.code === '000002');
     
     console.log("👤 Пользователь:", userData.code, "| Админ:", isAdmin);
     
