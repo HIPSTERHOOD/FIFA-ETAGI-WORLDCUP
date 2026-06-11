@@ -1671,6 +1671,7 @@ window.showMainApp = function() {
   window.loadLeaderboard();
   window.loadProfileStats();
   window.subscribeToUserPoints();
+  window.loadAllBetsForStats();
 };
 
   // Подписка на обновление очков в реальном времени
@@ -1802,6 +1803,23 @@ window.loadBets = function() {
     console.error("❌ Ошибка загрузки ставок:", error);
   });
 };
+
+  
+  window.loadAllBetsForStats = function() {
+  const betsRef = collection(db, "bets");
+  
+  onSnapshot(betsRef, (snapshot) => {
+    window.allBetsStats = [];  // ← новая переменная для всех ставок
+    snapshot.forEach(doc => {
+      window.allBetsStats.push({id: doc.id, ...doc.data()});
+    });
+    console.log("✅ Загружено ВСЕХ ставок для статистики:", window.allBetsStats.length);
+    window.renderMatches();  // перерисовываем матчи с обновлённой статистикой
+  }, (error) => {
+    console.error("❌ Ошибка загрузки всех ставок:", error);
+  });
+};
+  
   // Отрисовка матчей
 window.renderMatches = function() {
   const container = document.getElementById('matchesList');
@@ -1856,8 +1874,8 @@ window.createMatchCard = function(match) {
   
   const userBet = allBets.find(b => b.matchId === match.id);
   
-  // 🔥 ПОЛУЧАЕМ КОЛИЧЕСТВО СТАВОК НА КОМАНДЫ
-  const betCounts = window.getBetCountsForMatch(match.id);
+  // 🔥 ПОЛУЧАЕМ СТАТИСТИКУ СТАВОК
+  const betCounts = window.getBetCountsForMatch ? window.getBetCountsForMatch(match.id) : { team1Count: 0, team2Count: 0, drawCount: 0, total: 0 };
   
   let groupLabel = match.group ? 'Группа ' + match.group : 'Плей-офф';
   
@@ -1868,7 +1886,6 @@ window.createMatchCard = function(match) {
       : '🎯 ' + userBet.exactScore;
     const pointsText = match.result ? ' | +' + (userBet.points || 0) : '';
     
-    const matchDate = new Date(match.date);
     const canCancel = matchDate > new Date();
     const cancelButton = canCancel ? 
       `<button onclick="window.cancelBet('${userBet.id}')" style="background:#dc3545;color:white;border:none;padding:4px 8px;border-radius:5px;margin-left:10px;font-size:12px;cursor:pointer;">✖ Отменить</button>` : '';
@@ -1883,23 +1900,32 @@ window.createMatchCard = function(match) {
     actionHtml = '<button class="btn-bet" onclick="window.openBetModal(\'' + match.id + '\')">' + (userBet ? '✏️ Изменить' : '📊 Ставка') + '</button>';
   }
   
-  // 🔥 ДОБАВЛЯЕМ ОТОБРАЖЕНИЕ СТАВОК ПОД КОМАНДАМИ
-  const betsStatsHtml = betCounts.total > 0 ? `
-    <div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e0e0e0; font-size: 12px;">
-      <div style="text-align: center; flex: 1;">
-        <span style="background: #E31E24; color: white; padding: 4px 8px; border-radius: 15px; font-weight: bold;">${betCounts.team1Count}</span>
-        <span style="color: #666; margin-left: 5px;">ставок</span>
+  // 🔥 ОТОБРАЖЕНИЕ СТАТИСТИКИ СТАВОК
+  let betsStatsHtml = '';
+  if (betCounts.total > 0) {
+    betsStatsHtml = `
+      <div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #e0e0e0; font-size: 12px;">
+        <div style="text-align: center; flex: 1;">
+          <span style="background: #28a745; color: white; padding: 4px 8px; border-radius: 15px; font-weight: bold;">${betCounts.team1Count}</span>
+          <span style="color: #666; margin-left: 5px;">ставок</span>
+        </div>
+        <div style="text-align: center; flex: 1;">
+          <span style="background: #ffc107; color: #333; padding: 4px 8px; border-radius: 15px; font-weight: bold;">${betCounts.drawCount}</span>
+          <span style="color: #666; margin-left: 5px;">на ничью</span>
+        </div>
+        <div style="text-align: center; flex: 1;">
+          <span style="background: #28a745; color: white; padding: 4px 8px; border-radius: 15px; font-weight: bold;">${betCounts.team2Count}</span>
+          <span style="color: #666; margin-left: 5px;">ставок</span>
+        </div>
       </div>
-      ${betCounts.drawCount > 0 ? `<div style="text-align: center; flex: 1;">
-        <span style="background: #6c757d; color: white; padding: 4px 8px; border-radius: 15px; font-weight: bold;">${betCounts.drawCount}</span>
-        <span style="color: #666; margin-left: 5px;">на ничью</span>
-      </div>` : '<div style="flex: 1;"></div>'}
-      <div style="text-align: center; flex: 1;">
-        <span style="background: #E31E24; color: white; padding: 4px 8px; border-radius: 15px; font-weight: bold;">${betCounts.team2Count}</span>
-        <span style="color: #666; margin-left: 5px;">ставок</span>
+    `;
+  } else {
+    betsStatsHtml = `
+      <div style="text-align: center; margin-top: 10px; padding-top: 8px; border-top: 1px dashed #e0e0e0; font-size: 11px; color: #999;">
+        📭 Пока нет ставок на этот матч
       </div>
-    </div>
-  ` : '';
+    `;
+  }
   
   card.innerHTML = `
     <div class="match-header">
@@ -1926,9 +1952,8 @@ window.createMatchCard = function(match) {
 };
 
 // Подсчёт количества ставок на каждую команду в матче
-// Подсчёт количества ставок на каждую команду в матче (из ВСЕХ ставок)
 window.getBetCountsForMatch = function(matchId) {
-  // Используем ВСЕ ставки, а не только текущего пользователя
+  // Используем ВСЕ ставки из глобальной переменной
   const allBetsStats = window.allBetsStats || [];
   const matchBets = allBetsStats.filter(b => b.matchId === matchId);
   
@@ -2374,20 +2399,6 @@ window.loadProfileStats = async function() {
   }
 };
 
-window.loadAllBetsForStats = function() {
-  const betsRef = collection(db, "bets");
-  
-  onSnapshot(betsRef, (snapshot) => {
-    window.allBetsStats = [];  // ← новая переменная для всех ставок
-    snapshot.forEach(doc => {
-      window.allBetsStats.push({id: doc.id, ...doc.data()});
-    });
-    console.log("✅ Загружено ВСЕХ ставок для статистики:", window.allBetsStats.length);
-    window.renderMatches();  // перерисовываем матчи с обновлённой статистикой
-  }, (error) => {
-    console.error("❌ Ошибка загрузки всех ставок:", error);
-  });
-};
 // Функция очистки результата
 window.clearMatchResult = async function(matchId) {
   if (!confirm('Удалить результат матча? Очки будут пересчитаны.')) return;
