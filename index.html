@@ -297,6 +297,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <button class="nav-btn" onclick="window.showTab('bracket')">Сетка</button>
       <button class="nav-btn" onclick="window.showTab('leaderboard')">Таблица</button>
       <button class="nav-btn" onclick="window.showTab('profile')">Профиль</button>
+      <button class="nav-btn" onclick="window.showTab('results')">📊 Результаты</button>
       <button class="nav-btn hidden" id="navAdmin" onclick="window.showTab('admin')">Админ</button>
     </div>
   </div>
@@ -337,6 +338,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div id="betsHistoryList"></div>
   </div>
 
+  <!-- Вкладка Результаты (добавить после профиля, перед админом) -->
+<div id="resultsTab" class="tab-content">
+  <h2 style="margin-bottom:20px;color:#E31E24;">📊 Завершённые матчи</h2>
+  <div id="resultsList"><div class="loading">Загрузка...</div></div>
+</div>
+  
   <div id="adminTab" class="tab-content">
     <h2 style="margin-bottom:20px;color:#E31E24;">⚙️ Админ-панель</h2>
 
@@ -1509,9 +1516,9 @@ window.loadMatches = async function() {
       allMatches.sort((a, b) => new Date(a.date) - new Date(b.date));
       window.renderMatches();
       window.renderBracket();
+      window.renderResultsHistory();  // ← ДОБАВЛЕНО
       if (isAdmin) window.renderAdminMatches();
       
-      // 🔥 ВАЖНО: Обновляем профиль после загрузки матчей
       if (userData) {
         console.log(" Матчи загружены, обновляем профиль...");
         window.loadProfileStats();
@@ -3140,6 +3147,11 @@ window.showTab = function(tabName) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.getElementById(tabName + 'Tab').classList.add('active');
   
+  // Если открыли вкладку результатов - обновляем
+  if (tabName === 'results') {
+    window.renderResultsHistory();
+  }
+  
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   const navBtn = document.querySelector('[onclick="window.showTab(\'' + tabName + '\')"]');
   if (navBtn) navBtn.classList.add('active');
@@ -3256,6 +3268,82 @@ window.renderBracket = function() {
     container.appendChild(stageDiv);
   });
 };
+
+  // Отображение истории завершённых матчей
+window.renderResultsHistory = function() {
+  const container = document.getElementById('resultsList');
+  if (!container) return;
+  
+  // Берём только завершённые матчи (с результатом)
+  const finishedMatches = allMatches.filter(m => m.result !== null);
+  
+  if (finishedMatches.length === 0) {
+    container.innerHTML = '<div class="loading">📭 Пока нет завершённых матчей</div>';
+    return;
+  }
+  
+  // Сортируем по дате (новые сверху)
+  finishedMatches.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  container.innerHTML = '';
+  
+  finishedMatches.forEach(match => {
+    const matchDate = new Date(match.date);
+    const dateStr = matchDate.toLocaleDateString('ru-RU', { day:'numeric', month:'long', weekday:'short' });
+    const timeStr = matchDate.toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' });
+    
+    // Считаем статистику ставок на этот матч (из всех ставок)
+    const allBetsStats = window.allBetsStats || [];
+    const matchBets = allBetsStats.filter(b => b.matchId === match.id);
+    
+    // Угадавшие исход
+    const correctOutcomeBets = matchBets.filter(b => {
+      if (b.betType === 'outcome') {
+        let actualOutcome = 'draw';
+        if (match.result.team1 > match.result.team2) actualOutcome = 'team1';
+        else if (match.result.team2 > match.result.team1) actualOutcome = 'team2';
+        return b.outcome === actualOutcome;
+      }
+      return false;
+    });
+    
+    // Угадавшие точный счёт
+    const correctScoreBets = matchBets.filter(b => {
+      if (b.betType === 'score') {
+        return b.exactScore === `${match.result.team1}:${match.result.team2}`;
+      }
+      return false;
+    });
+    
+    const resultCard = document.createElement('div');
+    resultCard.className = 'match-card';
+    resultCard.style.borderLeft = '4px solid #28a745';
+    resultCard.innerHTML = `
+      <div class="match-header">
+        <span class="match-group">${match.group ? 'Группа ' + match.group : (match.stage === 'final' ? '🏆 Финал' : match.stage === 'semi' ? '1/2 финала' : match.stage === 'quarter' ? '1/4 финала' : 'Плей-офф')}</span>
+        <span>📅 ${dateStr} | ⏰ ${timeStr}</span>
+      </div>
+      <div class="match-teams">
+        <div class="team team1">
+          <span class="flag">${match.team1.flag}</span>
+          <span class="name">${match.team1.name}</span>
+        </div>
+        <div class="result" style="font-size: 28px;">${match.result.team1} : ${match.result.team2}</div>
+        <div class="team team2">
+          <span class="name">${match.team2.name}</span>
+          <span class="flag">${match.team2.flag}</span>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 8px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #666;">
+        <span>📊 Угадали исход: ${correctOutcomeBets.length} чел.</span>
+        <span>🎯 Угадали счёт: ${correctScoreBets.length} чел.</span>
+        <span>📝 Всего ставок: ${matchBets.length}</span>
+      </div>
+    `;
+    container.appendChild(resultCard);
+  });
+};
+  
 
 window.renderAdminUsers = function(users) {
   console.log("👥 renderAdminUsers вызван. Пользователей:", users ? users.length : 0);
