@@ -310,7 +310,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div id="matchesTab" class="tab-content active">
     <div class="filter-tabs">
       <button class="filter-btn active" onclick="window.filterMatches('all',this)">Все</button>
-      <button class="filter-btn" onclick="window.filterMatches('today',this)">Сегодня</button>
+      <button class="filter-btn" onclick="window.filterMatches('today',this)">📅 Ближайшие 24ч.</button>
       <button class="filter-btn" onclick="window.filterMatches('group',this)">Группы</button>
       <button class="filter-btn" onclick="window.filterMatches('playoff',this)">Плей-офф</button>
     </div>
@@ -1902,12 +1902,22 @@ window.renderMatches = function() {
   const now = new Date();
   
   if (currentFilter === 'today') {
-    const today = now.toISOString().split('T')[0];
-    filtered = allMatches.filter(m => m.date.startsWith(today));
+    // Показываем матчи в ближайшие 24 часа от текущего момента
+    const next24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    filtered = allMatches.filter(m => {
+      const matchDate = new Date(m.date);
+      return matchDate >= now && matchDate <= next24Hours;
+    });
   } else if (currentFilter === 'group') {
     filtered = allMatches.filter(m => m.stage === 'group');
   } else if (currentFilter === 'playoff') {
     filtered = allMatches.filter(m => m.stage !== 'group');
+  }
+  
+  // Если матчей в ближайшие 24 часа нет - показываем сообщение
+  if (currentFilter === 'today' && filtered.length === 0) {
+    container.innerHTML = '<div class="loading">📭 В ближайшие 24 часа матчей нет</div>';
+    return;
   }
   
   const matchesByDate = {};
