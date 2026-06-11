@@ -4318,7 +4318,17 @@ window.closeRulesModal = function() {
     }
   });
 };
-  
+
+
+  // Закрытие модальных окон при клике на фон
+document.addEventListener('click', function(event) {
+  const activeModals = document.querySelectorAll('.modal.active');
+  activeModals.forEach(modal => {
+    if (event.target === modal) {
+      modal.classList.remove('active');
+    }
+  });
+});
   
 </script>
 
