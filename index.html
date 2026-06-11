@@ -140,6 +140,75 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .bracket-team .flag{font-size:24px;margin-right:10px}
 .bracket-team .name{flex:1;font-size:14px;color:#1a1a1a}
 .bracket-team .score{font-weight:bold;color:#E31E24;margin-left:10px}
+
+/* Анимация пульсации для кнопок выбора типа ставки */
+@keyframes softPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(227, 30, 36, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(227, 30, 36, 0);
+    transform: scale(1.02);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(227, 30, 36, 0);
+    transform: scale(1);
+  }
+}
+
+@keyframes gentleGlow {
+  0% {
+    background: #f8f9fa;
+    border-color: #e0e0e0;
+  }
+  50% {
+    background: #fff3cd;
+    border-color: #E31E24;
+  }
+  100% {
+    background: #f8f9fa;
+    border-color: #e0e0e0;
+  }
+}
+
+/* Анимация для кнопок выбора ставки в модальном окне */
+.bet-type-selector .bet-type-btn {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Неактивная кнопка - мягкое свечение */
+.bet-type-selector .bet-type-btn:not(.active) {
+  animation: gentleGlow 2s ease-in-out infinite;
+  font-weight: 700;
+  border-width: 2px;
+}
+
+/* Активная кнопка - пульсация */
+.bet-type-selector .bet-type-btn.active {
+  background: #E31E24;
+  color: white;
+  border-color: #E31E24;
+  animation: softPulse 1.5s ease-in-out infinite;
+  font-weight: 700;
+}
+
+/* Подсказка под кнопками */
+.bet-type-hint {
+  text-align: center;
+  font-size: 12px;
+  color: #E31E24;
+  margin-top: 8px;
+  margin-bottom: 5px;
+  font-weight: 500;
+  animation: gentleGlow 2s ease-in-out infinite;
+  padding: 5px;
+  border-radius: 8px;
+}
+
+  
 </style>
 </head>
 <body>
