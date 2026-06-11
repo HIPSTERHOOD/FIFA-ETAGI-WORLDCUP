@@ -4000,6 +4000,30 @@ window.syncUserOnLogin = async function(code) {
 window.closeRulesModal = function() {
   document.getElementById('rulesModal').classList.remove('active');
 }; 
+
+  window.searchAdminUsers = function() {
+  const search = document.getElementById('adminUserSearch').value.toLowerCase().trim();
+  const container = document.getElementById('adminUsersList');
+  
+  if (!container) {
+    console.error("❌ Контейнер adminUsersList не найден");
+    return;
+  }
+  
+  const items = container.querySelectorAll('.user-list-item');
+  console.log("🔍 Поиск '" + search + "', найдено элементов: " + items.length);
+  
+  items.forEach(item => {
+    // Получаем весь текст из элемента
+    const fullText = item.textContent.toLowerCase();
+    
+    if (search === '' || fullText.includes(search)) {
+      item.style.display = 'flex';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+};
   
   
 </script>
