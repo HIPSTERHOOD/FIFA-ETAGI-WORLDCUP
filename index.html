@@ -141,9 +141,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .bracket-team .name{flex:1;font-size:14px;color:#1a1a1a}
 .bracket-team .score{font-weight:bold;color:#E31E24;margin-left:10px}
 </style>
-<script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -206,19 +203,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <input type="text" id="loginCode" placeholder="Введите ваш код" autocomplete="off">
     </div>
 
-      <div class="form-group">
-      <label>🔑 Пароль</label>
-      <input type="password" id="loginPassword" placeholder="Введите пароль" autocomplete="off">
-      <small style="color:#666; font-size:11px; display:block; margin-top:5px;">
-        ℹ️ При первом входе установите пароль (мин. 4 символа)
-      </small>
-    </div>
-
     <button class="btn" onclick="window.loginUser()">🚪 Войти</button>
   </div>
 </div>
 
-  
 <div id="mainApp">
   <div class="header">
     <div class="header-top">
@@ -273,16 +261,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="profile-stat"><span class="stat-label">Ставок:</span><span class="stat-value" id="profileBets"></span></div>
       <div class="profile-stat"><span class="stat-label">Угадано:</span><span class="stat-value" id="profileCorrect"></span></div>
     </div>
-<!-- Добавьте в profileTab, после profile-card -->
-<div class="profile-card" style="margin-top: 15px;">
-  <button class="btn btn-secondary" onclick="window.changeMyPassword()" style="background:#1a1a1a;">
-    🔑 Сменить пароль
-  </button>
-  <p style="font-size:11px; color:#666; margin-top:10px; text-align:center;">
-    Рекомендуем установить надёжный пароль
-  </p>
-</div>
-    
     <h3 style="margin-bottom:15px;color:#E31E24;">📋 История ставок</h3>
     <div id="betsHistoryList"></div>
   </div>
@@ -372,7 +350,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 </div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, writeBatch, deleteDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCV3qfYaqrJ2CCfuxkR3gEDLRizIpWjJbs",
@@ -384,9 +365,9 @@ const firebaseConfig = {
   measurementId: "G-4ZNYHFVE51"
 };
 
-const app = firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 let currentUser = null;
 let userData = null;
@@ -1329,20 +1310,7 @@ const matchesData = [
   {id:"FINAL",stage:"final",team1:{name:"TBD_SF_1",code:"TBD",flag:"❓"},team2:{name:"TBD_SF_2",code:"TBD",flag:"❓"},date:"2026-07-19T22:00:00+03:00",dependsOn:["SF_1","SF_2"]}
 ];
 
-// Простое хеширование паролей (можно заменить на bcrypt, но для простоты используем SHA-256)
-window.hashPassword = async function(password) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password + "salt_etagi_2026"); // соль для усиления
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-};
-
-window.verifyPassword = async function(password, hash) {
-  const hashedInput = await window.hashPassword(password);
-  return hashedInput === hash;
-};
-  
+// Инициализация
 window.addEventListener('DOMContentLoaded', async () => {
   await window.initializeData();
   window.setupAuthListener();
@@ -1500,14 +1468,33 @@ window.setupAuthListener = function() {
   });
 };
 
+window.cancelBet = async function(betId) {
+  const bet = allBets.find(b => b.id === betId);
+  if (!bet) return;
+  const match = allMatches.find(m => m.id === bet.matchId);
+  if (!match) return;
 
+  // Одна проверка
+  if (new Date(match.date) <= new Date()) {
+    window.showAlert('❌ Нельзя отменить ставку - матч уже начался!', 'error');
+    return;
+  }
+
+  if (!confirm('Отменить ставку?')) return;
+  try {
+    await deleteDoc(doc(db, "bets", betId));
+    window.showAlert('✅ Ставка отменена', 'success');
+    window.loadProfileStats();
+    window.renderMatches();
+  } catch (error) {
+    console.error(error);
+    window.showAlert('❌ Ошибка: ' + error.message, 'error');
+  }
+};
   
 // Вход по коду
 window.loginUser = async function() {
   const code = document.getElementById('loginCode').value.trim();
-  const password = document.getElementById('loginPassword').value; // новое поле
-  
-  console.log("🔍 Попытка входа с кодом:", code);
   
   if (!code) {
     window.showAlert('Введите код сотрудника', 'error');
@@ -1515,151 +1502,99 @@ window.loginUser = async function() {
   }
   
   try {
-    // Шаг 1: Проверяем сотрудника
-    console.log("📋 Проверяем сотрудника в Firestore...");
+    // 1. Проверяем сотрудника
     const empDoc = await getDoc(doc(db, "employees", code));
-    
     if (!empDoc.exists()) {
-      console.error("❌ Сотрудник не найден:", code);
-      window.showAlert('❌ Сотрудник с кодом "' + code + '" не найден', 'error');
+      window.showAlert('❌ Сотрудник не найден', 'error');
       return;
     }
     
-    console.log("✅ Сотрудник найден:", empDoc.data().fullName);
     currentEmployeeCode = code;
     
-    // Шаг 2: Проверяем/создаём пользователя с паролем
-    const userQuery = query(collection(db, "users"), where("code", "==", code));
-    const userSnapshot = await getDocs(userQuery);
-    
-    let userDoc;
-    let needsPasswordSetup = false;
-    
-    if (userSnapshot.empty) {
-      // Новый пользователь - нужно создать и установить пароль
-      needsPasswordSetup = true;
-    } else {
-      userDoc = userSnapshot.docs[0].data();
-      // Проверяем, есть ли уже пароль
-      if (!userDoc.passwordHash) {
-        needsPasswordSetup = true;
-      } else {
-        // Проверяем введённый пароль
-        const isValid = await window.verifyPassword(password, userDoc.passwordHash);
-        if (!isValid) {
-          window.showAlert('❌ Неверный пароль!', 'error');
-          return;
-        }
-      }
-    }
-    
-    if (needsPasswordSetup) {
-      if (!password) {
-        window.showAlert('🔐 При первом входе нужно установить пароль!', 'error');
-        return;
-      }
-      
-      if (password.length < 4) {
-        window.showAlert('❌ Пароль должен быть не менее 4 символов', 'error');
-        return;
-      }
-      
-      // Хешируем пароль
-      const passwordHash = await window.hashPassword(password);
-      
-      if (userSnapshot.empty) {
-        // Создаём нового пользователя с паролем
-        const empData = empDoc.data();
-        const newUserRef = doc(collection(db, "users"));
-        userDoc = {
-          uid: currentUser.uid,
-          code: code,
-          fullName: empData.fullName,
-          lastName: empData.lastName,
-          initials: empData.initials,
-          isAdmin: empData.isAdmin || false,
-          totalPoints: 0,
-          passwordHash: passwordHash,
-          createdAt: serverTimestamp()
-        };
-        await setDoc(newUserRef, userDoc);
-      } else {
-        // Обновляем существующего пользователя - добавляем пароль
-        const existingDoc = userSnapshot.docs[0];
-        await updateDoc(existingDoc.ref, {
-          passwordHash: passwordHash
-        });
-        userDoc = { ...userDoc, passwordHash: passwordHash };
-      }
-      
-      window.showAlert('✅ Пароль установлен! Теперь входите с паролем.', 'success');
-      // Очищаем поле пароля для повторного входа
-      document.getElementById('loginPassword').value = '';
-      return;
-    }
-    
-    // Шаг 3: Анонимный вход в Firebase
-    console.log("🚪 Выполняем анонимный вход...");
+    // 2. Анонимный вход
     const userCredential = await signInAnonymously(auth);
-    console.log("✅ Анонимный вход успешен, UID:", userCredential.user.uid);
+    console.log("✅ Анонимный вход, UID:", userCredential.user.uid);
     
-    // Сохраняем сессию
+    // 3. Сохраняем сессию
     window.saveSession(code);
     
-    // Загружаем данные пользователя
-    console.log("📥 Загружаем данные пользователя...");
+    // 4. Загружаем или создаём пользователя (с привязкой по коду)
     await window.loadUserData(code);
+    
+    // 5. Синхронизируем дубликаты (если есть)
+    await window.syncUserOnLogin(code);
     
   } catch (error) {
     console.error("💥 Ошибка входа:", error);
-    
-    let message = 'Ошибка: ' + error.message;
-    if (error.code === 'auth/admin-restricted-operation') {
-      message = '❌ Anonymous Auth отключён в Firebase!';
-    } else if (error.code === 'auth/network-request-failed') {
-      message = '❌ Нет интернета или проблема с сетью';
-    }
-    
-    window.showAlert(message, 'error');
+    window.showAlert('Ошибка: ' + error.message, 'error');
   }
 };
 // Загрузка данных пользователя
 window.loadUserData = async function(code) {
   try {
+    // 🔥 Ищем пользователя ТОЛЬКО по коду сотрудника
     const userQuery = query(collection(db, "users"), where("code", "==", code));
     const snapshot = await getDocs(userQuery);
     
     let userDoc;
+    let userDocId;
+    
     if (snapshot.empty) {
-      // Создаём без пароля (будет установлен при первом входе)
+      // Пользователь не существует - создаём нового
       const empDoc = await getDoc(doc(db, "employees", code));
       const empData = empDoc.data();
       
+      if (!empData) {
+        window.showAlert('❌ Сотрудник не найден', 'error');
+        return;
+      }
+      
+      // Создаём НОВЫЙ документ пользователя
       const newUserRef = doc(collection(db, "users"));
       userDoc = {
-        uid: currentUser.uid,
+        uid: currentUser.uid,  // текущий анонимный uid
         code: code,
         fullName: empData.fullName,
         lastName: empData.lastName,
         initials: empData.initials,
         isAdmin: empData.isAdmin || false,
         totalPoints: 0,
-        // passwordHash не устанавливаем - будет при первом входе
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        lastLoginAt: serverTimestamp(),
+        lastLoginIP: await window.getSimpleIP()
       };
       await setDoc(newUserRef, userDoc);
+      userDocId = newUserRef.id;
+      console.log("✅ Создан новый пользователь:", code);
+      
     } else {
-      userDoc = snapshot.docs[0].data();
+      // 🔥 ПОЛЬЗОВАТЕЛЬ УЖЕ СУЩЕСТВУЕТ - ОБНОВЛЯЕМ ЕГО uid
+      const existingDoc = snapshot.docs[0];
+      userDoc = existingDoc.data();
+      userDocId = existingDoc.id;
+      
+      // 🔥 ВАЖНО: Обновляем uid текущего анонимного пользователя
+      // Не создаём новый документ, а обновляем существующий
+      if (userDoc.uid !== currentUser.uid) {
+        await updateDoc(doc(db, "users", userDocId), {
+          uid: currentUser.uid,  // обновляем uid на текущий
+          lastLoginAt: serverTimestamp(),
+          lastLoginIP: await window.getSimpleIP()
+        });
+        console.log("🔄 Обновлён uid для существующего пользователя:", code);
+      }
+      
+      console.log("✅ Найден существующий пользователь:", code);
     }
     
     userData = userDoc;
-    isAdmin = (userData.code === 'PRIDE');
     
-    // Сброс isAdmin для не-PRIDE
-    if (userData.code !== 'PRIDE' && userData.isAdmin) {
-      await updateDoc(snapshot.docs[0].ref, { isAdmin: false });
-      isAdmin = false;
-    }
+    // Обновляем глобальную переменную userData с актуальными данными
+    userData.uid = currentUser.uid;
+    userData.code = code;
+    
+    // 🔒 Жёсткая проверка админа
+    isAdmin = (userData.code === 'PRIDE');
     
     console.log("👤 Пользователь:", userData.code, "| Админ:", isAdmin);
     
@@ -1707,7 +1642,7 @@ window.showMainApp = function() {
   }
   document.getElementById('userName').textContent = displayName;
   document.getElementById('userPoints').textContent = userData.totalPoints || 0;
-  document.getElementById('profileName').textContent = displayName;
+  document.getElementById('profileName').textContent = userData.fullName;
   
   // Скрываем код для PRIDE
   if (userData.code === 'PRIDE') {
@@ -1751,6 +1686,32 @@ window.subscribeToUserPoints = function() {
       // Обновляем глобальную переменную
       userData.totalPoints = newPoints;
       
+      // Обновляем отображение везде
+      document.getElementById('userPoints').textContent = newPoints;
+      document.getElementById('profilePoints').textContent = newPoints;
+      
+      // Обновляем таблицу лидеров
+      window.loadLeaderboard();
+    }
+  });
+};
+
+// Подписка на обновление очков в реальном времени
+window.subscribeToUserPoints = function() {
+  if (!userData || !userData.code) return;
+  
+  const userRef = doc(db, "users", currentUser.uid);
+  
+  onSnapshot(userRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const updatedData = docSnap.data();
+      const newPoints = updatedData.totalPoints || 0;
+      
+      console.log("📊 Очки обновились:", userData.totalPoints, "→", newPoints);
+      
+      // Обновляем глобальную переменную
+      userData.totalPoints = newPoints;
+      
       // 🔥 Обновляем ВСЕ места где показываются очки
       document.getElementById('userPoints').textContent = newPoints;
       document.getElementById('profilePoints').textContent = newPoints;
@@ -1762,9 +1723,6 @@ window.subscribeToUserPoints = function() {
     console.error("❌ Ошибка подписки на очки:", error);
   });
 };
-
-// Подписка на обновление очков в реальном времени
-
 
   // Очистка дубликатов пользователей
 window.removeDuplicateUsers = async function() {
@@ -2419,82 +2377,6 @@ window.clearMatchResult = async function(matchId) {
   }
 };
 
- window.resetUserPassword = async function(userCode) {
-  if (!isAdmin) {
-    window.showAlert('❌ Только для админа', 'error');
-    return;
-  }
-  
-  const newPassword = prompt(`Введите новый пароль для сотрудника ${userCode}:`);
-  if (!newPassword || newPassword.length < 4) {
-    window.showAlert('❌ Пароль должен быть не менее 4 символов', 'error');
-    return;
-  }
-  
-  try {
-    const usersQuery = query(collection(db, "users"), where("code", "==", userCode));
-    const usersSnap = await getDocs(usersQuery);
-    
-    if (usersSnap.empty) {
-      window.showAlert('❌ Пользователь не найден', 'error');
-      return;
-    }
-    
-    const passwordHash = await window.hashPassword(newPassword);
-    await updateDoc(usersSnap.docs[0].ref, { passwordHash: passwordHash });
-    
-    window.showAlert(`✅ Пароль для ${userCode} сброшен`, 'success');
-  } catch (error) {
-    window.showAlert('❌ ' + error.message, 'error');
-  }
-};
-  
-// В профиле пользователя - кнопка смены пароля
-window.changeMyPassword = async function() {
-  const oldPassword = prompt('Введите текущий пароль:');
-  if (!oldPassword) return;
-  
-  const newPassword = prompt('Введите новый пароль (мин. 4 символа):');
-  if (!newPassword || newPassword.length < 4) {
-    window.showAlert('❌ Пароль должен быть не менее 4 символов', 'error');
-    return;
-  }
-  
-  const confirmPassword = prompt('Подтвердите новый пароль:');
-  if (newPassword !== confirmPassword) {
-    window.showAlert('❌ Пароли не совпадают', 'error');
-    return;
-  }
-  
-  try {
-    // Проверяем старый пароль
-    const usersQuery = query(collection(db, "users"), where("code", "==", userData.code));
-    const usersSnap = await getDocs(usersQuery);
-    
-    if (usersSnap.empty) {
-      window.showAlert('❌ Ошибка: пользователь не найден', 'error');
-      return;
-    }
-    
-    const userDoc = usersSnap.docs[0];
-    const currentHash = userDoc.data().passwordHash;
-    
-    const isValid = await window.verifyPassword(oldPassword, currentHash);
-    if (!isValid) {
-      window.showAlert('❌ Неверный текущий пароль', 'error');
-      return;
-    }
-    
-    // Устанавливаем новый пароль
-    const newHash = await window.hashPassword(newPassword);
-    await updateDoc(userDoc.ref, { passwordHash: newHash });
-    
-    window.showAlert('✅ Пароль успешно изменён!', 'success');
-  } catch (error) {
-    window.showAlert('❌ ' + error.message, 'error');
-  }
-};
-  
   // Загрузка ставок для конкретного матча
 window.loadBetsForMatch = async function(matchId) {
   try {
@@ -3259,20 +3141,17 @@ window.renderAdminUsers = function(users) {
     
     const userName = user.fullName || user.lastName + ' ' + user.initials;
     
-   // В renderAdminUsers, добавьте в item.innerHTML:
-item.innerHTML = `
-  <div style="flex:1;">
-    <div style="font-weight:600;font-size:14px;">${user.fullName || user.lastName + ' ' + user.initials}</div>
-    <div style="font-size:12px;color:#666;">
-      Очки: ${user.totalPoints || 0} 
-      ${user.isAdmin ? '| 👑 Админ' : ''}
-      ${user.passwordHash ? '| 🔒 Пароль установлен' : '| ⚠️ Нет пароля'}
-    </div>
-  </div>
-  <div style="display:flex; gap:5px;">
-    <button class="btn btn-small" style="background:#ffc107; color:#000;" onclick="window.resetUserPassword('${user.code}')">🔄 Сброс пароля</button>
-  </div>
-`;
+    item.innerHTML = `
+      <div style="flex:1;">
+        <div style="font-weight:600;font-size:14px;">${userName}</div>
+        <div style="font-size:12px;color:#666;">
+          🏆 Очки: ${user.totalPoints || 0} 
+          ${user.isAdmin ? '| 👑 Админ' : ''}
+        </div>
+      </div>
+      <button class="btn btn-small" onclick="event.stopPropagation(); window.loginAsUser('${user.code}', '${user.uid || ''}')">👁 Войти</button>
+      <button class="btn btn-small" onclick="event.stopPropagation(); window.toggleUserBets('${user.code}')" style="background:#17a2b8;">📋 Ставки</button>
+    `;
     
     // Добавляем контейнер для ставок (скрытый изначально)
     const betsContainer = document.createElement('div');
@@ -3527,8 +3406,8 @@ window.renderUserBetsTable = function(activeBets, finishedBets, filter = 'all') 
   
   return tableHtml;
 };
-  
-  // Фильтрация ставок пользователя
+
+// Фильтрация ставок пользователя
 window.filterUserBets = function(userCode, filter) {
   const data = window.userBetsData?.[userCode];
   if (!data) return;
@@ -3881,9 +3760,8 @@ window.syncUserOnLogin = async function(code) {
 window.closeRulesModal = function() {
   document.getElementById('rulesModal').classList.remove('active');
 }; 
-
-
-
+  
+  
 </script>
 
   <!-- Модальное окно с правилами -->
@@ -3931,5 +3809,6 @@ window.closeRulesModal = function() {
     <button class="btn" onclick="window.closeRulesModal()" style="margin-top: 15px;">Понятно!</button>
   </div>
 </div>
+
 </body>
 </html>
