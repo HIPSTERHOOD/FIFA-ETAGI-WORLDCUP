@@ -2658,8 +2658,17 @@ window.renderLeaderboard = function(users) {
     }
   });
   
-  // 🔥 НОВАЯ СОРТИРОВКА: по очкам, затем по ранним ставкам
-  const sortedUsers = Object.values(uniqueUsers).sort((a, b) => {
+  // 🔥 НОВОЕ: Фильтруем пользователей с 0 очков
+  const usersWithPoints = Object.values(uniqueUsers).filter(user => (user.totalPoints || 0) > 0);
+  
+  // Если нет ни одного пользователя с очками
+  if (usersWithPoints.length === 0) {
+    container.innerHTML = '<div class="loading">🏆 Пока нет участников с очками</div>';
+    return;
+  }
+  
+  // Сортируем только пользователей с очками
+  const sortedUsers = usersWithPoints.sort((a, b) => {
     const pointsDiff = (b.totalPoints || 0) - (a.totalPoints || 0);
     if (pointsDiff !== 0) return pointsDiff;
     
@@ -2687,7 +2696,6 @@ window.renderLeaderboard = function(users) {
     const item = document.createElement('div');
     item.className = 'leaderboard-item ' + (user.code === userData?.code ? 'current-user' : '');
     
-    // Только три медали
     let medal = '';
     if (currentPosition === 1) medal = '🥇';
     else if (currentPosition === 2) medal = '🥈';
