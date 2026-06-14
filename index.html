@@ -559,6 +559,10 @@ button {
     Удаляет повторяющиеся записи пользователей (оставляет одну с максимальными очками)
   </p>
 </div>
+
+ <button class="btn btn-secondary" onclick="window.syncAllEarlyBets()" style="background:#17a2b8;">
+  ⏰ Пересчитать ранние ставки
+</button>   
     
     <div class="admin-section">
       <h3>📊 Результаты матчей</h3>
@@ -1630,6 +1634,53 @@ isAdmin: emp.code === 'PRIDE' || emp.code === '111656' || emp.code === '12457833
   }
 };
 
+
+  // Обновление показателя ранних ставок для пользователя
+window.updateUserEarlyBets = async function(userCode) {
+  try {
+    // Получаем все ставки пользователя
+    const betsQuery = query(collection(db, "bets"), where("userCode", "==", userCode));
+    const betsSnap = await getDocs(betsQuery);
+    
+    let totalEarlyHours = 0;
+    
+    for (const betDoc of betsSnap.docs) {
+      const bet = betDoc.data();
+      const match = allMatches.find(m => m.id === bet.matchId);
+      
+      // Если ставка угадана (points > 0) и матч завершён
+      if (match && match.result && bet.points > 0) {
+        const matchStart = new Date(match.date);
+        const betTime = bet.createdAt?.toDate?.() || new Date(bet.createdAtISO);
+        
+        if (betTime && matchStart > betTime) {
+          // Разница в часах до начала матча
+          const hoursEarly = (matchStart - betTime) / (1000 * 60 * 60);
+          totalEarlyHours += hoursEarly;
+        }
+      }
+    }
+    
+    // Обновляем пользователя
+    const usersQuery = query(collection(db, "users"), where("code", "==", userCode));
+    const usersSnap = await getDocs(usersQuery);
+    
+    if (!usersSnap.empty) {
+      await updateDoc(usersSnap.docs[0].ref, {
+        totalEarlyBets: totalEarlyHours
+      });
+      console.log(`📊 ${userCode}: ранних часов = ${totalEarlyHours.toFixed(2)}`);
+    }
+    
+    return totalEarlyHours;
+    
+  } catch (error) {
+    console.error("Ошибка обновления early bets:", error);
+    return 0;
+  }
+};
+
+  
 window.renderMatches = function() {
   const container = document.getElementById('matchesList');
   if (!container) return;
@@ -2607,30 +2658,45 @@ window.renderLeaderboard = function(users) {
     }
   });
   
-  const sortedUsers = Object.values(uniqueUsers).sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
+  // 🔥 НОВАЯ СОРТИРОВКА: по очкам, затем по ранним ставкам
+  const sortedUsers = Object.values(uniqueUsers).sort((a, b) => {
+    const pointsDiff = (b.totalPoints || 0) - (a.totalPoints || 0);
+    if (pointsDiff !== 0) return pointsDiff;
+    
+    const earlyDiff = (b.totalEarlyBets || 0) - (a.totalEarlyBets || 0);
+    if (earlyDiff !== 0) return earlyDiff;
+    
+    const dateA = a.createdAt?.toMillis?.() || 0;
+    const dateB = b.createdAt?.toMillis?.() || 0;
+    return dateB - dateA;
+  });
   
   let currentPosition = 1;
   let previousPoints = -1;
+  let previousEarly = -1;
   let posCounter = 0;
   
   sortedUsers.forEach((user, index) => {
-    
-    if (user.totalPoints !== previousPoints) {
+    if (user.totalPoints !== previousPoints || user.totalEarlyBets !== previousEarly) {
       currentPosition = posCounter + 1;
     }
     previousPoints = user.totalPoints;
+    previousEarly = user.totalEarlyBets;
     posCounter++;
     
     const item = document.createElement('div');
     item.className = 'leaderboard-item ' + (user.code === userData?.code ? 'current-user' : '');
     
+    // Только три медали
     let medal = '';
     if (currentPosition === 1) medal = '🥇';
     else if (currentPosition === 2) medal = '🥈';
     else if (currentPosition === 3) medal = '🥉';
     
+    const positionDisplay = medal || currentPosition;
+    
     item.innerHTML = `
-      <span class="position">${medal || currentPosition}</span>
+      <span class="position">${positionDisplay}</span>
       <span class="user-name-lb">${user.lastName} ${user.initials}</span>
       <span class="points">${user.totalPoints || 0} оч.</span>
     `;
@@ -2639,6 +2705,42 @@ window.renderLeaderboard = function(users) {
   });
 };
 
+  // Синхронизация ранних ставок для всех пользователей
+window.syncAllEarlyBets = async function() {
+  if (!isAdmin) {
+    window.showAlert('❌ Только для админа', 'error');
+    return;
+  }
+  
+  if (!confirm('Пересчитать ранние ставки для всех пользователей?')) return;
+  
+  window.showAlert('⏳ Синхронизация...', 'info');
+  
+  try {
+    const usersRef = collection(db, "users");
+    const usersSnap = await getDocs(usersRef);
+    
+    let count = 0;
+    for (const userDoc of usersSnap.docs) {
+      const userCode = userDoc.data().code;
+      if (userCode) {
+        await window.updateUserEarlyBets(userCode);
+        count++;
+        if (count % 10 === 0) {
+          console.log(`📊 Обработано ${count} пользователей`);
+        }
+      }
+    }
+    
+    window.showAlert(`✅ Синхронизировано ${count} пользователей`, 'success');
+    window.loadLeaderboard();
+    
+  } catch (error) {
+    window.showAlert('❌ ' + error.message, 'error');
+  }
+};
+
+  
 window.searchLeaderboard = function() {
   const search = document.getElementById('leaderboardSearch').value.toLowerCase();
   const items = document.querySelectorAll('.leaderboard-item');
@@ -3076,6 +3178,7 @@ window.syncUserPoints = async function() {
 };
   
   // Функция пересчёта очков пользователя на основе всех его ставок
+// Функция пересчёта очков пользователя на основе всех его ставок
 window.recalculateUserPoints = async function(userCode) {
   try {
     console.log(`🔄 Пересчёт очков для пользователя: ${userCode}`);
@@ -3086,7 +3189,7 @@ window.recalculateUserPoints = async function(userCode) {
     
     if (usersSnap.empty) {
       console.warn(`⚠️ Пользователь ${userCode} не найден`);
-      return;
+      return 0;
     }
     
     const userDoc = usersSnap.docs[0];
@@ -3097,9 +3200,9 @@ window.recalculateUserPoints = async function(userCode) {
     const betsQuery = query(betsRef, where("userCode", "==", userCode));
     const betsSnap = await getDocs(betsQuery);
     
-    // 3. Считаем общую сумму очков
+    // 3. Считаем общую сумму очков и сумму ранних часов
     let totalPoints = 0;
-    const betsToUpdate = [];
+    let totalEarlyHours = 0;
     
     for (const betDoc of betsSnap.docs) {
       const bet = betDoc.data();
@@ -3131,14 +3234,29 @@ window.recalculateUserPoints = async function(userCode) {
         }
         
         totalPoints += points;
+        
+        // 🔥 СЧИТАЕМ РАННИЕ ЧАСЫ (только для угаданных ставок)
+        if (points > 0) {
+          const matchStart = new Date(match.date);
+          const betTime = bet.createdAt?.toDate?.() || new Date(bet.createdAtISO);
+          
+          if (betTime && matchStart > betTime) {
+            // Разница в часах до начала матча
+            const hoursEarly = (matchStart - betTime) / (1000 * 60 * 60);
+            totalEarlyHours += hoursEarly;
+          }
+        }
       }
       // Если матч не завершён - ставка не приносит очков
     }
     
-    // 4. Обновляем общие очки пользователя
+    // 4. Обновляем общие очки пользователя и показатель ранних ставок
     console.log(`  💯 Итого очков для ${userCode}: ${totalPoints}`);
+    console.log(`  ⏰ Ранних часов для ${userCode}: ${totalEarlyHours.toFixed(2)}`);
+    
     await updateDoc(doc(db, "users", userId), {
-      totalPoints: totalPoints
+      totalPoints: totalPoints,
+      totalEarlyBets: totalEarlyHours
     });
     
     // 5. Если это текущий пользователь - обновляем UI
@@ -3153,6 +3271,7 @@ window.recalculateUserPoints = async function(userCode) {
   } catch (error) {
     console.error(`❌ Ошибка пересчёта для ${userCode}:`, error);
     window.showAlert(`Ошибка пересчёта: ${error.message}`, 'error');
+    return 0;
   }
 };
 
