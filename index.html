@@ -1638,6 +1638,70 @@ isAdmin: emp.code === 'PRIDE' || emp.code === '111656' || emp.code === '12457833
 };
 
 
+   window.closeBetModal = function() {
+  const modal = document.getElementById('betModal');
+  if (modal) modal.classList.remove('active');
+  currentBetMatch = null;
+};
+
+  
+window.saveBet = async function() {
+  if (!currentBetMatch || !currentUser) {
+    window.showAlert('Ошибка: данные не загружены', 'error');
+    return;
+  }
+  
+  const matchDate = new Date(currentBetMatch.date);
+  if (matchDate <= new Date()) {
+    window.showAlert('❌ Нельзя сделать ставку - матч уже начался!', 'error');
+    return;
+  }
+  
+  // Берём значения из полей точного счёта
+  const score1 = document.getElementById('scoreTeam1').value;
+  const score2 = document.getElementById('scoreTeam2').value;
+  
+  // Проверка на корректность счёта
+  if (score1 === undefined || score2 === undefined) {
+    window.showAlert('Ошибка: не удалось получить значения счёта', 'error');
+    return;
+  }
+  
+  // Всегда сохраняем как точный счёт
+  let betData = {
+    userCode: userData.code,
+    userId: currentUser.uid,
+    userName: userData.lastName + ' ' + userData.initials,
+    matchId: currentBetMatch.id,
+    betType: 'score',
+    exactScore: score1 + ':' + score2,
+    points: 0,
+    createdAt: serverTimestamp()
+  };
+  
+  try {
+    const existingBet = allBets.find(b => b.matchId === currentBetMatch.id);
+    
+    if (existingBet) {
+      await updateDoc(doc(db, "bets", existingBet.id), betData);
+      window.showAlert('✅ Ставка обновлена!', 'success');
+    } else {
+      await setDoc(doc(collection(db, "bets")), betData);
+      window.showAlert('✅ Ставка сохранена!', 'success');
+    }
+    
+    window.closeBetModal();
+    window.loadBets(); // принудительно обновляем список ставок
+    window.renderMatches(); // обновляем отображение матчей
+    
+  } catch (error) {
+    console.error("Ошибка сохранения ставки:", error);
+    window.showAlert('Ошибка: ' + error.message, 'error');
+  }
+};
+
+
+ 
   // Обновление показателя ранних ставок для пользователя
 window.updateUserEarlyBets = async function(userCode) {
   try {
@@ -2098,8 +2162,6 @@ window.loadBets = function() {
     console.error("❌ Нет данных пользователя для загрузки ставок");
     return;
   }
-  
-  console.log("📥 Загружаем ставки для кода:", userData.code);
   
   const betsRef = collection(db, "bets");
   const q = query(betsRef, where("userCode", "==", userData.code));
