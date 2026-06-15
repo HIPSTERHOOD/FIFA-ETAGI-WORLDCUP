@@ -587,8 +587,8 @@ button {
     </div>
     <div id="betMatchInfo"></div>
    <div class="bet-type-selector" style="display: none;">
-  <button class="bet-type-btn active" onclick="window.selectBetType('outcome')" id="betTypeOutcome">📊 Исход</button>
-  <button class="bet-type-btn" onclick="window.selectBetType('score')" id="betTypeScore">🎯 Точный счёт</button>
+ <button class="bet-type-btn" onclick="window.selectBetType('outcome')" id="betTypeOutcome">📊 Исход</button>
+<button class="bet-type-btn active" onclick="window.selectBetType('score')" id="betTypeScore">🎯 Точный счёт</button>
 </div>
     <div id="outcomeSection">
       <p style="margin-bottom:10px;font-weight:600;font-size:14px;">Исход (+1 очко):</p>
@@ -2474,7 +2474,7 @@ window.openBetModal = function(matchId) {
   }
   
   currentBetMatch = match;
-  currentBetType = 'score';
+  currentBetType = 'score';  // ← Принудительно ставим тип "точный счёт"
   
   document.getElementById('betMatchInfo').innerHTML = `
     <div style="margin-bottom:20px;padding:15px;background:#f8f9fa;border-radius:10px;">
@@ -2513,77 +2513,14 @@ window.openBetModal = function(matchId) {
       document.getElementById('scoreTeam2').value = s2;
     }
   } else {
-    window.selectBetType('outcome');
+    // 🔥 ИСПРАВЛЕНО: выбираем точный счёт для новых ставок
+    window.selectBetType('score');
     currentOutcome = null;
     document.querySelectorAll('.outcome-btn').forEach(b => b.classList.remove('active'));
   }
   
   document.getElementById('betModal').classList.add('active');
 };
-
-window.closeBetModal = function() {
-  document.getElementById('betModal').classList.remove('active');
-  currentBetMatch = null;
-};
-
-window.selectBetType = function(type) {
-  currentBetType = type;
-  document.getElementById('betTypeOutcome').classList.toggle('active', type === 'outcome');
-  document.getElementById('betTypeScore').classList.toggle('active', type === 'score');
-  document.getElementById('outcomeSection').classList.toggle('hidden', type !== 'outcome');
-  document.getElementById('scoreSection').classList.toggle('hidden', type !== 'score');
-};
-
-window.selectOutcome = function(outcome) {
-  currentOutcome = outcome;
-  document.querySelectorAll('.outcome-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('outcome' + outcome.charAt(0).toUpperCase() + outcome.slice(1)).classList.add('active');
-};
-
-window.saveBet = async function() {
-  if (!currentBetMatch || !currentUser) return;
-  
-  const matchDate = new Date(currentBetMatch.date);
-  if (matchDate <= new Date()) {
-    window.showAlert('❌ Нельзя сделать ставку - матч уже начался!', 'error');
-    return;
-  }
-  
-  // 🔥 БЕРЁМ ТОЛЬКО ЗНАЧЕНИЯ ИЗ ПОЛЕЙ ТОЧНОГО СЧЁТА
-  const score1 = document.getElementById('scoreTeam1').value;
-  const score2 = document.getElementById('scoreTeam2').value;
-  
-  // 🔥 ВСЕГДА СОХРАНЯЕМ КАК ТОЧНЫЙ СЧЁТ
-  let betData = {
-    userCode: userData.code,
-    userId: currentUser.uid,
-    userName: userData.lastName + ' ' + userData.initials,
-    matchId: currentBetMatch.id,
-    betType: 'score',        // ← ВСЕГДА 'score'
-    exactScore: score1 + ':' + score2,
-    points: 0,
-    createdAt: serverTimestamp()
-  };
-  
-  try {
-    const existingBet = allBets.find(b => b.matchId === currentBetMatch.id);
-    
-    if (existingBet) {
-      await updateDoc(doc(db, "bets", existingBet.id), betData);
-      window.showAlert('✅ Ставка обновлена!', 'success');
-    } else {
-      await setDoc(doc(collection(db, "bets")), betData);
-      window.showAlert('✅ Ставка сохранена!', 'success');
-    }
-    
-    window.closeBetModal();
-    
-  } catch (error) {
-    console.error(error);
-    window.showAlert('Ошибка: ' + error.message, 'error');
-  }
-};
-
 // Таблица лидеров
 window.loadLeaderboard = function() {
   const usersRef = collection(db, "users");
