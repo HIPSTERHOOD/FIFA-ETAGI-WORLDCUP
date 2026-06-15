@@ -2461,6 +2461,31 @@ window.getOutcomeText = function(outcome, match) {
   }
   return outcome;
 };
+
+
+  window.selectBetType = function(type) {
+  currentBetType = type;
+  const outcomeBtn = document.getElementById('betTypeOutcome');
+  const scoreBtn = document.getElementById('betTypeScore');
+  const outcomeSection = document.getElementById('outcomeSection');
+  const scoreSection = document.getElementById('scoreSection');
+  
+  if (outcomeBtn) outcomeBtn.classList.toggle('active', type === 'outcome');
+  if (scoreBtn) scoreBtn.classList.toggle('active', type === 'score');
+  if (outcomeSection) outcomeSection.classList.toggle('hidden', type !== 'outcome');
+  if (scoreSection) scoreSection.classList.toggle('hidden', type !== 'score');
+};
+
+
+  window.selectOutcome = function(outcome) {
+  currentOutcome = outcome;
+  // Убираем активный класс у всех кнопок исходов
+  document.querySelectorAll('.outcome-btn').forEach(btn => btn.classList.remove('active'));
+  // Добавляем активный класс выбранной кнопке
+  const targetId = 'outcome' + outcome.charAt(0).toUpperCase() + outcome.slice(1);
+  const targetBtn = document.getElementById(targetId);
+  if (targetBtn) targetBtn.classList.add('active');
+};
   
 // Модальное окно ставки
 window.openBetModal = function(matchId) {
