@@ -444,8 +444,9 @@ button {
 </div>
 
 <div id="mainApp">
- <div class="header">
-  <!-- Первая строка: ФИО по центру -->
+<div id="stickyHeader" style="position: sticky; top: 0; z-index: 100; background: #E31E24; color: white; padding: 12px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+  
+  <!-- ФИО -->
   <div style="text-align: center; padding: 5px 0;">
     <div class="user-name" style="font-size: 18px; font-weight: bold;">
       <span id="userName"></span>
@@ -453,7 +454,7 @@ button {
     </div>
   </div>
   
-  <!-- Вторая строка: очки, правила, выход -->
+  <!-- Очки, правила, выход -->
   <div class="header-top">
     <div class="user-points">🔴 <span id="userPoints">0</span> очков</div>
     <div style="display: flex; gap: 15px; align-items: center;">
@@ -462,6 +463,11 @@ button {
       </button>
       <button onclick="window.logout()" style="background:none; border:none; color:white; cursor:pointer; font-size:20px;">🚪</button>
     </div>
+  </div>
+  
+  <!-- Строка "N из 140 броней..." -->
+  <div id="betsCounterBar" style="background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 8px; margin-top: 10px; text-align: center; font-size: 14px; font-weight: 500;">
+    <span id="betsCounterText">Загрузка данных о бронях...</span>
   </div>
 </div>
    <div class="nav-tabs" style="flex-wrap: wrap; gap: 8px;">
@@ -566,6 +572,9 @@ button {
     <button class="btn btn-secondary" onclick="window.recalculateAllBets()" style="background:#dc3545;">
   🔄 Пересчитать ВСЕ ставки (новые правила)
 </button>
+    <button class="btn btn-secondary" onclick="window.updateBetsCounterAdmin()" style="background:#ffc107; color:#000;">
+  📊 Обновить счётчик броней
+</button>
     
     <div class="admin-section">
       <h3>📊 Результаты матчей</h3>
@@ -599,7 +608,11 @@ button {
       </div>
     </div>
     <div id="scoreSection" class="hidden">
-      <p style="margin-bottom:10px;font-weight:600;font-size:14px;">Точный счёт (+2 очка):</p>
+      <p style="margin-bottom:10px;font-weight:600;font-size:14px;">🎯 Точный счёт:</p>
+<div style="font-size:12px;color:#666;margin-bottom:15px;background:#f8f9fa;padding:8px 12px;border-radius:8px;">
+  🔹 <strong>+3 балла</strong> — угадан точный счёт + исход матча<br>
+  🔹 <strong>+1 балл</strong> — угадан только исход (победа/ничья)
+</div>
      <div class="score-selectors">
   <select class="score-select" id="scoreTeam1">
     <option value="0">0</option><option value="1">1</option><option value="2">2</option>
@@ -1700,8 +1713,59 @@ window.saveBet = async function() {
   }
 };
 
+// Функция обновления счётчика броней
+window.updateBetsCounter = function() {
+  const counterText = document.getElementById('betsCounterText');
+  if (!counterText) return;
+  
+  // Читаем значение из Firestore
+  const settingsRef = doc(db, "settings", "betsCounter");
+  getDoc(settingsRef).then((docSnap) => {
+    if (docSnap.exists()) {
+      const count = docSnap.data().count || 0;
+      counterText.textContent = `${count} из 140 броней поставлено по новостройкам!`;
+    } else {
+      // Если документа нет — создаём с нулём
+      setDoc(settingsRef, { count: 0, updatedAt: serverTimestamp() });
+      counterText.textContent = `0 из 140 броней поставлено по новостройкам!`;
+    }
+  }).catch(error => {
+    console.error("Ошибка загрузки счётчика:", error);
+    counterText.textContent = `— из 140 броней поставлено по новостройкам!`;
+  });
+};
 
- 
+
+  // Админ-функция обновления счётчика броней
+window.updateBetsCounterAdmin = function() {
+  if (!isAdmin) {
+    window.showAlert('❌ Только для админа', 'error');
+    return;
+  }
+  
+  const newCount = prompt('Введите новое количество броней (от 0 до 140):');
+  if (newCount === null) return;
+  
+  const count = parseInt(newCount);
+  if (isNaN(count) || count < 0 || count > 140) {
+    window.showAlert('❌ Введите число от 0 до 140', 'error');
+    return;
+  }
+  
+  const settingsRef = doc(db, "settings", "betsCounter");
+  setDoc(settingsRef, { 
+    count: count, 
+    updatedAt: serverTimestamp(),
+    updatedBy: userData.fullName || userData.code
+  }).then(() => {
+    window.showAlert(`✅ Счётчик обновлён: ${count} из 140`, 'success');
+    window.updateBetsCounter();
+  }).catch(error => {
+    console.error("Ошибка обновления:", error);
+    window.showAlert('❌ Ошибка: ' + error.message, 'error');
+  });
+};
+  
   // Обновление показателя ранних ставок для пользователя
 window.updateUserEarlyBets = async function(userCode) {
   try {
@@ -2049,6 +2113,7 @@ window.showMainApp = function() {
   window.loadProfileStats();
   window.subscribeToUserPoints();
   window.loadAllBetsForStats();
+  window.updateBetsCounter();
 };
 
   // Подписка на обновление очков в реальном времени
@@ -3099,21 +3164,23 @@ window.renderBetsForMatch = function(matchId, bets) {
     
     const userName = bet.userFullName || bet.userName || bet.userCode;
     
-    let pointsColor = '#dc3545';
-    let pointsText = `${bet.points || 0}`;
-    if (bet.points === 2) {
-      pointsColor = '#28a745';
-      pointsText = '+2 🎯';
-    } else if (bet.points === 1) {
-      pointsColor = '#17a2b8';
-      pointsText = '+1 ✅';
-    } else if (bet.points === 0 && match.result) {
-      pointsColor = '#dc3545';
-      pointsText = '0 ❌';
-    } else {
-      pointsColor = '#ffc107';
-      pointsText = '? ⏳';
-    }
+   let pointsText = `${bet.points || 0}`;
+if (bet.points === 3) {
+  pointsColor = '#9b59b6';  // фиолетовый за максимальный результат
+  pointsText = '+3 🎯';
+} else if (bet.points === 2) {
+  pointsColor = '#28a745';
+  pointsText = '+2 🎯';
+} else if (bet.points === 1) {
+  pointsColor = '#17a2b8';
+  pointsText = '+1 ✅';
+} else if (bet.points === 0 && match.result) {
+  pointsColor = '#dc3545';
+  pointsText = '0 ❌';
+} else {
+  pointsColor = '#ffc107';
+  pointsText = '? ⏳';
+}
     
     html += `
       <tr style="border-bottom:1px solid #dee2e6;">
@@ -3127,7 +3194,7 @@ window.renderBetsForMatch = function(matchId, bets) {
     `;
   }
   
-  html += '</tbody>赶';
+  html += '</tbody>';
   
   const totalBets = bets.length;
   const totalPoints = bets.reduce((sum, bet) => sum + (bet.points || 0), 0);
