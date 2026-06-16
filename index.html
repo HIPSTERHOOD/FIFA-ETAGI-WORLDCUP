@@ -2485,21 +2485,24 @@ window.showMatchBetsModal = function(matchId) {
       }
       
       // Очки
-      let pointsColor = '#dc3545';
-      let pointsText = `${bet.points || 0}`;
-      if (bet.points === 2) {
-        pointsColor = '#28a745';
-        pointsText = '+2 🎯';
-      } else if (bet.points === 1) {
-        pointsColor = '#17a2b8';
-        pointsText = '+1 ✅';
-      } else if (bet.points === 0 && match.result) {
-        pointsColor = '#dc3545';
-        pointsText = '0 ❌';
-      } else if (!match.result) {
-        pointsColor = '#ffc107';
-        pointsText = '? ⏳';
-      }
+     let pointsColor = '#dc3545';
+let pointsText = `${bet.points || 0}`;
+if (bet.points === 3) {
+  pointsColor = '#9b59b6';
+  pointsText = '+3 🎯✅';
+} else if (bet.points === 2) {
+  pointsColor = '#28a745';
+  pointsText = '+2 🎯';
+} else if (bet.points === 1) {
+  pointsColor = '#17a2b8';
+  pointsText = '+1 ✅';
+} else if (bet.points === 0 && match.result) {
+  pointsColor = '#dc3545';
+  pointsText = '0 ❌';
+} else if (!match.result) {
+  pointsColor = '#ffc107';
+  pointsText = '? ⏳';
+}
       
       betsHtml += `
         <tr style="border-bottom:1px solid #dee2e6;">
