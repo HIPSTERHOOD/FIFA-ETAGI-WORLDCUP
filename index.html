@@ -2334,7 +2334,20 @@ window.createMatchCard = function(match) {
     const betText = userBet.betType === 'outcome' 
       ? '📊 ' + window.getOutcomeText(userBet.outcome, match)
       : '🎯 ' + userBet.exactScore;
-    const pointsText = match.result ? ' | +' + (userBet.points || 0) : '';
+    let pointsText = '';
+if (match.result && userBet.points > 0) {
+  if (userBet.points === 3) {
+    pointsText = ' | +3 🎯✅';
+  } else if (userBet.points === 2) {
+    pointsText = ' | +2 🎯';
+  } else if (userBet.points === 1) {
+    pointsText = ' | +1 ✅';
+  } else {
+    pointsText = ' | +' + userBet.points;
+  }
+} else if (match.result && userBet.points === 0) {
+  pointsText = ' | 0 ❌';
+}
     
     const canCancel = matchDate > new Date();
     const cancelButton = canCancel ? 
@@ -4213,21 +4226,24 @@ window.renderUserBetsTable = function(activeBets, finishedBets, filter = 'all') 
     }
     
     // Очки и цвет
-    let pointsColor = '#dc3545';
-    let pointsText = `${bet.points || 0}`;
-    if (bet.points === 2) {
-      pointsColor = '#28a745';
-      pointsText = '+2 🎯';
-    } else if (bet.points === 1) {
-      pointsColor = '#17a2b8';
-      pointsText = '+1 ✅';
-    } else if (bet.points === 0 && match && match.result) {
-      pointsColor = '#dc3545';
-      pointsText = '0 ❌';
-    } else if (!match || !match.result) {
-      pointsColor = '#ffc107';
-      pointsText = '? ⏳';
-    }
+   let pointsColor = '#dc3545';
+let pointsText = `${bet.points || 0}`;
+if (bet.points === 3) {
+  pointsColor = '#9b59b6';
+  pointsText = '+3 🎯✅';
+} else if (bet.points === 2) {
+  pointsColor = '#28a745';
+  pointsText = '+2 🎯';
+} else if (bet.points === 1) {
+  pointsColor = '#17a2b8';
+  pointsText = '+1 ✅';
+} else if (bet.points === 0 && match && match.result) {
+  pointsColor = '#dc3545';
+  pointsText = '0 ❌';
+} else if (!match || !match.result) {
+  pointsColor = '#ffc107';
+  pointsText = '? ⏳';
+}
     
     tableHtml += `
       <tr style="border-bottom:1px solid #dee2e6;">
