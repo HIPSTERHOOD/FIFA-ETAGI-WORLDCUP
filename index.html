@@ -1959,7 +1959,11 @@ window.loadMatches = async function() {
 };
 
 
-  // ========== РАСЧЁТ ТАБЛИЦЫ ГРУППЫ ==========
+// ============================================================
+// ===== ВЕСЬ ЭТОТ БЛОК ВСТАВЬТЕ ВМЕСТО СТАРОГО =====
+// ============================================================
+
+// ========== РАСЧЁТ ТАБЛИЦЫ ГРУППЫ ==========
 window.calculateGroupStandings = function(groupId) {
   const groupMatches = allMatches.filter(m => m.group === groupId && m.stage === 'group' && m.result);
   
@@ -2022,265 +2026,7 @@ window.calculateGroupStandings = function(groupId) {
   return sorted;
 };
 
-// ========== ОБНОВЛЕНИЕ КОМАНД В ПЛЕЙ-ОФФ ==========
-window.updateMatchTeams = async function(matchId, teamPosition, teamData) {
-  if (!teamData) return;
-  
-  try {
-    const matchRef = doc(db, "matches", matchId);
-    const updateData = {};
-    
-    const field = teamPosition; // 'team1' или 'team2'
-    updateData[field] = {
-      name: teamData.name,
-      code: teamData.code,
-      flag: teamData.flag
-    };
-    updateData[field + '.name'] = teamData.name;
-    updateData[field + '.code'] = teamData.code;
-    updateData[field + '.flag'] = teamData.flag;
-    
-    await updateDoc(matchRef, updateData);
-    console.log(`✅ Матч ${matchId}: ${teamPosition} = ${teamData.name}`);
-  } catch (error) {
-    console.error(`❌ Ошибка обновления матча ${matchId}:`, error);
-  }
-};
-
-// ========== ГЛАВНАЯ ФУНКЦИЯ ОБНОВЛЕНИЯ ПЛЕЙ-ОФФ (ПОЛНАЯ ВЕРСИЯ) ==========
-window.updatePlayoffMatches = async function() {
-  try {
-    console.log("🔄 Принудительное обновление плей-офф...");
-    
-    // Получаем победителей групп
-    const groups = ['A','B','C','D','E','F','G','H','I','J','K','L'];
-    const groupWinners = {};
-    
-    groups.forEach(group => {
-      const standings = window.calculateGroupStandings(group);
-      if (standings && standings.length >= 2) {
-        groupWinners[group] = {
-          first: standings[0] || null,
-          second: standings[1] || null,
-          third: standings[2] || null,
-          fourth: standings[3] || null
-        };
-      }
-    });
-    
-    // Вспомогательная функция для лучшей 3-й команды
-    function getBestThird(thirdTeams) {
-      if (!thirdTeams || thirdTeams.length === 0) return null;
-      return thirdTeams.sort((a, b) => {
-        if (b.points !== a.points) return b.points - a.points;
-        if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
-        return b.goalsFor - a.goalsFor;
-      })[0];
-    }
-    
-    // ===== 1/16 ФИНАЛА =====
-    
-    // R32_1: A1 vs C2
-    if (groupWinners.A && groupWinners.A.first && groupWinners.C && groupWinners.C.second) {
-      await window.forceUpdateMatchTeams('R32_1', groupWinners.A.first, groupWinners.C.second);
-    }
-    
-    // R32_2: B1 vs лучшая 3-я из A, C, D
-    if (groupWinners.B && groupWinners.B.first) {
-      const thirdTeams = [];
-      if (groupWinners.A && groupWinners.A.third) thirdTeams.push({...groupWinners.A.third, group: 'A'});
-      if (groupWinners.C && groupWinners.C.third) thirdTeams.push({...groupWinners.C.third, group: 'C'});
-      if (groupWinners.D && groupWinners.D.third) thirdTeams.push({...groupWinners.D.third, group: 'D'});
-      const bestThird = getBestThird(thirdTeams);
-      if (bestThird) {
-        await window.forceUpdateMatchTeams('R32_2', groupWinners.B.first, bestThird);
-      }
-    }
-    
-    // R32_3: C1 vs лучшая 3-я из D, E, F
-    if (groupWinners.C && groupWinners.C.first) {
-      const thirdTeams = [];
-      if (groupWinners.D && groupWinners.D.third) thirdTeams.push({...groupWinners.D.third, group: 'D'});
-      if (groupWinners.E && groupWinners.E.third) thirdTeams.push({...groupWinners.E.third, group: 'E'});
-      if (groupWinners.F && groupWinners.F.third) thirdTeams.push({...groupWinners.F.third, group: 'F'});
-      const bestThird = getBestThird(thirdTeams);
-      if (bestThird) {
-        await window.forceUpdateMatchTeams('R32_3', groupWinners.C.first, bestThird);
-      }
-    }
-    
-    // R32_4: D1 vs лучшая 3-я из A, B, C
-    if (groupWinners.D && groupWinners.D.first) {
-      const thirdTeams = [];
-      if (groupWinners.A && groupWinners.A.third) thirdTeams.push({...groupWinners.A.third, group: 'A'});
-      if (groupWinners.B && groupWinners.B.third) thirdTeams.push({...groupWinners.B.third, group: 'B'});
-      if (groupWinners.C && groupWinners.C.third) thirdTeams.push({...groupWinners.C.third, group: 'C'});
-      const bestThird = getBestThird(thirdTeams);
-      if (bestThird) {
-        await window.forceUpdateMatchTeams('R32_4', groupWinners.D.first, bestThird);
-      }
-    }
-    
-    // R32_5: E1 vs F2
-    if (groupWinners.E && groupWinners.E.first && groupWinners.F && groupWinners.F.second) {
-      await window.forceUpdateMatchTeams('R32_5', groupWinners.E.first, groupWinners.F.second);
-    }
-    
-    // R32_6: F1 vs лучшая 3-я из G, H, I, J, K, L
-    if (groupWinners.F && groupWinners.F.first) {
-      const thirdTeams = [];
-      ['G','H','I','J','K','L'].forEach(g => {
-        if (groupWinners[g] && groupWinners[g].third) {
-          thirdTeams.push({...groupWinners[g].third, group: g});
-        }
-      });
-      const bestThird = getBestThird(thirdTeams);
-      if (bestThird) {
-        await window.forceUpdateMatchTeams('R32_6', groupWinners.F.first, bestThird);
-      }
-    }
-    
-    // R32_7: G1 vs лучшая 3-я из J, K, L
-    if (groupWinners.G && groupWinners.G.first) {
-      const thirdTeams = [];
-      if (groupWinners.J && groupWinners.J.third) thirdTeams.push({...groupWinners.J.third, group: 'J'});
-      if (groupWinners.K && groupWinners.K.third) thirdTeams.push({...groupWinners.K.third, group: 'K'});
-      if (groupWinners.L && groupWinners.L.third) thirdTeams.push({...groupWinners.L.third, group: 'L'});
-      const bestThird = getBestThird(thirdTeams);
-      if (bestThird) {
-        await window.forceUpdateMatchTeams('R32_7', groupWinners.G.first, bestThird);
-      }
-    }
-    
-    // R32_8: H1 vs лучшая 3-я из C, D, E, F, G, I, J, K, L
-    if (groupWinners.H && groupWinners.H.first) {
-      const thirdTeams = [];
-      ['C','D','E','F','G','I','J','K','L'].forEach(g => {
-        if (groupWinners[g] && groupWinners[g].third) {
-          thirdTeams.push({...groupWinners[g].third, group: g});
-        }
-      });
-      const bestThird = getBestThird(thirdTeams);
-      if (bestThird) {
-        await window.forceUpdateMatchTeams('R32_8', groupWinners.H.first, bestThird);
-      }
-    }
-    
-    // R32_9: I1 vs лучшая 3-я из J, K, L
-    if (groupWinners.I && groupWinners.I.first) {
-      const thirdTeams = [];
-      if (groupWinners.J && groupWinners.J.third) thirdTeams.push({...groupWinners.J.third, group: 'J'});
-      if (groupWinners.K && groupWinners.K.third) thirdTeams.push({...groupWinners.K.third, group: 'K'});
-      if (groupWinners.L && groupWinners.L.third) thirdTeams.push({...groupWinners.L.third, group: 'L'});
-      const bestThird = getBestThird(thirdTeams);
-      if (bestThird) {
-        await window.forceUpdateMatchTeams('R32_9', groupWinners.I.first, bestThird);
-      }
-    }
-    
-    // R32_10: J1 vs лучшая 3-я из C, D, E, F, G, H, I
-    if (groupWinners.J && groupWinners.J.first) {
-      const thirdTeams = [];
-      ['C','D','E','F','G','H','I'].forEach(g => {
-        if (groupWinners[g] && groupWinners[g].third) {
-          thirdTeams.push({...groupWinners[g].third, group: g});
-        }
-      });
-      const bestThird = getBestThird(thirdTeams);
-      if (bestThird) {
-        await window.forceUpdateMatchTeams('R32_10', groupWinners.J.first, bestThird);
-      }
-    }
-    
-    // R32_11: K1 vs L2
-    if (groupWinners.K && groupWinners.K.first && groupWinners.L && groupWinners.L.second) {
-      await window.forceUpdateMatchTeams('R32_11', groupWinners.K.first, groupWinners.L.second);
-    }
-    
-    // R32_12: L1 vs лучшая 3-я из G, H, I, J, K
-    if (groupWinners.L && groupWinners.L.first) {
-      const thirdTeams = [];
-      ['G','H','I','J','K'].forEach(g => {
-        if (groupWinners[g] && groupWinners[g].third) {
-          thirdTeams.push({...groupWinners[g].third, group: g});
-        }
-      });
-      const bestThird = getBestThird(thirdTeams);
-      if (bestThird) {
-        await window.forceUpdateMatchTeams('R32_12', groupWinners.L.first, bestThird);
-      }
-    }
-    
-    // R32_13: I2 vs лучшая 3-я из J, K, L
-    if (groupWinners.I && groupWinners.I.second) {
-      const thirdTeams = [];
-      if (groupWinners.J && groupWinners.J.third) thirdTeams.push({...groupWinners.J.third, group: 'J'});
-      if (groupWinners.K && groupWinners.K.third) thirdTeams.push({...groupWinners.K.third, group: 'K'});
-      if (groupWinners.L && groupWinners.L.third) thirdTeams.push({...groupWinners.L.third, group: 'L'});
-      const bestThird = getBestThird(thirdTeams);
-      if (bestThird) {
-        await window.forceUpdateMatchTeams('R32_13', groupWinners.I.second, bestThird);
-      }
-    }
-    
-    // R32_14: J2 vs лучшая 3-я из G, H, I
-    if (groupWinners.J && groupWinners.J.second) {
-      const thirdTeams = [];
-      if (groupWinners.G && groupWinners.G.third) thirdTeams.push({...groupWinners.G.third, group: 'G'});
-      if (groupWinners.H && groupWinners.H.third) thirdTeams.push({...groupWinners.H.third, group: 'H'});
-      if (groupWinners.I && groupWinners.I.third) thirdTeams.push({...groupWinners.I.third, group: 'I'});
-      const bestThird = getBestThird(thirdTeams);
-      if (bestThird) {
-        await window.forceUpdateMatchTeams('R32_14', groupWinners.J.second, bestThird);
-      }
-    }
-    
-    // R32_15: K2 vs лучшая 3-я из C, D, E, F
-    if (groupWinners.K && groupWinners.K.second) {
-      const thirdTeams = [];
-      if (groupWinners.C && groupWinners.C.third) thirdTeams.push({...groupWinners.C.third, group: 'C'});
-      if (groupWinners.D && groupWinners.D.third) thirdTeams.push({...groupWinners.D.third, group: 'D'});
-      if (groupWinners.E && groupWinners.E.third) thirdTeams.push({...groupWinners.E.third, group: 'E'});
-      if (groupWinners.F && groupWinners.F.third) thirdTeams.push({...groupWinners.F.third, group: 'F'});
-      const bestThird = getBestThird(thirdTeams);
-      if (bestThird) {
-        await window.forceUpdateMatchTeams('R32_15', groupWinners.K.second, bestThird);
-      }
-    }
-    
-    // R32_16: L2 vs лучшая 3-я из A, B, C, D
-    if (groupWinners.L && groupWinners.L.second) {
-      const thirdTeams = [];
-      if (groupWinners.A && groupWinners.A.third) thirdTeams.push({...groupWinners.A.third, group: 'A'});
-      if (groupWinners.B && groupWinners.B.third) thirdTeams.push({...groupWinners.B.third, group: 'B'});
-      if (groupWinners.C && groupWinners.C.third) thirdTeams.push({...groupWinners.C.third, group: 'C'});
-      if (groupWinners.D && groupWinners.D.third) thirdTeams.push({...groupWinners.D.third, group: 'D'});
-      const bestThird = getBestThird(thirdTeams);
-      if (bestThird) {
-        await window.forceUpdateMatchTeams('R32_16', groupWinners.L.second, bestThird);
-      }
-    }
-    
-    // ===== 1/8 ФИНАЛА =====
-    await window.updateRoundOf16();
-    
-    // ===== 1/4 ФИНАЛА =====
-    await window.updateQuarterFinals();
-    
-    // ===== 1/2 ФИНАЛА =====
-    await window.updateSemiFinals();
-    
-    // ===== ФИНАЛ И МАТЧ ЗА 3 МЕСТО =====
-    await window.updateFinal();
-    
-    console.log("✅ Плей-офф полностью обновлён!");
-    
-  } catch (error) {
-    console.error("❌ Ошибка обновления плей-офф:", error);
-  }
-};
-
-// ===== ФУНКЦИЯ ДЛЯ ПРИНУДИТЕЛЬНОГО ОБНОВЛЕНИЯ КОМАНД В МАТЧЕ =====
+// ========== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ ПРИНУДИТЕЛЬНОГО ОБНОВЛЕНИЯ МАТЧА ==========
 window.forceUpdateMatchTeams = async function(matchId, team1Data, team2Data) {
   if (!team1Data || !team2Data) {
     console.warn(`⚠️ Нет данных для матча ${matchId}`);
@@ -2315,7 +2061,129 @@ window.forceUpdateMatchTeams = async function(matchId, team1Data, team2Data) {
   }
 };
 
-// ===== ОБНОВЛЕНИЕ 1/8 ФИНАЛА =====
+// ========== ГЛАВНАЯ ФУНКЦИЯ ОБНОВЛЕНИЯ ПЛЕЙ-ОФФ (ПОЛНАЯ ОФИЦИАЛЬНАЯ СЕТКА) ==========
+window.updatePlayoffMatches = async function() {
+  try {
+    console.log("🔄 Обновление плей-офф по официальной сетке ЧМ-2026...");
+    
+    const groups = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+    const groupWinners = {};
+    
+    groups.forEach(group => {
+      const standings = window.calculateGroupStandings(group);
+      if (standings && standings.length >= 2) {
+        groupWinners[group] = {
+          first: standings[0] || null,
+          second: standings[1] || null,
+          third: standings[2] || null,
+          fourth: standings[3] || null
+        };
+      }
+    });
+    
+    // ===== 1/16 ФИНАЛА (16 матчей) =====
+    // Официальные пары по расписанию ЧМ-2026
+    
+    // R32_1: 2A (ЮАР) vs 2B (Канада)
+    if (groupWinners.A && groupWinners.A.second && groupWinners.B && groupWinners.B.second) {
+      await window.forceUpdateMatchTeams('R32_1', groupWinners.A.second, groupWinners.B.second);
+    }
+    
+    // R32_2: 1E (Германия) vs 3D (Парагвай)
+    if (groupWinners.E && groupWinners.E.first && groupWinners.D && groupWinners.D.third) {
+      await window.forceUpdateMatchTeams('R32_2', groupWinners.E.first, groupWinners.D.third);
+    }
+    
+    // R32_3: 1C (Бразилия) vs 2F (Япония)
+    if (groupWinners.C && groupWinners.C.first && groupWinners.F && groupWinners.F.second) {
+      await window.forceUpdateMatchTeams('R32_3', groupWinners.C.first, groupWinners.F.second);
+    }
+    
+    // R32_4: 1F (Нидерланды) vs 2C (Марокко)
+    if (groupWinners.F && groupWinners.F.first && groupWinners.C && groupWinners.C.second) {
+      await window.forceUpdateMatchTeams('R32_4', groupWinners.F.first, groupWinners.C.second);
+    }
+    
+    // R32_5: 1I (Франция) vs 3F (Швеция)
+    if (groupWinners.I && groupWinners.I.first && groupWinners.F && groupWinners.F.third) {
+      await window.forceUpdateMatchTeams('R32_5', groupWinners.I.first, groupWinners.F.third);
+    }
+    
+    // R32_6: 2E (Кот-д'Ивуар) vs 2I (Норвегия)
+    if (groupWinners.E && groupWinners.E.second && groupWinners.I && groupWinners.I.second) {
+      await window.forceUpdateMatchTeams('R32_6', groupWinners.E.second, groupWinners.I.second);
+    }
+    
+    // R32_7: 1A (Мексика) vs 3C (Шотландия)
+    if (groupWinners.A && groupWinners.A.first && groupWinners.C && groupWinners.C.third) {
+      await window.forceUpdateMatchTeams('R32_7', groupWinners.A.first, groupWinners.C.third);
+    }
+    
+    // R32_8: 1L (Англия) vs 3E (Эквадор)
+    if (groupWinners.L && groupWinners.L.first && groupWinners.E && groupWinners.E.third) {
+      await window.forceUpdateMatchTeams('R32_8', groupWinners.L.first, groupWinners.E.third);
+    }
+    
+    // R32_9: 1D (США) vs 3B (Босния и Герцеговина)
+    if (groupWinners.D && groupWinners.D.first && groupWinners.B && groupWinners.B.third) {
+      await window.forceUpdateMatchTeams('R32_9', groupWinners.D.first, groupWinners.B.third);
+    }
+    
+    // R32_10: 1G (Египет) vs 3A (Южная Корея)
+    if (groupWinners.G && groupWinners.G.first && groupWinners.A && groupWinners.A.third) {
+      await window.forceUpdateMatchTeams('R32_10', groupWinners.G.first, groupWinners.A.third);
+    }
+    
+    // R32_11: 2K (Португалия) vs 2L (Гана)
+    if (groupWinners.K && groupWinners.K.second && groupWinners.L && groupWinners.L.second) {
+      await window.forceUpdateMatchTeams('R32_11', groupWinners.K.second, groupWinners.L.second);
+    }
+    
+    // R32_12: 1H (Испания) vs 2J (Австрия)
+    if (groupWinners.H && groupWinners.H.first && groupWinners.J && groupWinners.J.second) {
+      await window.forceUpdateMatchTeams('R32_12', groupWinners.H.first, groupWinners.J.second);
+    }
+    
+    // R32_13: 2D (Австралия) vs 2G (Иран)
+    if (groupWinners.D && groupWinners.D.second && groupWinners.G && groupWinners.G.second) {
+      await window.forceUpdateMatchTeams('R32_13', groupWinners.D.second, groupWinners.G.second);
+    }
+    
+    // R32_14: 1B (Швейцария) vs 3J (Алжир)
+    if (groupWinners.B && groupWinners.B.first && groupWinners.J && groupWinners.J.third) {
+      await window.forceUpdateMatchTeams('R32_14', groupWinners.B.first, groupWinners.J.third);
+    }
+    
+    // R32_15: 1K (Колумбия) vs 3L (Хорватия)
+    if (groupWinners.K && groupWinners.K.first && groupWinners.L && groupWinners.L.third) {
+      await window.forceUpdateMatchTeams('R32_15', groupWinners.K.first, groupWinners.L.third);
+    }
+    
+    // R32_16: 1J (Аргентина) vs 2H (Уругвай)
+    if (groupWinners.J && groupWinners.J.first && groupWinners.H && groupWinners.H.second) {
+      await window.forceUpdateMatchTeams('R32_16', groupWinners.J.first, groupWinners.H.second);
+    }
+    
+    // ===== 1/8 ФИНАЛА =====
+    await window.updateRoundOf16();
+    
+    // ===== 1/4 ФИНАЛА =====
+    await window.updateQuarterFinals();
+    
+    // ===== 1/2 ФИНАЛА =====
+    await window.updateSemiFinals();
+    
+    // ===== ФИНАЛ И МАТЧ ЗА 3 МЕСТО =====
+    await window.updateFinal();
+    
+    console.log("✅ Плей-офф полностью обновлён по официальной сетке!");
+    
+  } catch (error) {
+    console.error("❌ Ошибка обновления плей-офф:", error);
+  }
+};
+
+// ========== ОБНОВЛЕНИЕ 1/8 ФИНАЛА ==========
 window.updateRoundOf16 = async function() {
   try {
     // R16_1: Победитель R32_1 vs Победитель R32_2
@@ -2436,9 +2304,10 @@ window.updateRoundOf16 = async function() {
   }
 };
 
-// ===== ОБНОВЛЕНИЕ 1/4 ФИНАЛА =====
+// ========== ОБНОВЛЕНИЕ 1/4 ФИНАЛА ==========
 window.updateQuarterFinals = async function() {
   try {
+    // QF_1: Победитель R16_1 vs Победитель R16_2
     const r16_1 = allMatches.find(m => m.id === 'R16_1');
     const r16_2 = allMatches.find(m => m.id === 'R16_2');
     
@@ -2452,6 +2321,7 @@ window.updateQuarterFinals = async function() {
       }
     }
     
+    // QF_2: Победитель R16_3 vs Победитель R16_4
     const r16_3 = allMatches.find(m => m.id === 'R16_3');
     const r16_4 = allMatches.find(m => m.id === 'R16_4');
     
@@ -2465,6 +2335,7 @@ window.updateQuarterFinals = async function() {
       }
     }
     
+    // QF_3: Победитель R16_5 vs Победитель R16_6
     const r16_5 = allMatches.find(m => m.id === 'R16_5');
     const r16_6 = allMatches.find(m => m.id === 'R16_6');
     
@@ -2478,6 +2349,7 @@ window.updateQuarterFinals = async function() {
       }
     }
     
+    // QF_4: Победитель R16_7 vs Победитель R16_8
     const r16_7 = allMatches.find(m => m.id === 'R16_7');
     const r16_8 = allMatches.find(m => m.id === 'R16_8');
     
@@ -2497,9 +2369,10 @@ window.updateQuarterFinals = async function() {
   }
 };
 
-// ===== ОБНОВЛЕНИЕ 1/2 ФИНАЛА =====
+// ========== ОБНОВЛЕНИЕ 1/2 ФИНАЛА ==========
 window.updateSemiFinals = async function() {
   try {
+    // SF_1: Победитель QF_1 vs Победитель QF_2
     const qf_1 = allMatches.find(m => m.id === 'QF_1');
     const qf_2 = allMatches.find(m => m.id === 'QF_2');
     
@@ -2513,6 +2386,7 @@ window.updateSemiFinals = async function() {
       }
     }
     
+    // SF_2: Победитель QF_3 vs Победитель QF_4
     const qf_3 = allMatches.find(m => m.id === 'QF_3');
     const qf_4 = allMatches.find(m => m.id === 'QF_4');
     
@@ -2532,7 +2406,7 @@ window.updateSemiFinals = async function() {
   }
 };
 
-// ===== ОБНОВЛЕНИЕ ФИНАЛА И МАТЧА ЗА 3 МЕСТО =====
+// ========== ОБНОВЛЕНИЕ ФИНАЛА И МАТЧА ЗА 3 МЕСТО ==========
 window.updateFinal = async function() {
   try {
     const sf_1 = allMatches.find(m => m.id === 'SF_1');
@@ -2561,6 +2435,10 @@ window.updateFinal = async function() {
     console.error("❌ Ошибка обновления финала:", error);
   }
 };
+
+// ============================================================
+// ===== КОНЕЦ БЛОКА ДЛЯ ЗАМЕНЫ =====
+// ============================================================
 
   
 // Аутентификация
@@ -4408,234 +4286,7 @@ window.calculateBetPoints = async function(matchId, score1, score2) {
   window.loadLeaderboard();
 };
 
-// ========== АВТОМАТИЧЕСКОЕ ПРОДВИЖЕНИЕ ПО СЕТКЕ ==========
 
-// Расчёт таблицы группы и определение победителей
-window.calculateGroupStandings = function(groupId) {
-  const groupMatches = allMatches.filter(m => m.group === groupId && m.stage === 'group' && m.result);
-  
-  const standings = {};
-  
-  // Инициализация команд
-  groupMatches.forEach(match => {
-    if (!standings[match.team1.code]) {
-      standings[match.team1.code] = {
-        code: match.team1.code,
-        name: match.team1.name,
-        flag: match.team1.flag,
-        points: 0,
-        goalsFor: 0,
-        goalsAgainst: 0,
-        goalDifference: 0
-      };
-    }
-    if (!standings[match.team2.code]) {
-      standings[match.team2.code] = {
-        code: match.team2.code,
-        name: match.team2.name,
-        flag: match.team2.flag,
-        points: 0,
-        goalsFor: 0,
-        goalsAgainst: 0,
-        goalDifference: 0
-      };
-    }
-  });
-  
-  // Подсчёт очков
-  groupMatches.forEach(match => {
-    const t1 = standings[match.team1.code];
-    const t2 = standings[match.team2.code];
-    
-    t1.goalsFor += match.result.team1;
-    t1.goalsAgainst += match.result.team2;
-    t1.goalDifference = t1.goalsFor - t1.goalsAgainst;
-    
-    t2.goalsFor += match.result.team2;
-    t2.goalsAgainst += match.result.team1;
-    t2.goalDifference = t2.goalsFor - t2.goalsAgainst;
-    
-    if (match.result.team1 > match.result.team2) {
-      t1.points += 3;
-    } else if (match.result.team1 < match.result.team2) {
-      t2.points += 3;
-    } else {
-      t1.points += 1;
-      t2.points += 1;
-    }
-  });
-  
-  // Сортировка: очки → разница мячей → забитые мячи
-  const sorted = Object.values(standings).sort((a, b) => {
-    if (b.points !== a.points) return b.points - a.points;
-    if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
-    return b.goalsFor - a.goalsFor;
-  });
-  
-  return sorted; // [0] - 1 место, [1] - 2 место, [2] - 3 место, [3] - 4 место
-};
-
-// Обновление команд в матчах плей-офф
-window.updatePlayoffMatches = async function() {
-  const updates = [];
-  
-  // Для каждой группы определяем 1-е и 2-е места
-  const groups = ['A','B','C','D','E','F','G','H','I','J','K','L'];
-  const groupWinners = {};
-  
-  groups.forEach(group => {
-    const standings = window.calculateGroupStandings(group);
-    groupWinners[group] = {
-      first: standings[0],
-      second: standings[1],
-      third: standings[2]
-    };
-  });
-  
-  // Обновляем матчи 1/16 финала
-  // Здесь нужна логика согласно расписанию ФИФА
-  // Пример для первых матчей:
-  
-  // R32_1: Победитель A vs 3-е место C/D/E
-  if (groupWinners.A && groupWinners.A.first) {
-    updates.push({
-      matchId: 'R32_1',
-      team: 'team1',
-      data: groupWinners.A.first
-    });
-  }
-  
-  // R32_2: Победитель B vs 3-е место A/C/D
-  if (groupWinners.B && groupWinners.B.first) {
-    updates.push({
-      matchId: 'R32_2',
-      team: 'team1',
-      data: groupWinners.B.first
-    });
-  }
-  
-  // ... добавьте остальные матчи по аналогии
-  
-  // Применяем обновления
-  for (const update of updates) {
-    const match = allMatches.find(m => m.id === update.matchId);
-    if (match) {
-      const matchRef = doc(db, "matches", update.matchId);
-      const updateData = {};
-      
-      if (update.team === 'team1') {
-        updateData['team1'] = update.data;
-        updateData['team1.name'] = update.data.name;
-        updateData['team1.code'] = update.data.code;
-        updateData['team1.flag'] = update.data.flag;
-      } else {
-        updateData['team2'] = update.data;
-        updateData['team2.name'] = update.data.name;
-        updateData['team2.code'] = update.data.code;
-        updateData['team2.flag'] = update.data.flag;
-      }
-      
-      await updateDoc(matchRef, updateData);
-    }
-  }
-};
-
-
-  window.recalculateAllBets = async function() {
-  if (!isAdmin) {
-    window.showAlert('❌ Только для админа', 'error');
-    return;
-  }
-  
-  if (!confirm('Пересчитать все ставки по новым правилам?\n\nСтарые ставки на исход останутся с 1 баллом.\nСтавки на точный счёт будут пересчитаны (до 3 баллов).')) return;
-  
-  window.showAlert('⏳ Пересчёт...', 'info');
-  
-  const usersRef = collection(db, "users");
-  const usersSnap = await getDocs(usersRef);
-  
-  let count = 0;
-  for (const userDoc of usersSnap.docs) {
-    const userCode = userDoc.data().code;
-    if (userCode) {
-      await window.recalculateUserPoints(userCode);
-      count++;
-    }
-  }
-  
-  window.showAlert(`✅ Пересчитано ${count} пользователей`, 'success');
-  window.loadLeaderboard();
-  window.loadProfileStats();
-};
-
-  
-// Продвижение победителя в следующий раунд
-window.advanceWinner = async function(matchId) {
-  const match = allMatches.find(m => m.id === matchId);
-  if (!match || !match.result || !match.nextMatch) return;
-  
-  // Определяем победителя
-  let winner;
-  
-  if (match.result.team1 > match.result.team2) {
-    winner = match.team1;
-  } else if (match.result.team2 > match.result.team1) {
-    winner = match.team2;
-  } else {
-    // 🔥 Ничья в плей-офф — используем победителя по пенальти
-    if (match.penaltyWinner) {
-      winner = match.penaltyWinner === 'team1' ? match.team1 : match.team2;
-    } else {
-      // Если победитель по пенальти не указан — пытаемся определить по ставкам? Нет, просто пропускаем
-      console.warn(`⚠️ Матч ${matchId} завершился ничьей, но победитель по пенальти не указан`);
-      return;
-    }
-  }
-  
-  if (!winner) {
-    console.warn(`⚠️ Не удалось определить победителя для матча ${matchId}`);
-    return;
-  }
-  
-  console.log(`🏆 Победитель матча ${matchId}: ${winner.name}`);
-  
-  // Находим следующий матч
-  const nextMatch = allMatches.find(m => m.id === match.nextMatch);
-  if (!nextMatch) {
-    console.warn(`⚠️ Следующий матч ${match.nextMatch} не найден`);
-    return;
-  }
-  
-  // Определяем, в какую позицию вставлять (team1 или team2)
-  // Это зависит от структуры сетки
-  const teamPosition = nextMatch.team1.code === 'TBD' ? 'team1' : 'team2';
-  
-  // Обновляем следующий матч
-  const nextMatchRef = doc(db, "matches", match.nextMatch);
-  const updateData = {};
-  
-  if (teamPosition === 'team1') {
-    updateData['team1'] = winner;
-    updateData['team1.name'] = winner.name;
-    updateData['team1.code'] = winner.code;
-    updateData['team1.flag'] = winner.flag;
-  } else {
-    updateData['team2'] = winner;
-    updateData['team2.name'] = winner.name;
-    updateData['team2.code'] = winner.code;
-    updateData['team2.flag'] = winner.flag;
-  }
-  
-  await updateDoc(nextMatchRef, updateData);
-  console.log(`✅ Победитель добавлен в матч ${match.nextMatch}: ${winner.name}`);
-  
-  // Рекурсивно продолжаем продвижение, если следующий матч уже завершён
-  // (это нужно, если мы обновляем результаты ретроактивно)
-  const updatedNextMatch = allMatches.find(m => m.id === match.nextMatch);
-  if (updatedNextMatch && updatedNextMatch.result && updatedNextMatch.nextMatch) {
-    await window.advanceWinner(match.nextMatch);
-  }
-};
 // Навигация
 window.showTab = function(tabName) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
