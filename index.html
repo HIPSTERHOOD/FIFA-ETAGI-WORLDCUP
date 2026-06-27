@@ -1572,22 +1572,41 @@ const matchesData = [
   {id:"L5",stage:"group",group:"L",team1:{name:"Панама",code:"PAN",flag:"🇵🇦"},team2:{name:"Англия",code:"ENG",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"},date:"2026-06-28T00:00:00+03:00"},
   {id:"L6",stage:"group",group:"L",team1:{name:"Хорватия",code:"CRO",flag:"🇭🇷"},team2:{name:"Гана",code:"GHA",flag:"🇬🇭"},date:"2026-06-28T00:00:00+03:00"},
   // ========== 1/16 ФИНАЛА (16 матчей) ==========
-  {id:"R32_1",stage:"round_of_32",team1:{name:"TBD_A1",code:"TBD",flag:"❓"},team2:{name:"TBD_C2",code:"TBD",flag:"❓"},date:"2026-06-28T22:00:00+03:00",nextMatch:"R16_1",dependsOn:["A","C"]},
-  {id:"R32_2",stage:"round_of_32",team1:{name:"TBD_B1",code:"TBD",flag:"❓"},team2:{name:"TBD_D2",code:"TBD",flag:"❓"},date:"2026-06-29T01:00:00+03:00",nextMatch:"R16_2",dependsOn:["B","D"]},
-  {id:"R32_3",stage:"round_of_32",team1:{name:"TBD_C1",code:"TBD",flag:"❓"},team2:{name:"TBD_AB3",code:"TBD",flag:"❓"},date:"2026-06-29T04:00:00+03:00",nextMatch:"R16_3",dependsOn:["C","AB"]},
-  {id:"R32_4",stage:"round_of_32",team1:{name:"TBD_D1",code:"TBD",flag:"❓"},team2:{name:"TBD_EF3",code:"TBD",flag:"❓"},date:"2026-06-29T22:00:00+03:00",nextMatch:"R16_4",dependsOn:["D","EF"]},
-  {id:"R32_5",stage:"round_of_32",team1:{name:"TBD_E1",code:"TBD",flag:"❓"},team2:{name:"TBD_F2",code:"TBD",flag:"❓"},date:"2026-06-30T01:00:00+03:00",nextMatch:"R16_5",dependsOn:["E","F"]},
-  {id:"R32_6",stage:"round_of_32",team1:{name:"TBD_F1",code:"TBD",flag:"❓"},team2:{name:"TBD_GH3",code:"TBD",flag:"❓"},date:"2026-06-30T04:00:00+03:00",nextMatch:"R16_6",dependsOn:["F","GH"]},
-  {id:"R32_7",stage:"round_of_32",team1:{name:"TBD_G1",code:"TBD",flag:"❓"},team2:{name:"TBD_H2",code:"TBD",flag:"❓"},date:"2026-06-30T22:00:00+03:00",nextMatch:"R16_7",dependsOn:["G","H"]},
-  {id:"R32_8",stage:"round_of_32",team1:{name:"TBD_H1",code:"TBD",flag:"❓"},team2:{name:"TBD_AB3_2",code:"TBD",flag:"❓"},date:"2026-07-01T01:00:00+03:00",nextMatch:"R16_8",dependsOn:["H","AB"]},
-  {id:"R32_9",stage:"round_of_32",team1:{name:"TBD_I1",code:"TBD",flag:"❓"},team2:{name:"TBD_J2",code:"TBD",flag:"❓"},date:"2026-07-01T04:00:00+03:00",nextMatch:"R16_9",dependsOn:["I","J"]},
-  {id:"R32_10",stage:"round_of_32",team1:{name:"TBD_J1",code:"TBD",flag:"❓"},team2:{name:"TBD_KL3",code:"TBD",flag:"❓"},date:"2026-07-01T22:00:00+03:00",nextMatch:"R16_10",dependsOn:["J","KL"]},
-  {id:"R32_11",stage:"round_of_32",team1:{name:"TBD_K1",code:"TBD",flag:"❓"},team2:{name:"TBD_L2",code:"TBD",flag:"❓"},date:"2026-07-02T01:00:00+03:00",nextMatch:"R16_11",dependsOn:["K","L"]},
-  {id:"R32_12",stage:"round_of_32",team1:{name:"TBD_L1",code:"TBD",flag:"❓"},team2:{name:"TBD_IJ3",code:"TBD",flag:"❓"},date:"2026-07-02T04:00:00+03:00",nextMatch:"R16_12",dependsOn:["L","IJ"]},
-  {id:"R32_13",stage:"round_of_32",team1:{name:"TBD_I2",code:"TBD",flag:"❓"},team2:{name:"TBD_KL3_2",code:"TBD",flag:"❓"},date:"2026-07-02T22:00:00+03:00",nextMatch:"R16_13",dependsOn:["I","KL"]},
-  {id:"R32_14",stage:"round_of_32",team1:{name:"TBD_J2_2",code:"TBD",flag:"❓"},team2:{name:"TBD_GH3_2",code:"TBD",flag:"❓"},date:"2026-07-03T01:00:00+03:00",nextMatch:"R16_14",dependsOn:["J","GH"]},
-  {id:"R32_15",stage:"round_of_32",team1:{name:"TBD_K2",code:"TBD",flag:"❓"},team2:{name:"TBD_EF3_2",code:"TBD",flag:"❓"},date:"2026-07-03T04:00:00+03:00",nextMatch:"R16_15",dependsOn:["K","EF"]},
-  {id:"R32_16",stage:"round_of_32",team1:{name:"TBD_L2_2",code:"TBD",flag:"❓"},team2:{name:"TBD_CD3",code:"TBD",flag:"❓"},date:"2026-07-03T22:00:00+03:00",nextMatch:"R16_16",dependsOn:["L","CD"]},
+ // R32_1 — правильно (A1 vs C2) ✅
+{id:"R32_1",stage:"round_of_32",team1:{name:"TBD_A1",code:"TBD",flag:"❓"},team2:{name:"TBD_C2",code:"TBD",flag:"❓"},date:"2026-06-28T22:00:00+03:00",nextMatch:"R16_1",dependsOn:["A","C"]},
+
+// R32_2 — нужно изменить (B1 vs 3-е место A/C/D)
+{id:"R32_2",stage:"round_of_32",team1:{name:"TBD_B1",code:"TBD",flag:"❓"},team2:{name:"TBD_3ACD",code:"TBD",flag:"❓"},date:"2026-06-29T01:00:00+03:00",nextMatch:"R16_2",dependsOn:["B","A","C","D"]},
+
+// R32_3 — нужно изменить (C1 vs 3-е место D/E/F)
+{id:"R32_3",stage:"round_of_32",team1:{name:"TBD_C1",code:"TBD",flag:"❓"},team2:{name:"TBD_3DEF",code:"TBD",flag:"❓"},date:"2026-06-29T04:00:00+03:00",nextMatch:"R16_3",dependsOn:["C","D","E","F"]},
+
+// R32_4 — нужно изменить (D1 vs 3-е место A/B/C)
+{id:"R32_4",stage:"round_of_32",team1:{name:"TBD_D1",code:"TBD",flag:"❓"},team2:{name:"TBD_3ABC",code:"TBD",flag:"❓"},date:"2026-06-29T22:00:00+03:00",nextMatch:"R16_4",dependsOn:["D","A","B","C"]},
+
+// R32_5 — правильно (E1 vs F2) ✅
+{id:"R32_5",stage:"round_of_32",team1:{name:"TBD_E1",code:"TBD",flag:"❓"},team2:{name:"TBD_F2",code:"TBD",flag:"❓"},date:"2026-06-30T01:00:00+03:00",nextMatch:"R16_5",dependsOn:["E","F"]},
+
+// R32_6 — нужно изменить (F1 vs 3-е место G/H/I/J/K/L)
+{id:"R32_6",stage:"round_of_32",team1:{name:"TBD_F1",code:"TBD",flag:"❓"},team2:{name:"TBD_3GHL",code:"TBD",flag:"❓"},date:"2026-06-30T04:00:00+03:00",nextMatch:"R16_6",dependsOn:["F","G","H","I","J","K","L"]},
+
+// R32_7 — нужно изменить (G1 vs 3-е место J/K/L)
+{id:"R32_7",stage:"round_of_32",team1:{name:"TBD_G1",code:"TBD",flag:"❓"},team2:{name:"TBD_3JKL",code:"TBD",flag:"❓"},date:"2026-06-30T22:00:00+03:00",nextMatch:"R16_7",dependsOn:["G","J","K","L"]},
+
+// R32_8 — нужно изменить (H1 vs 3-е место C/D/E/F/G/I/J/K/L)
+{id:"R32_8",stage:"round_of_32",team1:{name:"TBD_H1",code:"TBD",flag:"❓"},team2:{name:"TBD_3CDEFGIJKL",code:"TBD",flag:"❓"},date:"2026-07-01T01:00:00+03:00",nextMatch:"R16_8",dependsOn:["H","C","D","E","F","G","I","J","K","L"]},
+
+// R32_9 — нужно изменить (I1 vs 3-е место J/K/L)
+{id:"R32_9",stage:"round_of_32",team1:{name:"TBD_I1",code:"TBD",flag:"❓"},team2:{name:"TBD_3JKL",code:"TBD",flag:"❓"},date:"2026-07-01T04:00:00+03:00",nextMatch:"R16_9",dependsOn:["I","J","K","L"]},
+
+// R32_10 — нужно изменить (J1 vs 3-е место C/D/E/F/G/H/I)
+{id:"R32_10",stage:"round_of_32",team1:{name:"TBD_J1",code:"TBD",flag:"❓"},team2:{name:"TBD_3CDEFGHI",code:"TBD",flag:"❓"},date:"2026-07-01T22:00:00+03:00",nextMatch:"R16_10",dependsOn:["J","C","D","E","F","G","H","I"]},
+
+// R32_11 — правильно (K1 vs L2) ✅
+{id:"R32_11",stage:"round_of_32",team1:{name:"TBD_K1",code:"TBD",flag:"❓"},team2:{name:"TBD_L2",code:"TBD",flag:"❓"},date:"2026-07-02T01:00:00+03:00",nextMatch:"R16_11",dependsOn:["K","L"]},
+
+// R32_12 — нужно изменить (L1 vs 3-е место G/H/I/J/K)
+{id:"R32_12",stage:"round_of_32",team1:{name:"TBD_L1",code:"TBD",flag:"❓"},team2:{name:"TBD_3GHIJK",code:"TBD",flag:"❓"},date:"2026-07-02T04:00:00+03:00",nextMatch:"R16_12",dependsOn:["L","G","H","I","J","K"]},
   
   // ========== 1/8 ФИНАЛА (8 матчей) ==========
   {id:"R16_1",stage:"round_of_16",team1:{name:"TBD_R32_1",code:"TBD",flag:"❓"},team2:{name:"TBD_R32_2",code:"TBD",flag:"❓"},date:"2026-07-05T22:00:00+03:00",nextMatch:"QF_1",dependsOn:["R32_1","R32_2"]},
