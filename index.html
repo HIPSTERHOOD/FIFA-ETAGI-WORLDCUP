@@ -628,9 +628,24 @@ button {
     <option value="9">9</option><option value="10">10</option>
   </select>
 </div>
-<p style="color:#666;font-size:13px;text-align:center;">✨ Можно ставить на любой счёт, включая 0:0</p>    </div>
-    <button class="btn" onclick="window.saveBet()">✔️ Сохранить</button>
+ <div id="penaltySelector" style="display: none; margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 10px; border: 2px solid #E31E24;">
+    <p style="font-weight: 600; font-size: 14px; color: #E31E24; margin-bottom: 10px;">
+      ⚠️ Ничейный счёт! Кто победит по пенальти?
+    </p>
+    <div style="display: flex; gap: 10px; justify-content: center;">
+      <button id="penaltyTeam1" onclick="window.selectPenaltyWinner('team1')" style="padding: 10px 20px; background: white; border: 2px solid #E31E24; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; flex: 1;">
+        ⚽ Команда 1
+      </button>
+      <button id="penaltyTeam2" onclick="window.selectPenaltyWinner('team2')" style="padding: 10px 20px; background: white; border: 2px solid #E31E24; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; flex: 1;">
+        ⚽ Команда 2
+      </button>
+    </div>
+    <p style="font-size: 11px; color: #666; margin-top: 8px; text-align: center;">
+      Выберите команду, которая победит в серии пенальти
+    </p>
   </div>
+  
+  <p style="color:#666;font-size:13px;text-align:center;">✨ Можно ставить на любой счёт, включая 0:0</p>
 </div>
 
 <script type="module">
@@ -1669,6 +1684,76 @@ isAdmin: emp.code === 'PRIDE' || emp.code === '111656' || emp.code === '12457833
     team2Btn.style.color = '#E31E24';
   }
 };
+
+  window.saveBet = async function() {
+  if (!currentBetMatch || !currentUser) {
+    window.showAlert('Ошибка: данные не загружены', 'error');
+    return;
+  }
+  
+  const matchDate = new Date(currentBetMatch.date);
+  if (matchDate <= new Date()) {
+    window.showAlert('❌ Нельзя сделать ставку - матч уже начался!', 'error');
+    return;
+  }
+  
+  // Берём значения из полей точного счёта
+  const score1 = document.getElementById('scoreTeam1').value;
+  const score2 = document.getElementById('scoreTeam2').value;
+  
+  // Проверка на корректность счёта
+  if (score1 === undefined || score2 === undefined) {
+    window.showAlert('Ошибка: не удалось получить значения счёта', 'error');
+    return;
+  }
+  
+  // 🔥 Проверка для плей-офф: если ничья, нужно выбрать победителя по пенальти
+  const score1Num = parseInt(score1);
+  const score2Num = parseInt(score2);
+  if (currentBetMatch.stage !== 'group' && score1Num === score2Num && !currentPenaltyWinner) {
+    window.showAlert('⚠️ Выберите победителя по пенальти!', 'error');
+    return;
+  }
+  
+  // Всегда сохраняем как точный счёт
+  let betData = {
+    userCode: userData.code,
+    userId: currentUser.uid,
+    userName: userData.lastName + ' ' + userData.initials,
+    matchId: currentBetMatch.id,
+    betType: 'score',
+    exactScore: score1 + ':' + score2,
+    points: 0,
+    createdAt: serverTimestamp()
+  };
+  
+  // 🔥 Добавляем победителя по пенальти, если выбран
+  if (currentPenaltyWinner) {
+    betData.penaltyWinner = currentPenaltyWinner;
+  }
+  
+  try {
+    const existingBet = allBets.find(b => b.matchId === currentBetMatch.id);
+    
+    if (existingBet) {
+      await updateDoc(doc(db, "bets", existingBet.id), betData);
+      window.showAlert('✅ Ставка обновлена!', 'success');
+    } else {
+      await setDoc(doc(collection(db, "bets")), betData);
+      window.showAlert('✅ Ставка сохранена!', 'success');
+    }
+    
+    window.closeBetModal();
+    window.loadBets(); // принудительно обновляем список ставок
+    window.renderMatches(); // обновляем отображение матчей
+    
+  } catch (error) {
+    console.error("Ошибка сохранения ставки:", error);
+    window.showAlert('Ошибка: ' + error.message, 'error');
+  }
+};
+
+  
 // Функция обновления счётчика броней
 window.updateBetsCounter = function() {
   const counterText = document.getElementById('betsCounterText');
