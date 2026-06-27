@@ -595,57 +595,64 @@ button {
       <button class="modal-close" onclick="window.closeBetModal()">×</button>
     </div>
     <div id="betMatchInfo"></div>
-   <div class="bet-type-selector" style="display: none;">
- <button class="bet-type-btn" onclick="window.selectBetType('outcome')" id="betTypeOutcome">📊 Исход</button>
-<button class="bet-type-btn active" onclick="window.selectBetType('score')" id="betTypeScore">🎯 Точный счёт</button>
-</div>
+    
+    <div class="bet-type-selector" style="display: none;">
+      <button class="bet-type-btn" onclick="window.selectBetType('outcome')" id="betTypeOutcome">📊 Исход</button>
+      <button class="bet-type-btn active" onclick="window.selectBetType('score')" id="betTypeScore">🎯 Точный счёт</button>
+    </div>
+    
     <div id="outcomeSection">
       <p style="margin-bottom:10px;font-weight:600;font-size:14px;">Исход (+1 очко):</p>
       <div class="outcome-options">
-       <button class="outcome-btn" onclick="window.selectOutcome('team1')" id="outcomeTeam1">${match.team1.name}</button>
-<button class="outcome-btn" onclick="window.selectOutcome('draw')" id="outcomeDraw">Ничья</button>
-<button class="outcome-btn" onclick="window.selectOutcome('team2')" id="outcomeTeam2">${match.team2.name}</button>
+        <button class="outcome-btn" onclick="window.selectOutcome('team1')" id="outcomeTeam1">${match.team1.name}</button>
+        <button class="outcome-btn" onclick="window.selectOutcome('draw')" id="outcomeDraw">Ничья</button>
+        <button class="outcome-btn" onclick="window.selectOutcome('team2')" id="outcomeTeam2">${match.team2.name}</button>
       </div>
     </div>
+    
     <div id="scoreSection" class="hidden">
       <p style="margin-bottom:10px;font-weight:600;font-size:14px;">🎯 Точный счёт:</p>
-<div style="font-size:12px;color:#666;margin-bottom:15px;background:#f8f9fa;padding:8px 12px;border-radius:8px;">
-  🔹 <strong>+3 балла</strong> — угадан точный счёт + исход матча<br>
-  🔹 <strong>+1 балл</strong> — угадан только исход (победа/ничья)
-</div>
-     <div class="score-selectors">
-  <select class="score-select" id="scoreTeam1">
-    <option value="0">0</option><option value="1">1</option><option value="2">2</option>
-    <option value="3">3</option><option value="4">4</option><option value="5">5</option>
-    <option value="6">6</option><option value="7">7</option><option value="8">8</option>
-    <option value="9">9</option><option value="10">10</option>
-  </select>
-  <span style="font-size:24px;font-weight:bold;">:</span>
-  <select class="score-select" id="scoreTeam2">
-    <option value="0">0</option><option value="1">1</option><option value="2">2</option>
-    <option value="3">3</option><option value="4">4</option><option value="5">5</option>
-    <option value="6">6</option><option value="7">7</option><option value="8">8</option>
-    <option value="9">9</option><option value="10">10</option>
-  </select>
-</div>
- <div id="penaltySelector" style="display: none; margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 10px; border: 2px solid #E31E24;">
-    <p style="font-weight: 600; font-size: 14px; color: #E31E24; margin-bottom: 10px;">
-      ⚠️ Ничейный счёт! Кто победит по пенальти?
-    </p>
-    <div style="display: flex; gap: 10px; justify-content: center;">
-      <button id="penaltyTeam1" onclick="window.selectPenaltyWinner('team1')" style="padding: 10px 20px; background: white; border: 2px solid #E31E24; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; flex: 1;">
-        ⚽ Команда 1
-      </button>
-      <button id="penaltyTeam2" onclick="window.selectPenaltyWinner('team2')" style="padding: 10px 20px; background: white; border: 2px solid #E31E24; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; flex: 1;">
-        ⚽ Команда 2
-      </button>
+      <div style="font-size:12px;color:#666;margin-bottom:15px;background:#f8f9fa;padding:8px 12px;border-radius:8px;">
+        🔹 <strong>+3 балла</strong> — угадан точный счёт + исход матча<br>
+        🔹 <strong>+1 балл</strong> — угадан только исход (победа/ничья)
+      </div>
+      <div class="score-selectors">
+        <select class="score-select" id="scoreTeam1">
+          <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+          <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+          <option value="6">6</option><option value="7">7</option><option value="8">8</option>
+          <option value="9">9</option><option value="10">10</option>
+        </select>
+        <span style="font-size:24px;font-weight:bold;">:</span>
+        <select class="score-select" id="scoreTeam2">
+          <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+          <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+          <option value="6">6</option><option value="7">7</option><option value="8">8</option>
+          <option value="9">9</option><option value="10">10</option>
+        </select>
+      </div>
+      <div id="penaltySelector" style="display: none; margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 10px; border: 2px solid #E31E24;">
+        <p style="font-weight: 600; font-size: 14px; color: #E31E24; margin-bottom: 10px;">
+          ⚠️ Ничейный счёт! Кто победит по пенальти?
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <button id="penaltyTeam1" onclick="window.selectPenaltyWinner('team1')" style="padding: 10px 20px; background: white; border: 2px solid #E31E24; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; flex: 1;">
+            ⚽ Команда 1
+          </button>
+          <button id="penaltyTeam2" onclick="window.selectPenaltyWinner('team2')" style="padding: 10px 20px; background: white; border: 2px solid #E31E24; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; flex: 1;">
+            ⚽ Команда 2
+          </button>
+        </div>
+        <p style="font-size: 11px; color: #666; margin-top: 8px; text-align: center;">
+          Выберите команду, которая победит в серии пенальти
+        </p>
+      </div>
+      <p style="color:#666;font-size:13px;text-align:center;">✨ Можно ставить на любой счёт, включая 0:0</p>
     </div>
-    <p style="font-size: 11px; color: #666; margin-top: 8px; text-align: center;">
-      Выберите команду, которая победит в серии пенальти
-    </p>
+    
+    <!-- 🔥 КНОПКА СОХРАНИТЬ - ВНЕ #scoreSection, ВСЕГДА ВИДИМА -->
+    <button class="btn" onclick="window.saveBet()" style="margin-top:15px;">✔️ Сохранить</button>
   </div>
-  
-  <p style="color:#666;font-size:13px;text-align:center;">✨ Можно ставить на любой счёт, включая 0:0</p>
 </div>
 
 <script type="module">
@@ -2621,7 +2628,7 @@ window.selectPenaltyWinner = function(team) {
   }
 };
 
-  // Проверка, нужен ли выбор пенальти
+// Проверка, нужен ли выбор пенальти
 window.checkPenaltyNeeded = function() {
   const score1El = document.getElementById('scoreTeam1');
   const score2El = document.getElementById('scoreTeam2');
@@ -2634,6 +2641,14 @@ window.checkPenaltyNeeded = function() {
   const penaltyTeam2 = document.getElementById('penaltyTeam2');
   
   if (!penaltySelector) return;
+  
+  // 🔥 Обновляем названия команд в кнопках пенальти
+  if (currentBetMatch && penaltyTeam1 && penaltyTeam2) {
+    const team1Name = currentBetMatch.team1.name || 'Команда 1';
+    const team2Name = currentBetMatch.team2.name || 'Команда 2';
+    penaltyTeam1.innerHTML = `⚽ ${team1Name}`;
+    penaltyTeam2.innerHTML = `⚽ ${team2Name}`;
+  }
   
   // Только для плей-офф (не групповой этап)
   if (currentBetMatch && currentBetMatch.stage !== 'group') {
