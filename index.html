@@ -2048,6 +2048,7 @@ window.updateMatchTeams = async function(matchId, teamPosition, teamData) {
 };
 
 // ========== ГЛАВНАЯ ФУНКЦИЯ ОБНОВЛЕНИЯ ПЛЕЙ-ОФФ ==========
+// ========== ГЛАВНАЯ ФУНКЦИЯ ОБНОВЛЕНИЯ ПЛЕЙ-ОФФ (ИСПРАВЛЕННАЯ) ==========
 window.updatePlayoffMatches = async function() {
   try {
     console.log("🔄 Обновление плей-офф...");
@@ -2062,10 +2063,22 @@ window.updatePlayoffMatches = async function() {
         groupWinners[group] = {
           first: standings[0] || null,
           second: standings[1] || null,
-          third: standings[2] || null
+          third: standings[2] || null,
+          fourth: standings[3] || null
         };
       }
     });
+    
+    // ===== ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ДЛЯ ПОЛУЧЕНИЯ ЛУЧШЕЙ 3-Й КОМАНДЫ =====
+    function getBestThird(thirdTeams) {
+      if (!thirdTeams || thirdTeams.length === 0) return null;
+      // Сортируем по очкам, затем по разнице мячей, затем по забитым
+      return thirdTeams.sort((a, b) => {
+        if (b.points !== a.points) return b.points - a.points;
+        if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+        return b.goalsFor - a.goalsFor;
+      })[0];
+    }
     
     // ===== 1/16 ФИНАЛА =====
     
@@ -2082,10 +2095,8 @@ window.updatePlayoffMatches = async function() {
       if (groupWinners.A && groupWinners.A.third) thirdTeams.push({...groupWinners.A.third, group: 'A'});
       if (groupWinners.C && groupWinners.C.third) thirdTeams.push({...groupWinners.C.third, group: 'C'});
       if (groupWinners.D && groupWinners.D.third) thirdTeams.push({...groupWinners.D.third, group: 'D'});
-      if (thirdTeams.length > 0) {
-        const bestThird = thirdTeams.sort((a, b) => b.points - a.points)[0];
-        await window.updateMatchTeams('R32_2', 'team2', bestThird);
-      }
+      const bestThird = getBestThird(thirdTeams);
+      if (bestThird) await window.updateMatchTeams('R32_2', 'team2', bestThird);
     }
     
     // R32_3: C1 vs лучшая 3-я из D, E, F
@@ -2095,10 +2106,8 @@ window.updatePlayoffMatches = async function() {
       if (groupWinners.D && groupWinners.D.third) thirdTeams.push({...groupWinners.D.third, group: 'D'});
       if (groupWinners.E && groupWinners.E.third) thirdTeams.push({...groupWinners.E.third, group: 'E'});
       if (groupWinners.F && groupWinners.F.third) thirdTeams.push({...groupWinners.F.third, group: 'F'});
-      if (thirdTeams.length > 0) {
-        const bestThird = thirdTeams.sort((a, b) => b.points - a.points)[0];
-        await window.updateMatchTeams('R32_3', 'team2', bestThird);
-      }
+      const bestThird = getBestThird(thirdTeams);
+      if (bestThird) await window.updateMatchTeams('R32_3', 'team2', bestThird);
     }
     
     // R32_4: D1 vs лучшая 3-я из A, B, C
@@ -2108,13 +2117,11 @@ window.updatePlayoffMatches = async function() {
       if (groupWinners.A && groupWinners.A.third) thirdTeams.push({...groupWinners.A.third, group: 'A'});
       if (groupWinners.B && groupWinners.B.third) thirdTeams.push({...groupWinners.B.third, group: 'B'});
       if (groupWinners.C && groupWinners.C.third) thirdTeams.push({...groupWinners.C.third, group: 'C'});
-      if (thirdTeams.length > 0) {
-        const bestThird = thirdTeams.sort((a, b) => b.points - a.points)[0];
-        await window.updateMatchTeams('R32_4', 'team2', bestThird);
-      }
+      const bestThird = getBestThird(thirdTeams);
+      if (bestThird) await window.updateMatchTeams('R32_4', 'team2', bestThird);
     }
     
-    // R32_5: E1 vs F2
+    // R32_5: E1 vs F2 (ИСПРАВЛЕНО: F2, а не F1)
     if (groupWinners.E && groupWinners.E.first && groupWinners.F && groupWinners.F.second) {
       await window.updateMatchTeams('R32_5', 'team1', groupWinners.E.first);
       await window.updateMatchTeams('R32_5', 'team2', groupWinners.F.second);
@@ -2129,10 +2136,8 @@ window.updatePlayoffMatches = async function() {
           thirdTeams.push({...groupWinners[g].third, group: g});
         }
       });
-      if (thirdTeams.length > 0) {
-        const bestThird = thirdTeams.sort((a, b) => b.points - a.points)[0];
-        await window.updateMatchTeams('R32_6', 'team2', bestThird);
-      }
+      const bestThird = getBestThird(thirdTeams);
+      if (bestThird) await window.updateMatchTeams('R32_6', 'team2', bestThird);
     }
     
     // R32_7: G1 vs лучшая 3-я из J, K, L
@@ -2142,10 +2147,8 @@ window.updatePlayoffMatches = async function() {
       if (groupWinners.J && groupWinners.J.third) thirdTeams.push({...groupWinners.J.third, group: 'J'});
       if (groupWinners.K && groupWinners.K.third) thirdTeams.push({...groupWinners.K.third, group: 'K'});
       if (groupWinners.L && groupWinners.L.third) thirdTeams.push({...groupWinners.L.third, group: 'L'});
-      if (thirdTeams.length > 0) {
-        const bestThird = thirdTeams.sort((a, b) => b.points - a.points)[0];
-        await window.updateMatchTeams('R32_7', 'team2', bestThird);
-      }
+      const bestThird = getBestThird(thirdTeams);
+      if (bestThird) await window.updateMatchTeams('R32_7', 'team2', bestThird);
     }
     
     // R32_8: H1 vs лучшая 3-я из C, D, E, F, G, I, J, K, L
@@ -2157,10 +2160,8 @@ window.updatePlayoffMatches = async function() {
           thirdTeams.push({...groupWinners[g].third, group: g});
         }
       });
-      if (thirdTeams.length > 0) {
-        const bestThird = thirdTeams.sort((a, b) => b.points - a.points)[0];
-        await window.updateMatchTeams('R32_8', 'team2', bestThird);
-      }
+      const bestThird = getBestThird(thirdTeams);
+      if (bestThird) await window.updateMatchTeams('R32_8', 'team2', bestThird);
     }
     
     // R32_9: I1 vs лучшая 3-я из J, K, L
@@ -2170,10 +2171,8 @@ window.updatePlayoffMatches = async function() {
       if (groupWinners.J && groupWinners.J.third) thirdTeams.push({...groupWinners.J.third, group: 'J'});
       if (groupWinners.K && groupWinners.K.third) thirdTeams.push({...groupWinners.K.third, group: 'K'});
       if (groupWinners.L && groupWinners.L.third) thirdTeams.push({...groupWinners.L.third, group: 'L'});
-      if (thirdTeams.length > 0) {
-        const bestThird = thirdTeams.sort((a, b) => b.points - a.points)[0];
-        await window.updateMatchTeams('R32_9', 'team2', bestThird);
-      }
+      const bestThird = getBestThird(thirdTeams);
+      if (bestThird) await window.updateMatchTeams('R32_9', 'team2', bestThird);
     }
     
     // R32_10: J1 vs лучшая 3-я из C, D, E, F, G, H, I
@@ -2185,13 +2184,11 @@ window.updatePlayoffMatches = async function() {
           thirdTeams.push({...groupWinners[g].third, group: g});
         }
       });
-      if (thirdTeams.length > 0) {
-        const bestThird = thirdTeams.sort((a, b) => b.points - a.points)[0];
-        await window.updateMatchTeams('R32_10', 'team2', bestThird);
-      }
+      const bestThird = getBestThird(thirdTeams);
+      if (bestThird) await window.updateMatchTeams('R32_10', 'team2', bestThird);
     }
     
-    // R32_11: K1 vs L2
+    // R32_11: K1 vs L2 (ИСПРАВЛЕНО: L2, а не L1)
     if (groupWinners.K && groupWinners.K.first && groupWinners.L && groupWinners.L.second) {
       await window.updateMatchTeams('R32_11', 'team1', groupWinners.K.first);
       await window.updateMatchTeams('R32_11', 'team2', groupWinners.L.second);
@@ -2206,39 +2203,33 @@ window.updatePlayoffMatches = async function() {
           thirdTeams.push({...groupWinners[g].third, group: g});
         }
       });
-      if (thirdTeams.length > 0) {
-        const bestThird = thirdTeams.sort((a, b) => b.points - a.points)[0];
-        await window.updateMatchTeams('R32_12', 'team2', bestThird);
-      }
+      const bestThird = getBestThird(thirdTeams);
+      if (bestThird) await window.updateMatchTeams('R32_12', 'team2', bestThird);
     }
     
-    // R32_13: I2 vs лучшая 3-я из J, K, L
+    // R32_13: I2 vs лучшая 3-я из J, K, L (ИСПРАВЛЕНО: I2, а не I1)
     if (groupWinners.I && groupWinners.I.second) {
       await window.updateMatchTeams('R32_13', 'team1', groupWinners.I.second);
       const thirdTeams = [];
       if (groupWinners.J && groupWinners.J.third) thirdTeams.push({...groupWinners.J.third, group: 'J'});
       if (groupWinners.K && groupWinners.K.third) thirdTeams.push({...groupWinners.K.third, group: 'K'});
       if (groupWinners.L && groupWinners.L.third) thirdTeams.push({...groupWinners.L.third, group: 'L'});
-      if (thirdTeams.length > 0) {
-        const bestThird = thirdTeams.sort((a, b) => b.points - a.points)[0];
-        await window.updateMatchTeams('R32_13', 'team2', bestThird);
-      }
+      const bestThird = getBestThird(thirdTeams);
+      if (bestThird) await window.updateMatchTeams('R32_13', 'team2', bestThird);
     }
     
-    // R32_14: J2 vs лучшая 3-я из G, H, I
+    // R32_14: J2 vs лучшая 3-я из G, H, I (ИСПРАВЛЕНО: J2, а не J1)
     if (groupWinners.J && groupWinners.J.second) {
       await window.updateMatchTeams('R32_14', 'team1', groupWinners.J.second);
       const thirdTeams = [];
       if (groupWinners.G && groupWinners.G.third) thirdTeams.push({...groupWinners.G.third, group: 'G'});
       if (groupWinners.H && groupWinners.H.third) thirdTeams.push({...groupWinners.H.third, group: 'H'});
       if (groupWinners.I && groupWinners.I.third) thirdTeams.push({...groupWinners.I.third, group: 'I'});
-      if (thirdTeams.length > 0) {
-        const bestThird = thirdTeams.sort((a, b) => b.points - a.points)[0];
-        await window.updateMatchTeams('R32_14', 'team2', bestThird);
-      }
+      const bestThird = getBestThird(thirdTeams);
+      if (bestThird) await window.updateMatchTeams('R32_14', 'team2', bestThird);
     }
     
-    // R32_15: K2 vs лучшая 3-я из C, D, E, F
+    // R32_15: K2 vs лучшая 3-я из C, D, E, F (ИСПРАВЛЕНО: K2, а не K1)
     if (groupWinners.K && groupWinners.K.second) {
       await window.updateMatchTeams('R32_15', 'team1', groupWinners.K.second);
       const thirdTeams = [];
@@ -2246,13 +2237,11 @@ window.updatePlayoffMatches = async function() {
       if (groupWinners.D && groupWinners.D.third) thirdTeams.push({...groupWinners.D.third, group: 'D'});
       if (groupWinners.E && groupWinners.E.third) thirdTeams.push({...groupWinners.E.third, group: 'E'});
       if (groupWinners.F && groupWinners.F.third) thirdTeams.push({...groupWinners.F.third, group: 'F'});
-      if (thirdTeams.length > 0) {
-        const bestThird = thirdTeams.sort((a, b) => b.points - a.points)[0];
-        await window.updateMatchTeams('R32_15', 'team2', bestThird);
-      }
+      const bestThird = getBestThird(thirdTeams);
+      if (bestThird) await window.updateMatchTeams('R32_15', 'team2', bestThird);
     }
     
-    // R32_16: L2 vs лучшая 3-я из A, B, C, D
+    // R32_16: L2 vs лучшая 3-я из A, B, C, D (ИСПРАВЛЕНО: L2, а не L1)
     if (groupWinners.L && groupWinners.L.second) {
       await window.updateMatchTeams('R32_16', 'team1', groupWinners.L.second);
       const thirdTeams = [];
@@ -2260,10 +2249,8 @@ window.updatePlayoffMatches = async function() {
       if (groupWinners.B && groupWinners.B.third) thirdTeams.push({...groupWinners.B.third, group: 'B'});
       if (groupWinners.C && groupWinners.C.third) thirdTeams.push({...groupWinners.C.third, group: 'C'});
       if (groupWinners.D && groupWinners.D.third) thirdTeams.push({...groupWinners.D.third, group: 'D'});
-      if (thirdTeams.length > 0) {
-        const bestThird = thirdTeams.sort((a, b) => b.points - a.points)[0];
-        await window.updateMatchTeams('R32_16', 'team2', bestThird);
-      }
+      const bestThird = getBestThird(thirdTeams);
+      if (bestThird) await window.updateMatchTeams('R32_16', 'team2', bestThird);
     }
     
     // ===== 1/8 ФИНАЛА =====
@@ -2282,249 +2269,6 @@ window.updatePlayoffMatches = async function() {
     
   } catch (error) {
     console.error("❌ Ошибка обновления плей-офф:", error);
-  }
-};
-
-// ========== ОБНОВЛЕНИЕ 1/8 ФИНАЛА ==========
-window.updateRoundOf16 = async function() {
-  try {
-    // R16_1: Победитель R32_1 vs Победитель R32_2
-    const r32_1 = allMatches.find(m => m.id === 'R32_1');
-    const r32_2 = allMatches.find(m => m.id === 'R32_2');
-    
-    if (r32_1 && r32_1.result) {
-      const winner = r32_1.result.team1 > r32_1.result.team2 ? r32_1.team1 : r32_1.team2;
-      await window.updateMatchTeams('R16_1', 'team1', winner);
-    }
-    if (r32_2 && r32_2.result) {
-      const winner = r32_2.result.team1 > r32_2.result.team2 ? r32_2.team1 : r32_2.team2;
-      await window.updateMatchTeams('R16_1', 'team2', winner);
-    }
-    
-    // R16_2: Победитель R32_3 vs Победитель R32_4
-    const r32_3 = allMatches.find(m => m.id === 'R32_3');
-    const r32_4 = allMatches.find(m => m.id === 'R32_4');
-    
-    if (r32_3 && r32_3.result) {
-      const winner = r32_3.result.team1 > r32_3.result.team2 ? r32_3.team1 : r32_3.team2;
-      await window.updateMatchTeams('R16_2', 'team1', winner);
-    }
-    if (r32_4 && r32_4.result) {
-      const winner = r32_4.result.team1 > r32_4.result.team2 ? r32_4.team1 : r32_4.team2;
-      await window.updateMatchTeams('R16_2', 'team2', winner);
-    }
-    
-    // R16_3: Победитель R32_5 vs Победитель R32_6
-    const r32_5 = allMatches.find(m => m.id === 'R32_5');
-    const r32_6 = allMatches.find(m => m.id === 'R32_6');
-    
-    if (r32_5 && r32_5.result) {
-      const winner = r32_5.result.team1 > r32_5.result.team2 ? r32_5.team1 : r32_5.team2;
-      await window.updateMatchTeams('R16_3', 'team1', winner);
-    }
-    if (r32_6 && r32_6.result) {
-      const winner = r32_6.result.team1 > r32_6.result.team2 ? r32_6.team1 : r32_6.team2;
-      await window.updateMatchTeams('R16_3', 'team2', winner);
-    }
-    
-    // R16_4: Победитель R32_7 vs Победитель R32_8
-    const r32_7 = allMatches.find(m => m.id === 'R32_7');
-    const r32_8 = allMatches.find(m => m.id === 'R32_8');
-    
-    if (r32_7 && r32_7.result) {
-      const winner = r32_7.result.team1 > r32_7.result.team2 ? r32_7.team1 : r32_7.team2;
-      await window.updateMatchTeams('R16_4', 'team1', winner);
-    }
-    if (r32_8 && r32_8.result) {
-      const winner = r32_8.result.team1 > r32_8.result.team2 ? r32_8.team1 : r32_8.team2;
-      await window.updateMatchTeams('R16_4', 'team2', winner);
-    }
-    
-    // R16_5: Победитель R32_9 vs Победитель R32_10
-    const r32_9 = allMatches.find(m => m.id === 'R32_9');
-    const r32_10 = allMatches.find(m => m.id === 'R32_10');
-    
-    if (r32_9 && r32_9.result) {
-      const winner = r32_9.result.team1 > r32_9.result.team2 ? r32_9.team1 : r32_9.team2;
-      await window.updateMatchTeams('R16_5', 'team1', winner);
-    }
-    if (r32_10 && r32_10.result) {
-      const winner = r32_10.result.team1 > r32_10.result.team2 ? r32_10.team1 : r32_10.team2;
-      await window.updateMatchTeams('R16_5', 'team2', winner);
-    }
-    
-    // R16_6: Победитель R32_11 vs Победитель R32_12
-    const r32_11 = allMatches.find(m => m.id === 'R32_11');
-    const r32_12 = allMatches.find(m => m.id === 'R32_12');
-    
-    if (r32_11 && r32_11.result) {
-      const winner = r32_11.result.team1 > r32_11.result.team2 ? r32_11.team1 : r32_11.team2;
-      await window.updateMatchTeams('R16_6', 'team1', winner);
-    }
-    if (r32_12 && r32_12.result) {
-      const winner = r32_12.result.team1 > r32_12.result.team2 ? r32_12.team1 : r32_12.team2;
-      await window.updateMatchTeams('R16_6', 'team2', winner);
-    }
-    
-    // R16_7: Победитель R32_13 vs Победитель R32_14
-    const r32_13 = allMatches.find(m => m.id === 'R32_13');
-    const r32_14 = allMatches.find(m => m.id === 'R32_14');
-    
-    if (r32_13 && r32_13.result) {
-      const winner = r32_13.result.team1 > r32_13.result.team2 ? r32_13.team1 : r32_13.team2;
-      await window.updateMatchTeams('R16_7', 'team1', winner);
-    }
-    if (r32_14 && r32_14.result) {
-      const winner = r32_14.result.team1 > r32_14.result.team2 ? r32_14.team1 : r32_14.team2;
-      await window.updateMatchTeams('R16_7', 'team2', winner);
-    }
-    
-    // R16_8: Победитель R32_15 vs Победитель R32_16
-    const r32_15 = allMatches.find(m => m.id === 'R32_15');
-    const r32_16 = allMatches.find(m => m.id === 'R32_16');
-    
-    if (r32_15 && r32_15.result) {
-      const winner = r32_15.result.team1 > r32_15.result.team2 ? r32_15.team1 : r32_15.team2;
-      await window.updateMatchTeams('R16_8', 'team1', winner);
-    }
-    if (r32_16 && r32_16.result) {
-      const winner = r32_16.result.team1 > r32_16.result.team2 ? r32_16.team1 : r32_16.team2;
-      await window.updateMatchTeams('R16_8', 'team2', winner);
-    }
-    
-    console.log("✅ 1/8 финала обновлена");
-  } catch (error) {
-    console.error("❌ Ошибка обновления 1/8:", error);
-  }
-};
-
-// ========== ОБНОВЛЕНИЕ 1/4 ФИНАЛА ==========
-window.updateQuarterFinals = async function() {
-  try {
-    // QF_1: Победитель R16_1 vs Победитель R16_2
-    const r16_1 = allMatches.find(m => m.id === 'R16_1');
-    const r16_2 = allMatches.find(m => m.id === 'R16_2');
-    
-    if (r16_1 && r16_1.result) {
-      const winner = r16_1.result.team1 > r16_1.result.team2 ? r16_1.team1 : r16_1.team2;
-      await window.updateMatchTeams('QF_1', 'team1', winner);
-    }
-    if (r16_2 && r16_2.result) {
-      const winner = r16_2.result.team1 > r16_2.result.team2 ? r16_2.team1 : r16_2.team2;
-      await window.updateMatchTeams('QF_1', 'team2', winner);
-    }
-    
-    // QF_2: Победитель R16_3 vs Победитель R16_4
-    const r16_3 = allMatches.find(m => m.id === 'R16_3');
-    const r16_4 = allMatches.find(m => m.id === 'R16_4');
-    
-    if (r16_3 && r16_3.result) {
-      const winner = r16_3.result.team1 > r16_3.result.team2 ? r16_3.team1 : r16_3.team2;
-      await window.updateMatchTeams('QF_2', 'team1', winner);
-    }
-    if (r16_4 && r16_4.result) {
-      const winner = r16_4.result.team1 > r16_4.result.team2 ? r16_4.team1 : r16_4.team2;
-      await window.updateMatchTeams('QF_2', 'team2', winner);
-    }
-    
-    // QF_3: Победитель R16_5 vs Победитель R16_6
-    const r16_5 = allMatches.find(m => m.id === 'R16_5');
-    const r16_6 = allMatches.find(m => m.id === 'R16_6');
-    
-    if (r16_5 && r16_5.result) {
-      const winner = r16_5.result.team1 > r16_5.result.team2 ? r16_5.team1 : r16_5.team2;
-      await window.updateMatchTeams('QF_3', 'team1', winner);
-    }
-    if (r16_6 && r16_6.result) {
-      const winner = r16_6.result.team1 > r16_6.result.team2 ? r16_6.team1 : r16_6.team2;
-      await window.updateMatchTeams('QF_3', 'team2', winner);
-    }
-    
-    // QF_4: Победитель R16_7 vs Победитель R16_8
-    const r16_7 = allMatches.find(m => m.id === 'R16_7');
-    const r16_8 = allMatches.find(m => m.id === 'R16_8');
-    
-    if (r16_7 && r16_7.result) {
-      const winner = r16_7.result.team1 > r16_7.result.team2 ? r16_7.team1 : r16_7.team2;
-      await window.updateMatchTeams('QF_4', 'team1', winner);
-    }
-    if (r16_8 && r16_8.result) {
-      const winner = r16_8.result.team1 > r16_8.result.team2 ? r16_8.team1 : r16_8.team2;
-      await window.updateMatchTeams('QF_4', 'team2', winner);
-    }
-    
-    console.log("✅ 1/4 финала обновлена");
-  } catch (error) {
-    console.error("❌ Ошибка обновления 1/4:", error);
-  }
-};
-
-// ========== ОБНОВЛЕНИЕ 1/2 ФИНАЛА ==========
-window.updateSemiFinals = async function() {
-  try {
-    // SF_1: Победитель QF_1 vs Победитель QF_2
-    const qf_1 = allMatches.find(m => m.id === 'QF_1');
-    const qf_2 = allMatches.find(m => m.id === 'QF_2');
-    
-    if (qf_1 && qf_1.result) {
-      const winner = qf_1.result.team1 > qf_1.result.team2 ? qf_1.team1 : qf_1.team2;
-      await window.updateMatchTeams('SF_1', 'team1', winner);
-    }
-    if (qf_2 && qf_2.result) {
-      const winner = qf_2.result.team1 > qf_2.result.team2 ? qf_2.team1 : qf_2.team2;
-      await window.updateMatchTeams('SF_1', 'team2', winner);
-    }
-    
-    // SF_2: Победитель QF_3 vs Победитель QF_4
-    const qf_3 = allMatches.find(m => m.id === 'QF_3');
-    const qf_4 = allMatches.find(m => m.id === 'QF_4');
-    
-    if (qf_3 && qf_3.result) {
-      const winner = qf_3.result.team1 > qf_3.result.team2 ? qf_3.team1 : qf_3.team2;
-      await window.updateMatchTeams('SF_2', 'team1', winner);
-    }
-    if (qf_4 && qf_4.result) {
-      const winner = qf_4.result.team1 > qf_4.result.team2 ? qf_4.team1 : qf_4.team2;
-      await window.updateMatchTeams('SF_2', 'team2', winner);
-    }
-    
-    console.log("✅ 1/2 финала обновлена");
-  } catch (error) {
-    console.error("❌ Ошибка обновления 1/2:", error);
-  }
-};
-
-// ========== ОБНОВЛЕНИЕ ФИНАЛА И МАТЧА ЗА 3 МЕСТО ==========
-window.updateFinal = async function() {
-  try {
-    // FINAL: Победитель SF_1 vs Победитель SF_2
-    const sf_1 = allMatches.find(m => m.id === 'SF_1');
-    const sf_2 = allMatches.find(m => m.id === 'SF_2');
-    
-    if (sf_1 && sf_1.result) {
-      const winner = sf_1.result.team1 > sf_1.result.team2 ? sf_1.team1 : sf_1.team2;
-      await window.updateMatchTeams('FINAL', 'team1', winner);
-    }
-    if (sf_2 && sf_2.result) {
-      const winner = sf_2.result.team1 > sf_2.result.team2 ? sf_2.team1 : sf_2.team2;
-      await window.updateMatchTeams('FINAL', 'team2', winner);
-    }
-    
-    // THIRD: Проигравшие в полуфиналах
-    // Проигравший SF_1
-    if (sf_1 && sf_1.result) {
-      const loser = sf_1.result.team1 < sf_1.result.team2 ? sf_1.team1 : sf_1.team2;
-      await window.updateMatchTeams('THIRD', 'team1', loser);
-    }
-    // Проигравший SF_2
-    if (sf_2 && sf_2.result) {
-      const loser = sf_2.result.team1 < sf_2.result.team2 ? sf_2.team1 : sf_2.team2;
-      await window.updateMatchTeams('THIRD', 'team2', loser);
-    }
-    
-    console.log("✅ Финал и матч за 3 место обновлены");
-  } catch (error) {
-    console.error("❌ Ошибка обновления финала:", error);
   }
 };
 
