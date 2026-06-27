@@ -4629,21 +4629,22 @@ window.renderAdminMatches = function() {
                       match.stage === 'semi' ? '1/2' :
                       match.stage === 'final' ? 'Финал' : match.stage);
   
-  // 🔥 Добавляем блок выбора пенальти (только для плей-офф)
-  let penaltyHtml = '';
-  if (match.stage !== 'group') {
-    penaltyHtml = `
-      <div id="penaltyResult_${match.id}" style="margin-top: 8px; ${match.result ? '' : 'display: none;'}">
-        <span style="font-weight: 600; font-size: 13px;">🏆 Победитель по пенальти:</span>
-        <select id="penaltyWinnerSelect_${match.id}" style="padding: 6px 12px; border-radius: 8px; border: 2px solid #E31E24; margin-left: 8px;">
-          <option value="">Выберите...</option>
-          <option value="team1" ${match.penaltyWinner === 'team1' ? 'selected' : ''}>${match.team1.name}</option>
-          <option value="team2" ${match.penaltyWinner === 'team2' ? 'selected' : ''}>${match.team2.name}</option>
-        </select>
-        <button class="btn btn-small" style="background:#28a745; margin-left: 8px;" onclick="window.savePenaltyWinner('${match.id}')">💾 Сохранить пенальти</button>
-      </div>
-    `;
-  }
+ // 🔥 Добавляем блок выбора пенальти (всегда виден для плей-офф)
+let penaltyHtml = '';
+if (match.stage !== 'group') {
+  penaltyHtml = `
+    <div id="penaltyResult_${match.id}" style="margin-top: 8px;">
+      <span style="font-weight: 600; font-size: 13px;">🏆 Победитель по пенальти (если ничья):</span>
+      <select id="penaltyWinnerSelect_${match.id}" style="padding: 6px 12px; border-radius: 8px; border: 2px solid #E31E24; margin-left: 8px;">
+        <option value="">Не выбрано</option>
+        <option value="team1" ${match.penaltyWinner === 'team1' ? 'selected' : ''}>${match.team1.name}</option>
+        <option value="team2" ${match.penaltyWinner === 'team2' ? 'selected' : ''}>${match.team2.name}</option>
+      </select>
+      <button class="btn btn-small" style="background:#28a745; margin-left: 8px;" onclick="window.savePenaltyWinner('${match.id}')">💾 Сохранить пенальти</button>
+      <span style="font-size: 11px; color: #666; margin-left: 8px;">(выберите, если матч закончится вничью)</span>
+    </div>
+  `;
+}
   
   item.innerHTML = `
     <div class="admin-match-header">
