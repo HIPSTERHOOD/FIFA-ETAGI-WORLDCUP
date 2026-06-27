@@ -3639,15 +3639,34 @@ window.saveMatchResult = async function(matchId) {
       return;
     }
     
-    // 🔥 Проверка для плей-офф: если ничья, нужно указать победителя по пенальти
+    // 🔥 ОСНОВНАЯ ЛОГИКА: проверяем, нужен ли пенальти
     let penaltyWinner = null;
+    
+    // Если это плей-офф И счёт ничейный
     if (match.stage !== 'group' && score1 === score2) {
       const penaltySelect = document.getElementById(`penaltyWinnerSelect_${matchId}`);
-      if (!penaltySelect || !penaltySelect.value) {
-        window.showAlert('⚠️ Для ничейного счёта в плей-офф укажите победителя по пенальти!', 'error');
+      
+      // Проверяем, есть ли вообще элемент с выбором пенальти
+      if (!penaltySelect) {
+        window.showAlert('⚠️ Ошибка: не найден селектор выбора пенальти', 'error');
         return;
       }
+      
+      // Проверяем, выбран ли победитель
+      if (!penaltySelect.value || penaltySelect.value === '') {
+        window.showAlert('⚠️ Для ничейного счёта в плей-офф УКАЖИТЕ победителя по пенальти!\n\nВыберите команду в выпадающем списке "Победитель по пенальти" и нажмите "Сохранить" снова.', 'error');
+        // Подсвечиваем селектор красным
+        penaltySelect.style.borderColor = '#dc3545';
+        penaltySelect.style.borderWidth = '3px';
+        setTimeout(() => {
+          penaltySelect.style.borderColor = '#E31E24';
+          penaltySelect.style.borderWidth = '2px';
+        }, 3000);
+        return;
+      }
+      
       penaltyWinner = penaltySelect.value;
+      console.log(`🏆 Пенальти: победитель ${penaltyWinner === 'team1' ? match.team1.name : match.team2.name}`);
     }
     
     // Сохраняем результат
@@ -3659,6 +3678,9 @@ window.saveMatchResult = async function(matchId) {
     // Если есть победитель по пенальти — сохраняем
     if (penaltyWinner) {
       updateData.penaltyWinner = penaltyWinner;
+    } else if (match.penaltyWinner) {
+      // Если был старый победитель, но счёт не ничейный — очищаем
+      updateData.penaltyWinner = null;
     }
     
     await updateDoc(doc(db, "matches", matchId), updateData);
@@ -3684,11 +3706,6 @@ window.saveMatchResult = async function(matchId) {
     window.loadLeaderboard();
     if (userData && userData.code) {
       await window.loadProfileStats();
-    }
-    
-    // Если это групповой матч — обновляем сетку плей-офф
-    if (match.stage === 'group') {
-      await window.updatePlayoffMatches();
     }
     
     // Если это матч плей-офф — продвигаем победителя
@@ -4632,16 +4649,22 @@ window.renderAdminMatches = function() {
  // 🔥 Добавляем блок выбора пенальти (всегда виден для плей-офф)
 let penaltyHtml = '';
 if (match.stage !== 'group') {
+  // Определяем, выбран ли уже победитель
+  const hasPenaltyWinner = match.penaltyWinner && match.penaltyWinner !== '';
+  
   penaltyHtml = `
-    <div id="penaltyResult_${match.id}" style="margin-top: 8px;">
-      <span style="font-weight: 600; font-size: 13px;">🏆 Победитель по пенальти (если ничья):</span>
-      <select id="penaltyWinnerSelect_${match.id}" style="padding: 6px 12px; border-radius: 8px; border: 2px solid #E31E24; margin-left: 8px;">
-        <option value="">Не выбрано</option>
-        <option value="team1" ${match.penaltyWinner === 'team1' ? 'selected' : ''}>${match.team1.name}</option>
-        <option value="team2" ${match.penaltyWinner === 'team2' ? 'selected' : ''}>${match.team2.name}</option>
-      </select>
-      <button class="btn btn-small" style="background:#28a745; margin-left: 8px;" onclick="window.savePenaltyWinner('${match.id}')">💾 Сохранить пенальти</button>
-      <span style="font-size: 11px; color: #666; margin-left: 8px;">(выберите, если матч закончится вничью)</span>
+    <div id="penaltyResult_${match.id}" style="margin-top: 8px; padding: 8px 12px; background: #fff8f0; border-radius: 8px; border-left: 4px solid #E31E24;">
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <span style="font-weight: 600; font-size: 13px;">⚽ Победитель по пенальти:</span>
+        <select id="penaltyWinnerSelect_${match.id}" style="padding: 6px 12px; border-radius: 8px; border: 2px solid ${hasPenaltyWinner ? '#28a745' : '#E31E24'}; background: white; font-weight: 500;">
+          <option value="">— Не выбрано —</option>
+          <option value="team1" ${match.penaltyWinner === 'team1' ? 'selected' : ''}>${match.team1.flag} ${match.team1.name}</option>
+          <option value="team2" ${match.penaltyWinner === 'team2' ? 'selected' : ''}>${match.team2.flag} ${match.team2.name}</option>
+        </select>
+        <span style="font-size: 11px; color: #666;">
+          ${hasPenaltyWinner ? '✅ Выбран: ' + (match.penaltyWinner === 'team1' ? match.team1.name : match.team2.name) : '⚠️ Выберите, если матч закончится вничью'}
+        </span>
+      </div>
     </div>
   `;
 }
