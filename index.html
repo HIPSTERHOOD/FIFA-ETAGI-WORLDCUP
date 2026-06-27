@@ -2162,6 +2162,10 @@ window.showMainApp = function() {
   window.subscribeToUserPoints();
   window.loadAllBetsForStats();
   window.updateBetsCounter();
+
+   setTimeout(() => {
+    window.checkOldPlayoffBets();
+  }, 1500); // небольшая задержка, чтобы все данные загрузились  
 };
 
   // Подписка на обновление очков в реальном времени
@@ -2379,9 +2383,18 @@ window.createMatchCard = function(match) {
   
   let betInfoHtml = '';
   if (userBet) {
-    const betText = userBet.betType === 'outcome' 
-      ? '📊 ' + window.getOutcomeText(userBet.outcome, match)
-      : '🎯 ' + userBet.exactScore;
+   let betText = '';
+if (userBet.betType === 'outcome') {
+  betText = '📊 ' + window.getOutcomeText(userBet.outcome, match);
+} else {
+  const [score1, score2] = userBet.exactScore.split(':').map(Number);
+  if (score1 === score2 && userBet.penaltyWinner) {
+    const winnerName = userBet.penaltyWinner === 'team1' ? match.team1.name : match.team2.name;
+    betText = `🎯 ${userBet.exactScore} (пенальти: ${winnerName})`;
+  } else {
+    betText = '🎯 ' + userBet.exactScore;
+  }
+}
     let pointsText = '';
 if (match.result && userBet.points > 0) {
   if (userBet.points === 3) {
@@ -2517,20 +2530,27 @@ window.showMatchBetsModal = function(matchId) {
       });
       
       // Текст ставки
-      let betText = '';
-      let betIcon = '📊';
-      if (bet.betType === 'outcome') {
-        if (bet.outcome === 'team1') {
-          betText = `Победа: ${match.team1.name}`;
-        } else if (bet.outcome === 'team2') {
-          betText = `Победа: ${match.team2.name}`;
-        } else {
-          betText = 'Ничья';
-        }
-      } else {
-        betIcon = '🎯';
-        betText = `Точный счёт: ${bet.exactScore}`;
-      }
+    let betText = '';
+let betIcon = '📊';
+if (bet.betType === 'outcome') {
+  betIcon = '📊';
+  if (bet.outcome === 'team1') {
+    betText = `Победа: ${match.team1.name}`;
+  } else if (bet.outcome === 'team2') {
+    betText = `Победа: ${match.team2.name}`;
+  } else {
+    betText = 'Ничья';
+  }
+} else {
+  betIcon = '🎯';
+  const [score1, score2] = bet.exactScore.split(':').map(Number);
+  if (score1 === score2 && bet.penaltyWinner) {
+    const winnerName = bet.penaltyWinner === 'team1' ? match.team1.name : match.team2.name;
+    betText = `Точный счёт: ${bet.exactScore} (пенальти: ${winnerName})`;
+  } else {
+    betText = `Точный счёт: ${bet.exactScore}`;
+  }
+}
       
       // Очки
      let pointsColor = '#dc3545';
@@ -3088,17 +3108,22 @@ if (activeBets.length > 0) {
                     matchDate.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
     
     // 🔥 НОВОЕ ФОРМАТИРОВАНИЕ ДЛЯ СТАВОК НА ТОЧНЫЙ СЧЁТ
-    let betText = '';
-    if (bet.betType === 'score') {
-      const [betScore1, betScore2] = bet.exactScore.split(':').map(Number);
-      let outcomeText = '';
-      if (betScore1 > betScore2) outcomeText = `Победа: ${match.team1.name}`;
-      else if (betScore2 > betScore1) outcomeText = `Победа: ${match.team2.name}`;
-      else outcomeText = 'Ничья';
-      betText = `🎯 Точный счёт: ${bet.exactScore} (${outcomeText})`;
-    } else {
-      betText = '📊 Исход: ' + window.getOutcomeText(bet.outcome, match);
-    }
+   let betText = '';
+if (bet.betType === 'score') {
+  const [betScore1, betScore2] = bet.exactScore.split(':').map(Number);
+  let outcomeText = '';
+  if (betScore1 > betScore2) outcomeText = `Победа: ${match.team1.name}`;
+  else if (betScore2 > betScore1) outcomeText = `Победа: ${match.team2.name}`;
+  else if (bet.penaltyWinner) {
+    const winnerName = bet.penaltyWinner === 'team1' ? match.team1.name : match.team2.name;
+    outcomeText = `Победа по пенальти: ${winnerName}`;
+  } else {
+    outcomeText = 'Ничья';
+  }
+  betText = `🎯 Точный счёт: ${bet.exactScore} (${outcomeText})`;
+} else {
+  betText = '📊 Исход: ' + window.getOutcomeText(bet.outcome, match);
+}
     
     const groupLabel = match.group ? 'Группа ' + match.group : 
                        (match.stage === 'round_of_32' ? '1/16' : 
@@ -3309,22 +3334,27 @@ window.renderBetsForMatch = function(matchId, bets) {
       minute: '2-digit'
     });
     
-    let betText = '';
-    let betIcon = '📊';
-    
-    if (bet.betType === 'outcome') {
-      betIcon = '📊';
-      if (bet.outcome === 'team1') {
-        betText = `Победа: ${match.team1.name}`;
-      } else if (bet.outcome === 'team2') {
-        betText = `Победа: ${match.team2.name}`;
-      } else {
-        betText = 'Ничья';
-      }
-    } else {
-      betIcon = '🎯';
-      betText = `Точный счёт: ${bet.exactScore}`;
-    }
+   let betText = '';
+let betIcon = '📊';
+if (bet.betType === 'outcome') {
+  betIcon = '📊';
+  if (bet.outcome === 'team1') {
+    betText = `Победа: ${match.team1.name}`;
+  } else if (bet.outcome === 'team2') {
+    betText = `Победа: ${match.team2.name}`;
+  } else {
+    betText = 'Ничья';
+  }
+} else {
+  betIcon = '🎯';
+  const [score1, score2] = bet.exactScore.split(':').map(Number);
+  if (score1 === score2 && bet.penaltyWinner) {
+    const winnerName = bet.penaltyWinner === 'team1' ? match.team1.name : match.team2.name;
+    betText = `Точный счёт: ${bet.exactScore} (пенальти: ${winnerName})`;
+  } else {
+    betText = `Точный счёт: ${bet.exactScore}`;
+  }
+}
     
     const userName = bet.userFullName || bet.userName || bet.userCode;
     
@@ -4391,20 +4421,26 @@ window.renderUserBetsTable = function(activeBets, finishedBets, filter = 'all') 
     });
     
     // Текст ставки
-    let betText = '';
-    let betIcon = '📊';
-    if (bet.betType === 'outcome') {
-      if (bet.outcome === 'team1') {
-        betText = `Победа: ${match?.team1?.name || '?'}`;
-      } else if (bet.outcome === 'team2') {
-        betText = `Победа: ${match?.team2?.name || '?'}`;
-      } else {
-        betText = 'Ничья';
-      }
-    } else {
-      betIcon = '🎯';
-      betText = `Точный счёт: ${bet.exactScore}`;
-    }
+   let betText = '';
+let betIcon = '📊';
+if (bet.betType === 'outcome') {
+  if (bet.outcome === 'team1') {
+    betText = `Победа: ${match?.team1?.name || '?'}`;
+  } else if (bet.outcome === 'team2') {
+    betText = `Победа: ${match?.team2?.name || '?'}`;
+  } else {
+    betText = 'Ничья';
+  }
+} else {
+  betIcon = '🎯';
+  const [score1, score2] = bet.exactScore.split(':').map(Number);
+  if (score1 === score2 && bet.penaltyWinner) {
+    const winnerName = bet.penaltyWinner === 'team1' ? match?.team1?.name : match?.team2?.name;
+    betText = `Точный счёт: ${bet.exactScore} (пенальти: ${winnerName || '?'})`;
+  } else {
+    betText = `Точный счёт: ${bet.exactScore}`;
+  }
+}
     
     // Название матча
     const matchName = match ? `${match.team1?.flag || ''} ${match.team1?.name || '?'} vs ${match.team2?.name || '?'} ${match.team2?.flag || ''}` : bet.matchId;
@@ -4913,7 +4949,118 @@ window.closeRulesModal = function() {
   });
 };
 
+// Проверка старых ставок на плей-офф без указания пенальти
+window.checkOldPlayoffBets = async function() {
+  try {
+    // Проверяем, есть ли пользователь
+    if (!userData || !userData.code) return;
+    
+    // Проверяем, показывали ли уже это сообщение этому пользователю
+    const notificationKey = `penalty_notification_${userData.code}`;
+    if (localStorage.getItem(notificationKey) === 'shown') {
+      console.log("ℹ️ Уведомление уже было показано");
+      return;
+    }
+    
+    // Получаем все ставки пользователя
+    const betsRef = collection(db, "bets");
+    const q = query(betsRef, where("userCode", "==", userData.code));
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) {
+      console.log("ℹ️ Нет ставок для проверки");
+      return;
+    }
+    
+    // Собираем ставки на плей-офф с ничейным счётом, где нет пенальти
+    const needPenaltyBets = [];
+    
+    snapshot.forEach(doc => {
+      const bet = doc.data();
+      const match = allMatches.find(m => m.id === bet.matchId);
+      
+      // Проверяем: плей-офф, ставка на точный счёт, счёт ничейный, нет пенальти
+      if (match && match.stage !== 'group' && bet.betType === 'score') {
+        const [score1, score2] = bet.exactScore.split(':').map(Number);
+        if (score1 === score2 && !bet.penaltyWinner) {
+          needPenaltyBets.push({
+            id: doc.id,
+            bet: bet,
+            match: match
+          });
+        }
+      }
+    });
+    
+    if (needPenaltyBets.length === 0) {
+      console.log("ℹ️ Все ставки на плей-офф корректны");
+      return;
+    }
+    
+    // Формируем сообщение
+    let matchListHtml = needPenaltyBets.map(item => {
+      const date = new Date(item.match.date);
+      const dateStr = date.toLocaleDateString('ru-RU', { day:'numeric', month:'long', year:'numeric' });
+      return `<li style="margin: 5px 0;"><strong>${item.match.team1.name}</strong> vs <strong>${item.match.team2.name}</strong> (${dateStr})</li>`;
+    }).join('');
+    
+    // Создаём модальное окно
+    let modal = document.getElementById('penaltyNotificationModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'penaltyNotificationModal';
+      modal.className = 'modal';
+      modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+          <div class="modal-header">
+            <div class="modal-title" style="color: #E31E24;">⚠️ Внимание! Обновление правил</div>
+          </div>
+          <div style="max-height: 60vh; overflow-y: auto; padding-right: 10px;">
+            <p style="font-size: 14px; color: #333; margin-bottom: 15px;">
+              <strong>Уважаемый участник!</strong>
+            </p>
+            <p style="font-size: 14px; color: #333; margin-bottom: 15px;">
+              В матчах плей-офф теперь нужно указывать победителя по пенальти при ничейном счёте.
+            </p>
+            <p style="font-size: 14px; color: #333; margin-bottom: 15px;">
+              У вас есть ставки на следующие матчи плей-офф с ничейным счётом, где <strong>не выбран победитель</strong>:
+            </p>
+            <ul style="font-size: 14px; color: #333; padding-left: 20px; margin-bottom: 15px; background: #fff3cd; padding: 15px 20px; border-radius: 10px; border-left: 4px solid #E31E24;">
+              ${matchListHtml}
+            </ul>
+            <p style="font-size: 14px; color: #E31E24; font-weight: 600; margin-bottom: 10px;">
+              ⚠️ Пожалуйста, укажите победителя для корректного подсчёта очков!
+            </p>
+            <p style="font-size: 13px; color: #666; margin-bottom: 10px;">
+              Для этого нажмите <strong>«✏️ Изменить»</strong> на карточке матча и выберите команду-победителя по пенальти.
+            </p>
+            <p style="font-size: 12px; color: #999; font-style: italic;">
+              ℹ️ Это сообщение будет показано один раз. Если вы уже обновили ставки — проигнорируйте его.
+            </p>
+          </div>
+          <button class="btn" onclick="window.closePenaltyNotification()" style="margin-top: 15px;">Хорошо, спасибо! 👍</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+    
+    modal.classList.add('active');
+    
+    // Сохраняем, что уведомление показано
+    localStorage.setItem(notificationKey, 'shown');
+    
+  } catch (error) {
+    console.error("❌ Ошибка проверки старых ставок:", error);
+  }
+};
 
+// Закрытие уведомления
+window.closePenaltyNotification = function() {
+  const modal = document.getElementById('penaltyNotificationModal');
+  if (modal) modal.classList.remove('active');
+};
+
+  
   // Закрытие модальных окон при клике на фон
 document.addEventListener('click', function(event) {
   const activeModals = document.querySelectorAll('.modal.active');
