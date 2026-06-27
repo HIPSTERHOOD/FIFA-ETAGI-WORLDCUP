@@ -575,7 +575,9 @@ button {
     <button class="btn btn-secondary" onclick="window.updateBetsCounterAdmin()" style="background:#ffc107; color:#000;">
   📊 Обновить счётчик броней
 </button>
-    
+<button class="btn btn-secondary" onclick="window.fixPlayoffTimes()" style="background:#17a2b8; margin-top:10px;">
+  🕐 Исправить время в плей-офф
+</button>    
     <div class="admin-section">
       <h3>📊 Результаты матчей</h3>
       <div id="adminMatchesList"></div>
@@ -1620,6 +1622,11 @@ const matchesData = [
 window.addEventListener('DOMContentLoaded', async () => {
   await window.initializeData();
   window.setupAuthListener();
+  
+  // 🔥 Исправляем время в плей-офф через 3 секунды
+  setTimeout(() => {
+    window.fixPlayoffTimes();
+  }, 3000);
   
   // 🔥 Проверяем сохранённую сессию через 1 секунду
   setTimeout(() => {
@@ -4276,7 +4283,77 @@ window.calculateBetPoints = async function(matchId, score1, score2) {
   window.loadLeaderboard();
 };
 
+// ========== ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ ВРЕМЕНИ В ПЛЕЙ-ОФФ ==========
+window.fixPlayoffTimes = async function() {
+  console.log("⏳ Проверка и исправление времени в плей-офф...");
+  
+  const correctTimes = {
+    'R32_1': '2026-06-28T22:00:00+03:00',
+    'R32_2': '2026-06-29T23:30:00+03:00',
+    'R32_3': '2026-06-29T20:00:00+03:00',
+    'R32_4': '2026-06-29T22:00:00+03:00',
+    'R32_5': '2026-06-30T01:00:00+03:00',
+    'R32_6': '2026-06-30T20:00:00+03:00',
+    'R32_7': '2026-06-30T23:30:00+03:00',
+    'R32_8': '2026-07-01T03:30:00+03:00',
+    'R32_9': '2026-07-01T00:00:00+03:00',
+    'R32_10': '2026-07-02T01:00:00+03:00',
+    'R32_11': '2026-07-02T01:00:00+03:00',
+    'R32_12': '2026-07-02T04:00:00+03:00',
+    'R32_13': '2026-07-02T22:00:00+03:00',
+    'R32_14': '2026-07-03T01:00:00+03:00',
+    'R32_15': '2026-07-03T04:00:00+03:00',
+    'R32_16': '2026-07-03T22:00:00+03:00',
+  };
+  
+  const correctTimesR16 = {
+    'R16_1': '2026-07-05T22:00:00+03:00',
+    'R16_2': '2026-07-06T01:00:00+03:00',
+    'R16_3': '2026-07-06T04:00:00+03:00',
+    'R16_4': '2026-07-06T22:00:00+03:00',
+    'R16_5': '2026-07-07T01:00:00+03:00',
+    'R16_6': '2026-07-07T04:00:00+03:00',
+    'R16_7': '2026-07-07T22:00:00+03:00',
+    'R16_8': '2026-07-08T01:00:00+03:00',
+  };
+  
+  try {
+    // Обновляем 1/16 финала
+    let updated = 0;
+    for (const [id, time] of Object.entries(correctTimes)) {
+      const matchRef = doc(db, "matches", id);
+      const matchSnap = await getDoc(matchRef);
+      if (matchSnap.exists()) {
+        const currentTime = matchSnap.data().date;
+        if (currentTime !== time) {
+          await updateDoc(matchRef, { date: time });
+          console.log(`✅ ${id}: ${currentTime} → ${time}`);
+          updated++;
+        }
+      }
+    }
+    
+    // Обновляем 1/8 финала
+    for (const [id, time] of Object.entries(correctTimesR16)) {
+      const matchRef = doc(db, "matches", id);
+      const matchSnap = await getDoc(matchRef);
+      if (matchSnap.exists()) {
+        const currentTime = matchSnap.data().date;
+        if (currentTime !== time) {
+          await updateDoc(matchRef, { date: time });
+          console.log(`✅ ${id}: ${currentTime} → ${time}`);
+          updated++;
+        }
+      }
+    }
+    
+    console.log(`✅ Время в плей-офф обновлено! Исправлено ${updated} матчей.`);
+  } catch (error) {
+    console.error("❌ Ошибка при обновлении времени:", error);
+  }
+};
 
+  
 // Навигация
 window.showTab = function(tabName) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
