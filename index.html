@@ -565,6 +565,15 @@ button {
     Удаляет повторяющиеся записи пользователей (оставляет одну с максимальными очками)
   </p>
 </div>
+    <div class="admin-section">
+  <h3>🕐 Исправление времени плей-офф</h3>
+  <button class="btn btn-secondary" onclick="window.fixAllPlayoffTimes()" style="background:#17a2b8;">
+    🕐 Исправить время всех матчей 1/16 финала
+  </button>
+  <p style="font-size:12px;color:#666;margin-top:10px;">
+    Обновляет время для всех матчей 1/16 финала согласно официальному расписанию
+  </p>
+</div>
 
  <button class="btn btn-secondary" onclick="window.syncAllEarlyBets()" style="background:#17a2b8;">
   ⏰ Пересчитать ранние ставки
@@ -5121,6 +5130,80 @@ document.addEventListener('click', function(event) {
     }
   });
 });
+
+  // Функция для исправления времени всех матчей 1/16 финала
+window.fixAllPlayoffTimes = async function() {
+  if (!isAdmin) {
+    window.showAlert('❌ Только для админа', 'error');
+    return;
+  }
+  
+  if (!confirm('Обновить время всех матчей 1/16 финала согласно официальному расписанию?')) {
+    return;
+  }
+  
+  window.showAlert('⏳ Обновляю время матчей...', 'info');
+  
+  try {
+    const correctDates = {
+      'R32_1': '2026-06-28T22:00:00+03:00',
+      'R32_2': '2026-06-29T23:30:00+03:00',
+      'R32_3': '2026-06-29T20:00:00+03:00',
+      'R32_4': '2026-06-30T04:00:00+03:00',
+      'R32_5': '2026-07-01T00:00:00+03:00',
+      'R32_6': '2026-06-30T20:00:00+03:00',
+      'R32_7': '2026-07-01T04:00:00+03:00',
+      'R32_8': '2026-07-01T19:00:00+03:00',
+      'R32_9': '2026-07-01T23:00:00+03:00',
+      'R32_10': '2026-07-02T03:00:00+03:00',
+      'R32_11': '2026-07-02T22:00:00+03:00',
+      'R32_12': '2026-07-03T02:00:00+03:00',
+      'R32_13': '2026-07-03T06:00:00+03:00',
+      'R32_14': '2026-07-03T21:00:00+03:00',
+      'R32_15': '2026-07-04T01:00:00+03:00',
+      'R32_16': '2026-07-04T04:30:00+03:00'
+    };
+    
+    const matchesRef = collection(db, "matches");
+    let updated = 0;
+    let errors = 0;
+    
+    for (const [id, newDate] of Object.entries(correctDates)) {
+      try {
+        const matchRef = doc(matchesRef, id);
+        const matchSnap = await getDoc(matchRef);
+        
+        if (!matchSnap.exists()) {
+          console.warn(`⚠️ Матч ${id} не найден`);
+          continue;
+        }
+        
+        const currentDate = matchSnap.data().date;
+        if (currentDate !== newDate) {
+          await updateDoc(matchRef, { date: newDate });
+          console.log(`✅ ${id}: ${currentDate} → ${newDate}`);
+          updated++;
+        }
+      } catch (error) {
+        console.error(`❌ Ошибка ${id}:`, error);
+        errors++;
+      }
+    }
+    
+    window.showAlert(`✅ Обновлено ${updated} матчей. Ошибок: ${errors}`, 'success');
+    
+    // Обновляем отображение
+    await window.updatePlayoffMatches();
+    window.renderMatches();
+    window.renderAdminMatches();
+    
+    console.log('🎉 Готово! Перезагрузи страницу для полного обновления.');
+    
+  } catch (error) {
+    console.error('❌ Ошибка:', error);
+    window.showAlert('❌ ' + error.message, 'error');
+  }
+};
   
 </script>
 
