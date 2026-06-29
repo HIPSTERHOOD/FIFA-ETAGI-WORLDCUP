@@ -2072,9 +2072,18 @@ window.updatePlayoffMatches = async function() {
   try {
     console.log("🔄 Обновление плей-офф по реальной сетке ЧМ-2026...");
 
+    // 🔥 ПОЛУЧАЕМ ДАННЫЕ НАПРЯМУЮ ИЗ FIRESTORE
+    const matchesRef = collection(db, "matches");
+    const snapshot = await getDocs(matchesRef);
+    
+    const matches = {};
+    snapshot.forEach(doc => {
+      matches[doc.id] = doc.data();
+    });
+
     // Вспомогательная функция: получить победителя матча по его ID
     const getWinner = (matchId) => {
-      const match = allMatches.find(m => m.id === matchId);
+      const match = matches[matchId];
       if (!match || !match.result) return null;
       // Если есть пенальти, используем его
       if (match.penaltyWinner) {
@@ -2101,8 +2110,12 @@ window.updatePlayoffMatches = async function() {
       const winner2 = getWinner(pair.from[1]);
       if (winner1 && winner2) {
         await window.forceUpdateMatchTeams(pair.id, winner1, winner2);
+        console.log(`✅ ${pair.id}: ${winner1.name} vs ${winner2.name}`);
+      } else if (winner1) {
+        console.log(`⚠️ ${pair.id}: есть ${winner1.name}, ждём второго`);
+      } else if (winner2) {
+        console.log(`⚠️ ${pair.id}: есть ${winner2.name}, ждём первого`);
       } else {
-        // Если ещё нет победителя, ставим TBD
         await window.forceUpdateMatchTeams(pair.id, {name:"TBD", code:"TBD", flag:"❓"}, {name:"TBD", code:"TBD", flag:"❓"});
       }
     }
@@ -2120,6 +2133,7 @@ window.updatePlayoffMatches = async function() {
       const winner2 = getWinner(pair.from[1]);
       if (winner1 && winner2) {
         await window.forceUpdateMatchTeams(pair.id, winner1, winner2);
+        console.log(`✅ ${pair.id}: ${winner1.name} vs ${winner2.name}`);
       } else {
         await window.forceUpdateMatchTeams(pair.id, {name:"TBD", code:"TBD", flag:"❓"}, {name:"TBD", code:"TBD", flag:"❓"});
       }
@@ -2136,23 +2150,25 @@ window.updatePlayoffMatches = async function() {
       const winner2 = getWinner(pair.from[1]);
       if (winner1 && winner2) {
         await window.forceUpdateMatchTeams(pair.id, winner1, winner2);
+        console.log(`✅ ${pair.id}: ${winner1.name} vs ${winner2.name}`);
       } else {
         await window.forceUpdateMatchTeams(pair.id, {name:"TBD", code:"TBD", flag:"❓"}, {name:"TBD", code:"TBD", flag:"❓"});
       }
     }
 
-    // Обновляем финал и матч за 3 место
+    // Обновляем финал
     const winnerSF1 = getWinner('SF_1');
     const winnerSF2 = getWinner('SF_2');
     if (winnerSF1 && winnerSF2) {
       await window.forceUpdateMatchTeams('FINAL', winnerSF1, winnerSF2);
+      console.log(`✅ FINAL: ${winnerSF1.name} vs ${winnerSF2.name}`);
     } else {
       await window.forceUpdateMatchTeams('FINAL', {name:"TBD", code:"TBD", flag:"❓"}, {name:"TBD", code:"TBD", flag:"❓"});
     }
 
     // Матч за 3 место: проигравшие в полуфиналах
     const loserSF1 = (() => {
-      const m = allMatches.find(mm => mm.id === 'SF_1');
+      const m = matches['SF_1'];
       if (!m || !m.result) return null;
       if (m.penaltyWinner) {
         return m.penaltyWinner === 'team1' ? m.team2 : m.team1;
@@ -2160,7 +2176,7 @@ window.updatePlayoffMatches = async function() {
       return m.result.team1 < m.result.team2 ? m.team1 : m.team2;
     })();
     const loserSF2 = (() => {
-      const m = allMatches.find(mm => mm.id === 'SF_2');
+      const m = matches['SF_2'];
       if (!m || !m.result) return null;
       if (m.penaltyWinner) {
         return m.penaltyWinner === 'team1' ? m.team2 : m.team1;
@@ -2170,9 +2186,14 @@ window.updatePlayoffMatches = async function() {
 
     if (loserSF1 && loserSF2) {
       await window.forceUpdateMatchTeams('THIRD', loserSF1, loserSF2);
+      console.log(`✅ THIRD: ${loserSF1.name} vs ${loserSF2.name}`);
     } else {
       await window.forceUpdateMatchTeams('THIRD', {name:"TBD", code:"TBD", flag:"❓"}, {name:"TBD", code:"TBD", flag:"❓"});
     }
+
+    // Обновляем локальный allMatches
+    allMatches = Object.values(matches);
+    allMatches.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     console.log("✅ Плей-офф обновлён по реальной сетке!");
   } catch (error) {
