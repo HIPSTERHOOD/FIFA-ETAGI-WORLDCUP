@@ -3844,20 +3844,16 @@ window.saveMatchResult = async function(matchId) {
       return;
     }
     
-    // 🔥 ОСНОВНАЯ ЛОГИКА: проверяем, нужен ли пенальти
+    // Проверяем, нужен ли пенальти
     let penaltyWinner = null;
-    
-    // Если это плей-офф И счёт ничейный
     if (match.stage !== 'group' && score1 === score2) {
       const penaltySelect = document.getElementById(`penaltyWinnerSelect_${matchId}`);
-      
       if (!penaltySelect) {
         window.showAlert('⚠️ Ошибка: не найден селектор выбора пенальти', 'error');
         return;
       }
-      
       if (!penaltySelect.value || penaltySelect.value === '') {
-        window.showAlert('⚠️ Для ничейного счёта в плей-офф УКАЖИТЕ победителя по пенальти!\n\nВыберите команду в выпадающем списке "Победитель по пенальти" и нажмите "Сохранить" снова.', 'error');
+        window.showAlert('⚠️ Для ничейного счёта в плей-офф УКАЖИТЕ победителя по пенальти!', 'error');
         penaltySelect.style.borderColor = '#dc3545';
         penaltySelect.style.borderWidth = '3px';
         setTimeout(() => {
@@ -3866,9 +3862,7 @@ window.saveMatchResult = async function(matchId) {
         }, 3000);
         return;
       }
-      
       penaltyWinner = penaltySelect.value;
-      console.log(`🏆 Пенальти: победитель ${penaltyWinner === 'team1' ? match.team1.name : match.team2.name}`);
     }
     
     // Сохраняем результат
@@ -3890,19 +3884,18 @@ window.saveMatchResult = async function(matchId) {
     const q = query(betsRef, where("matchId", "==", matchId));
     const snapshot = await getDocs(q);
     
-    // Собираем всех пользователей, кто делал ставки
     const affectedUsers = new Set();
     snapshot.forEach(docSnap => {
       const bet = docSnap.data();
       if (bet.userCode) affectedUsers.add(bet.userCode);
     });
     
-    // Пересчитываем очки для каждого пользователя
+    // Пересчитываем очки
     for (const userCode of affectedUsers) {
       await window.recalculateUserPoints(userCode);
     }
     
-    // 🔥 ДОБАВЛЕНО: Обновляем плей-офф после сохранения результата
+    // 🔥 КРИТИЧЕСКИ ВАЖНО: Обновляем плей-офф после сохранения результата
     await window.updatePlayoffMatches();
     
     // Обновляем таблицу лидеров и профиль
@@ -3911,7 +3904,7 @@ window.saveMatchResult = async function(matchId) {
       await window.loadProfileStats();
     }
     
-    // Очищаем кэш и перезагружаем ставки для этого матча
+    // Очищаем кэш
     if (window.matchBetsCache && window.matchBetsCache[matchId]) {
       delete window.matchBetsCache[matchId];
     }
