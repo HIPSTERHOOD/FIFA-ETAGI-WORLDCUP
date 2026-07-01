@@ -1918,19 +1918,24 @@ window.loadMatches = async function() {
     const matchesRef = collection(db, "matches");
     const snapshot = await getDocs(matchesRef);
     
-    if (snapshot.size < 50) {
-      const batch = writeBatch(db);
-      matchesData.forEach(match => {
-        const docRef = doc(matchesRef, match.id);
-        batch.set(docRef, {
-          ...match,
-          result: null,
-          status: "scheduled",
-          createdAt: serverTimestamp()
-        });
-      });
-      await batch.commit();
-    }
+   // Никогда не перезаписываем матчи, если они уже есть в БД
+if (snapshot.size === 0) {
+  // Только если БД пуста – загружаем начальные данные
+  const batch = writeBatch(db);
+  matchesData.forEach(match => {
+    const docRef = doc(matchesRef, match.id);
+    batch.set(docRef, {
+      ...match,
+      result: null,
+      status: "scheduled",
+      createdAt: serverTimestamp()
+    });
+  });
+  await batch.commit();
+  console.log("📥 Загружены начальные матчи (т.к. БД была пуста)");
+} else {
+  console.log("ℹ️ Матчи уже есть в БД, пропускаем загрузку из кода");
+}
     
     onSnapshot(matchesRef, async (snap) => {
       allMatches = [];
