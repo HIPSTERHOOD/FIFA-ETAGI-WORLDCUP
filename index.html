@@ -680,7 +680,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
+window.db = db;
 let currentUser = null;
 let userData = null;
 let isAdmin = false;
@@ -4125,30 +4125,6 @@ window.showAlert = function(message, type) {
 window.forceLoadEmployees = async function() {
   window.showAlert("⏳ Загрузка...", "info");
   await window.loadEmployees();
-};
-
-// 🔥 Очистка матчей и перезагрузка
-window.resetMatches = async function() {
-  if (!confirm('Удалить ВСЕ матчи и загрузить заново? Это сбросит все результаты!')) return;
-  
-  try {
-    window.showAlert("🗑️ Удаление матчей...", "info");
-    
-    // Удаляем все матчи
-    const matchesRef = collection(db, "matches");
-    const snapshot = await getDocs(matchesRef);
-    const batch = writeBatch(db);
-    snapshot.forEach(docSnap => {
-      batch.delete(docSnap.ref);
-    });
-    await batch.commit();
-    
-    window.showAlert("✅ Матчи удалены. Перезагрузите страницу!", "success");
-    
-    setTimeout(() => location.reload(), 2000);
-  } catch (error) {
-    window.showAlert("❌ " + error.message, "error");
-  }
 };
 
   // Отображение сетки плей-офф
