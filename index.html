@@ -2971,18 +2971,8 @@ window.openBetModal = function(matchId) {
     currentBetType = 'score';
     currentPenaltyWinner = null;
 
-    // Проверяем, что элементы DOM существуют
-    const betMatchInfo = document.getElementById('betMatchInfo');
-    const outcomeSection = document.getElementById('outcomeSection');
-    const betModal = document.getElementById('betModal');
-
-    if (!betMatchInfo || !outcomeSection || !betModal) {
-      console.error('❌ Не найдены элементы DOM:', { betMatchInfo, outcomeSection, betModal });
-      window.showAlert('Ошибка отображения ставки', 'error');
-      return;
-    }
-
-    betMatchInfo.innerHTML = `
+    // ВСТАВЛЯЕМ КОНТЕНТ
+    document.getElementById('betMatchInfo').innerHTML = `
       <div style="margin-bottom:20px;padding:15px;background:#f8f9fa;border-radius:10px;">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div style="text-align:center;flex:1;">
@@ -2998,7 +2988,7 @@ window.openBetModal = function(matchId) {
       </div>
     `;
 
-    outcomeSection.innerHTML = `
+    document.getElementById('outcomeSection').innerHTML = `
       <p style="margin-bottom:10px;font-weight:600;font-size:14px;">Выберите исход (+1 очко):</p>
       <div class="outcome-options">
         <button class="outcome-btn" onclick="window.selectOutcome('team1')" id="outcomeTeam1">${match.team1.flag} ${match.team1.name}</button>
@@ -3007,6 +2997,7 @@ window.openBetModal = function(matchId) {
       </div>
     `;
 
+    // Если есть существующая ставка – восстанавливаем
     const existingBet = allBets.find(b => b.matchId === matchId);
     if (existingBet) {
       if (existingBet.betType === 'outcome') {
@@ -3042,7 +3033,7 @@ window.openBetModal = function(matchId) {
       document.querySelectorAll('.outcome-btn').forEach(b => b.classList.remove('active'));
     }
 
-    // Обновляем названия пенальти кнопок
+    // Обновляем названия кнопок пенальти
     const penaltyTeam1 = document.getElementById('penaltyTeam1');
     const penaltyTeam2 = document.getElementById('penaltyTeam2');
     if (penaltyTeam1 && penaltyTeam2) {
@@ -3057,8 +3048,11 @@ window.openBetModal = function(matchId) {
     if (score2El) score2El.addEventListener('change', window.checkPenaltyNeeded);
     window.checkPenaltyNeeded();
 
+    // ПОКАЗЫВАЕМ МОДАЛЬНОЕ ОКНО
+    const betModal = document.getElementById('betModal');
     betModal.classList.add('active');
     console.log('✅ Модальное окно открыто');
+
   } catch (error) {
     console.error('❌ Ошибка в openBetModal:', error);
     window.showAlert('Произошла ошибка при открытии ставки', 'error');
