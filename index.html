@@ -2860,91 +2860,121 @@ window.getOutcomeText = function(outcome, match) {
   if (targetBtn) targetBtn.classList.add('active');
 };
   
-// Модальное окно ставки
 window.openBetModal = function(matchId) {
-  const match = allMatches.find(m => m.id === matchId);
-  if (!match) return;
-  
-  const matchDate = new Date(match.date);
-  if (matchDate <= new Date()) {
-    window.showAlert('Ставки закрыты', 'error');
-    return;
-  }
-  
-  currentBetMatch = match;
-  currentBetType = 'score';
-  currentPenaltyWinner = null; // Сбрасываем выбор пенальти
-  
-  document.getElementById('betMatchInfo').innerHTML = `
-    <div style="margin-bottom:20px;padding:15px;background:#f8f9fa;border-radius:10px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div style="text-align:center;flex:1;">
-          <div style="font-size:32px;">${match.team1.flag}</div>
-          <div style="font-weight:600;font-size:14px;">${match.team1.name}</div>
-        </div>
-        <div style="padding:0 15px;color:#666;font-size:12px;">VS</div>
-        <div style="text-align:center;flex:1;">
-          <div style="font-size:32px;">${match.team2.flag}</div>
-          <div style="font-weight:600;font-size:14px;">${match.team2.name}</div>
+  console.log('🟢 openBetModal вызван, matchId:', matchId);
+  try {
+    const match = allMatches.find(m => m.id === matchId);
+    if (!match) {
+      console.error('❌ Матч не найден для id:', matchId);
+      window.showAlert('Матч не найден', 'error');
+      return;
+    }
+    console.log('✅ Матч найден:', match.team1.name, 'vs', match.team2.name);
+
+    const matchDate = new Date(match.date);
+    if (matchDate <= new Date()) {
+      window.showAlert('Ставки закрыты', 'error');
+      return;
+    }
+
+    currentBetMatch = match;
+    currentBetType = 'score';
+    currentPenaltyWinner = null;
+
+    // Проверяем, что элементы DOM существуют
+    const betMatchInfo = document.getElementById('betMatchInfo');
+    const outcomeSection = document.getElementById('outcomeSection');
+    const betModal = document.getElementById('betModal');
+
+    if (!betMatchInfo || !outcomeSection || !betModal) {
+      console.error('❌ Не найдены элементы DOM:', { betMatchInfo, outcomeSection, betModal });
+      window.showAlert('Ошибка отображения ставки', 'error');
+      return;
+    }
+
+    betMatchInfo.innerHTML = `
+      <div style="margin-bottom:20px;padding:15px;background:#f8f9fa;border-radius:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="text-align:center;flex:1;">
+            <div style="font-size:32px;">${match.team1.flag}</div>
+            <div style="font-weight:600;font-size:14px;">${match.team1.name}</div>
+          </div>
+          <div style="padding:0 15px;color:#666;font-size:12px;">VS</div>
+          <div style="text-align:center;flex:1;">
+            <div style="font-size:32px;">${match.team2.flag}</div>
+            <div style="font-weight:600;font-size:14px;">${match.team2.name}</div>
+          </div>
         </div>
       </div>
-    </div>
-  `;
+    `;
 
-  document.getElementById('outcomeSection').innerHTML = `
-    <p style="margin-bottom:10px;font-weight:600;font-size:14px;">Выберите исход (+1 очко):</p>
-    <div class="outcome-options">
-      <button class="outcome-btn" onclick="window.selectOutcome('team1')" id="outcomeTeam1">${match.team1.flag} ${match.team1.name}</button>
-      <button class="outcome-btn" onclick="window.selectOutcome('draw')" id="outcomeDraw">Ничья</button>
-      <button class="outcome-btn" onclick="window.selectOutcome('team2')" id="outcomeTeam2">${match.team2.flag} ${match.team2.name}</button>
-    </div>
-  `;
-  
-  const existingBet = allBets.find(b => b.matchId === matchId);
-  if (existingBet) {
-    if (existingBet.betType === 'outcome') {
-      window.selectBetType('outcome');
-      window.selectOutcome(existingBet.outcome);
-    } else {
-      window.selectBetType('score');
-      const [s1, s2] = existingBet.exactScore.split(':');
-      document.getElementById('scoreTeam1').value = s1;
-      document.getElementById('scoreTeam2').value = s2;
-      // Если была ставка с пенальти — восстанавливаем выбор
-      if (existingBet.penaltyWinner) {
-        currentPenaltyWinner = existingBet.penaltyWinner;
-        const teamBtn = document.getElementById('penaltyTeam1');
-        const teamBtn2 = document.getElementById('penaltyTeam2');
-        if (teamBtn && teamBtn2) {
-          if (existingBet.penaltyWinner === 'team1') {
-            teamBtn.style.background = '#E31E24';
-            teamBtn.style.color = 'white';
-            teamBtn2.style.background = 'white';
-            teamBtn2.style.color = '#E31E24';
-          } else {
-            teamBtn2.style.background = '#E31E24';
-            teamBtn2.style.color = 'white';
-            teamBtn.style.background = 'white';
-            teamBtn.style.color = '#E31E24';
+    outcomeSection.innerHTML = `
+      <p style="margin-bottom:10px;font-weight:600;font-size:14px;">Выберите исход (+1 очко):</p>
+      <div class="outcome-options">
+        <button class="outcome-btn" onclick="window.selectOutcome('team1')" id="outcomeTeam1">${match.team1.flag} ${match.team1.name}</button>
+        <button class="outcome-btn" onclick="window.selectOutcome('draw')" id="outcomeDraw">Ничья</button>
+        <button class="outcome-btn" onclick="window.selectOutcome('team2')" id="outcomeTeam2">${match.team2.flag} ${match.team2.name}</button>
+      </div>
+    `;
+
+    const existingBet = allBets.find(b => b.matchId === matchId);
+    if (existingBet) {
+      if (existingBet.betType === 'outcome') {
+        window.selectBetType('outcome');
+        window.selectOutcome(existingBet.outcome);
+      } else {
+        window.selectBetType('score');
+        const [s1, s2] = existingBet.exactScore.split(':');
+        document.getElementById('scoreTeam1').value = s1;
+        document.getElementById('scoreTeam2').value = s2;
+        if (existingBet.penaltyWinner) {
+          currentPenaltyWinner = existingBet.penaltyWinner;
+          const teamBtn = document.getElementById('penaltyTeam1');
+          const teamBtn2 = document.getElementById('penaltyTeam2');
+          if (teamBtn && teamBtn2) {
+            if (existingBet.penaltyWinner === 'team1') {
+              teamBtn.style.background = '#E31E24';
+              teamBtn.style.color = 'white';
+              teamBtn2.style.background = 'white';
+              teamBtn2.style.color = '#E31E24';
+            } else {
+              teamBtn2.style.background = '#E31E24';
+              teamBtn2.style.color = 'white';
+              teamBtn.style.background = 'white';
+              teamBtn.style.color = '#E31E24';
+            }
           }
         }
       }
+    } else {
+      window.selectBetType('score');
+      currentOutcome = null;
+      document.querySelectorAll('.outcome-btn').forEach(b => b.classList.remove('active'));
     }
-  } else {
-    window.selectBetType('score');
-    currentOutcome = null;
-    document.querySelectorAll('.outcome-btn').forEach(b => b.classList.remove('active'));
+
+    // Обновляем названия пенальти кнопок
+    const penaltyTeam1 = document.getElementById('penaltyTeam1');
+    const penaltyTeam2 = document.getElementById('penaltyTeam2');
+    if (penaltyTeam1 && penaltyTeam2) {
+      penaltyTeam1.innerHTML = `⚽ ${match.team1.name}`;
+      penaltyTeam2.innerHTML = `⚽ ${match.team2.name}`;
+    }
+
+    // Добавляем обработчики для пенальти
+    const score1El = document.getElementById('scoreTeam1');
+    const score2El = document.getElementById('scoreTeam2');
+    if (score1El) score1El.addEventListener('change', window.checkPenaltyNeeded);
+    if (score2El) score2El.addEventListener('change', window.checkPenaltyNeeded);
+    window.checkPenaltyNeeded();
+
+    betModal.classList.add('active');
+    console.log('✅ Модальное окно открыто');
+  } catch (error) {
+    console.error('❌ Ошибка в openBetModal:', error);
+    window.showAlert('Произошла ошибка при открытии ставки', 'error');
   }
-  
-  // Добавляем обработчики для проверки пенальти
-  const score1El = document.getElementById('scoreTeam1');
-  const score2El = document.getElementById('scoreTeam2');
-  if (score1El) score1El.addEventListener('change', window.checkPenaltyNeeded);
-  if (score2El) score2El.addEventListener('change', window.checkPenaltyNeeded);
-  window.checkPenaltyNeeded();
-  
-  document.getElementById('betModal').classList.add('active');
 };
+  
 // Таблица лидеров
 window.loadLeaderboard = function() {
   const usersRef = collection(db, "users");
