@@ -1937,8 +1937,6 @@ if (snapshot.size === 0) {
       });
       allMatches.sort((a, b) => new Date(a.date) - new Date(b.date));
       
-      // 🔥 ДОБАВЛЕНО: Обновляем плей-офф после загрузки
-      await window.updatePlayoffMatches();
       
       window.renderMatches();
       window.renderBracket();
@@ -3444,8 +3442,6 @@ window.clearMatchResult = async function(matchId) {
       await window.recalculateUserPoints(userCode);
     }
     
-    // 🔥 ДОБАВЛЕНО: Обновляем плей-офф после удаления результата
-    await window.updatePlayoffMatches();
     
     if (window.matchBetsCache && window.matchBetsCache[matchId]) {
       delete window.matchBetsCache[matchId];
@@ -3888,10 +3884,7 @@ window.saveMatchResult = async function(matchId) {
     for (const userCode of affectedUsers) {
       await window.recalculateUserPoints(userCode);
     }
-    
-    // 🔥 КРИТИЧЕСКИ ВАЖНО: Обновляем плей-офф после сохранения результата
-    await window.updatePlayoffMatches();
-    
+        
     // Обновляем таблицу лидеров и профиль
     window.loadLeaderboard();
     if (userData && userData.code) {
@@ -5155,8 +5148,6 @@ window.fixAllPlayoffTimes = async function() {
     
     window.showAlert(`✅ Обновлено ${updated} матчей. Ошибок: ${errors}`, 'success');
     
-    // Обновляем отображение
-    await window.updatePlayoffMatches();
     window.renderMatches();
     window.renderAdminMatches();
     
