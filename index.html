@@ -375,6 +375,101 @@ button {
   text-align: center;
   width: 70px;
 }
+
+  /* Принудительное отображение модального окна */
+.modal.active {
+  display: flex !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  z-index: 9999 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.modal.active .modal-content {
+  display: block !important;
+  background: white !important;
+  border-radius: 20px !important;
+  padding: 25px !important;
+  width: 100% !important;
+  max-width: 500px !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  min-height: 200px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Стили для содержимого внутри модального окна */
+.modal-content .hidden {
+  display: none !important;
+}
+
+.modal-content .outcome-options {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+}
+
+  /* === ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ МОДАЛЬНОГО ОКНА === */
+#betModal.active {
+  display: flex !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  z-index: 9999 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+#betModal.active .modal-content {
+  display: block !important;
+  background: white !important;
+  border-radius: 20px !important;
+  padding: 25px !important;
+  width: 100% !important;
+  max-width: 500px !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  min-height: 200px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Принудительное отображение всех дочерних элементов */
+#betModal.active #betMatchInfo,
+#betModal.active #outcomeSection,
+#betModal.active #scoreSection,
+#betModal.active .bet-type-selector,
+#betModal.active .outcome-options,
+#betModal.active .score-selectors,
+#betModal.active .outcome-btn,
+#betModal.active .score-select {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Скрываем только элементы с классом hidden */
+#betModal.active .hidden {
+  display: none !important;
+}
+
+/* Обеспечиваем сетку для кнопок исхода */
+#betModal.active .outcome-options {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+}
   
 </style>
 </head>
