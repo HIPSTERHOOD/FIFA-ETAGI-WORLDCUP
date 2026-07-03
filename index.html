@@ -685,6 +685,7 @@ button {
 </div> <!-- ЗАКРЫВАЕМ mainApp ЗДЕСЬ -->
 
 <!-- Модальное окно ставок (вынесено из mainApp) -->
+<!-- Модальное окно ставок (вынесено из mainApp) -->
 <div id="betModal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
@@ -714,12 +715,35 @@ button {
         🔹 <strong>+1 балл</strong> — угадан только исход (победа/ничья)
       </div>
       <div class="score-selectors">
-        <select class="score-select" id="scoreTeam1">...</select>
+        <select class="score-select" id="scoreTeam1">
+          <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+          <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+          <option value="6">6</option><option value="7">7</option><option value="8">8</option>
+          <option value="9">9</option><option value="10">10</option>
+        </select>
         <span style="font-size:24px;font-weight:bold;">:</span>
-        <select class="score-select" id="scoreTeam2">...</select>
+        <select class="score-select" id="scoreTeam2">
+          <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+          <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+          <option value="6">6</option><option value="7">7</option><option value="8">8</option>
+          <option value="9">9</option><option value="10">10</option>
+        </select>
       </div>
       <div id="penaltySelector" style="display: none; margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 10px; border: 2px solid #E31E24;">
-        ...
+        <p style="font-weight: 600; font-size: 14px; color: #E31E24; margin-bottom: 10px;">
+          ⚠️ Ничейный счёт! Кто победит по пенальти?
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <button id="penaltyTeam1" onclick="window.selectPenaltyWinner('team1')" style="padding: 10px 20px; background: white; border: 2px solid #E31E24; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; flex: 1;">
+            ⚽ Команда 1
+          </button>
+          <button id="penaltyTeam2" onclick="window.selectPenaltyWinner('team2')" style="padding: 10px 20px; background: white; border: 2px solid #E31E24; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; flex: 1;">
+            ⚽ Команда 2
+          </button>
+        </div>
+        <p style="font-size: 11px; color: #666; margin-top: 8px; text-align: center;">
+          Выберите команду, которая победит в серии пенальти
+        </p>
       </div>
       <p style="color:#666;font-size:13px;text-align:center;">✨ Можно ставить на любой счёт, включая 0:0</p>
     </div>
@@ -1748,13 +1772,12 @@ isAdmin: emp.code === 'PRIDE' || emp.code === '111656' || emp.code === '12457833
 };
 
 
-  window.closeBetModal = function() {
+ window.closeBetModal = function() {
   const modal = document.getElementById('betModal');
   if (modal) modal.classList.remove('active');
   currentBetMatch = null;
-  currentPenaltyWinner = null; // 🔥 Сбрасываем выбор пенальти
+  currentPenaltyWinner = null;
   
-  // Сбрасываем стили кнопок пенальти
   const team1Btn = document.getElementById('penaltyTeam1');
   const team2Btn = document.getElementById('penaltyTeam2');
   if (team1Btn) {
