@@ -2083,35 +2083,6 @@ window.updatePlayoffMatches = async function() {
       // Иначе по счёту
       return match.result.team1 > match.result.team2 ? match.team1 : match.team2;
     };
-
-    // Обновляем 1/8 финала
-    /*
-    const r16Pairs = [
-      { id: 'R16_1', from: ['R32_1', 'R32_2'] },
-      { id: 'R16_2', from: ['R32_3', 'R32_4'] },
-      { id: 'R16_3', from: ['R32_5', 'R32_6'] },
-      { id: 'R16_4', from: ['R32_7', 'R32_8'] },
-      { id: 'R16_5', from: ['R32_9', 'R32_10'] },
-      { id: 'R16_6', from: ['R32_11', 'R32_12'] },
-      { id: 'R16_7', from: ['R32_13', 'R32_14'] },
-      { id: 'R16_8', from: ['R32_15', 'R32_16'] }
-    ];
-
-    for (const pair of r16Pairs) {
-      const winner1 = getWinner(pair.from[0]);
-      const winner2 = getWinner(pair.from[1]);
-      if (winner1 && winner2) {
-        await window.forceUpdateMatchTeams(pair.id, winner1, winner2);
-        console.log(`✅ ${pair.id}: ${winner1.name} vs ${winner2.name}`);
-      } else if (winner1) {
-        console.log(`⚠️ ${pair.id}: есть ${winner1.name}, ждём второго`);
-      } else if (winner2) {
-        console.log(`⚠️ ${pair.id}: есть ${winner2.name}, ждём первого`);
-      } else {
-        await window.forceUpdateMatchTeams(pair.id, {name:"TBD", code:"TBD", flag:"❓"}, {name:"TBD", code:"TBD", flag:"❓"});
-      }
-    } 
-*/
     // Обновляем 1/4 финала
     const qfPairs = [
       { id: 'QF_1', from: ['R16_1', 'R16_2'] },
