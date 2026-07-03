@@ -569,13 +569,6 @@ button {
   <h3>🕐 Исправление времени плей-офф</h3>
     <div class="admin-section">
   <h3>🏆 Продвижение победителей</h3>
-  <button class="btn btn-secondary" onclick="window.forceAdvanceWinners()" style="background:#28a745;">
-    🔄 Продвинуть всех победителей в 1/8 финала
-  </button>
-  <p style="font-size:12px;color:#666;margin-top:10px;">
-    Обновляет матчи 1/8 финала на основе результатов 1/16 финала
-  </p>
-</div>
 
  <button class="btn btn-secondary" onclick="window.syncAllEarlyBets()" style="background:#17a2b8;">
   ⏰ Пересчитать ранние ставки
@@ -2092,6 +2085,7 @@ window.updatePlayoffMatches = async function() {
     };
 
     // Обновляем 1/8 финала
+    /*
     const r16Pairs = [
       { id: 'R16_1', from: ['R32_1', 'R32_2'] },
       { id: 'R16_2', from: ['R32_3', 'R32_4'] },
@@ -2116,8 +2110,8 @@ window.updatePlayoffMatches = async function() {
       } else {
         await window.forceUpdateMatchTeams(pair.id, {name:"TBD", code:"TBD", flag:"❓"}, {name:"TBD", code:"TBD", flag:"❓"});
       }
-    }
-
+    } 
+*/
     // Обновляем 1/4 финала
     const qfPairs = [
       { id: 'QF_1', from: ['R16_1', 'R16_2'] },
@@ -5199,57 +5193,6 @@ window.fixAllPlayoffTimes = async function() {
     
   } catch (error) {
     console.error('❌ Ошибка:', error);
-    window.showAlert('❌ ' + error.message, 'error');
-  }
-};
-
-  window.forceAdvanceWinners = async function() {
-  if (!isAdmin) {
-    window.showAlert('❌ Только для админа', 'error');
-    return;
-  }
-  
-  window.showAlert('⏳ Обновляю сетку...', 'info');
-  
-  try {
-    // Получаем победителя R32_1
-    const r32_1_ref = doc(db, "matches", "R32_1");
-    const r32_1_snap = await getDoc(r32_1_ref);
-    const r32_1_data = r32_1_snap.data();
-    
-    if (!r32_1_data || !r32_1_data.result) {
-      window.showAlert('❌ Нет результата для R32_1', 'error');
-      return;
-    }
-    
-    // Определяем победителя
-    let winner = null;
-    if (r32_1_data.penaltyWinner) {
-      winner = r32_1_data.penaltyWinner === 'team1' ? r32_1_data.team1 : r32_1_data.team2;
-    } else {
-      winner = r32_1_data.result.team1 > r32_1_data.result.team2 ? r32_1_data.team1 : r32_1_data.team2;
-    }
-    
-    // Обновляем R16_1
-    await updateDoc(doc(db, "matches", "R16_1"), {
-      'team1': winner,
-      'team1.name': winner.name,
-      'team1.code': winner.code,
-      'team1.flag': winner.flag
-    });
-    
-    window.showAlert(`✅ Победитель (${winner.name}) продвинут в 1/8 финала!`, 'success');
-    
-    // Обновляем всю сетку
-    await window.updatePlayoffMatches();
-    
-    // Обновляем отображение
-    window.renderMatches();
-    window.renderBracket();
-    window.renderAdminMatches();
-    
-  } catch (error) {
-    console.error(error);
     window.showAlert('❌ ' + error.message, 'error');
   }
 };
