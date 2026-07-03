@@ -275,7 +275,6 @@ html, body {
   overflow: hidden;
 }
 
-/* Неактивная кнопка - мягкое свечение */
 .bet-type-selector .bet-type-btn:not(.active) {
   animation: gentleGlow 2s ease-in-out infinite;
   font-weight: 700;
@@ -500,7 +499,7 @@ button {
       <li>Отправьте свой вариант победителя, например: "Бразилия", или укажите точный счёт матча</li>
     </ol>
     <p style="font-size: 11px; color: #999; margin-top: 8px; font-style: italic;">
-      ⚠️ Важно: проголосовать можно только до начала матча, голос после старта не засчитывается.
+      ⚠️ Важно: проголосовать можно только до начала матча, ставка после старта не засчитывается.
     </p>
   </div>
   
@@ -3000,6 +2999,11 @@ window.openBetModal = function(matchId) {
       </div>
     `;
 
+    // 🔥 КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: Убираем класс hidden у outcomeSection
+    document.getElementById('outcomeSection').classList.remove('hidden');
+    // Также убеждаемся, что scoreSection видна
+    document.getElementById('scoreSection').classList.remove('hidden');
+
     // Если есть существующая ставка – восстанавливаем
     const existingBet = allBets.find(b => b.matchId === matchId);
     if (existingBet) {
@@ -3054,6 +3058,12 @@ window.openBetModal = function(matchId) {
     // ПОКАЗЫВАЕМ МОДАЛЬНОЕ ОКНО
     const betModal = document.getElementById('betModal');
     betModal.classList.add('active');
+    
+    // Небольшая задержка для перерисовки
+    setTimeout(() => {
+      betModal.style.display = 'flex';
+    }, 50);
+    
     console.log('✅ Модальное окно открыто');
 
   } catch (error) {
