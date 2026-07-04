@@ -571,7 +571,7 @@ button {
 </div>
     <div class="admin-section">
   <h3>🕐 Исправление времени плей-офф</h3>
-  <button class="btn btn-secondary" onclick="window.fixAllPlayoffTimes()" style="background:#17a2b8;">
+  <button class="btn btn-secondary" onclick="window.()" style="background:#17a2b8;">
     🕐 Исправить время всех матчей 1/16 финала
   </button>
   <p style="font-size:12px;color:#666;margin-top:10px;">
@@ -5193,7 +5193,7 @@ document.addEventListener('click', function(event) {
 });
 
   // Функция для исправления времени всех матчей 1/16 финала
-window.fixAllPlayoffTimes = async function() {
+window. = async function() {
   // 🔒 ПРОВЕРКА ВЕРСИИ — БЛОКИРУЕМ СТАРЫЕ КЛИЕНТЫ
   if (!window.isAppVersionValid) {
     window.showAlert('❌ Ваша версия устарела. Обновите страницу!', 'error');
@@ -5276,6 +5276,44 @@ setInterval(async () => {
   await checkAppVersion();
 }, 300000); // 300000 мс = 5 минут
 // =================================================
+
+  // =============================================
+//  ПРОСТОЕ ИСПРАВЛЕНИЕ ОТОБРАЖЕНИЯ МАТЧЕЙ
+// =============================================
+
+// Эта функция ПОДМЕНЯЕТ команды в матчах при показе
+function fixMatchDisplay(match) {
+  if (!match) return match;
+  
+  // Находим правильный матч из matchesData
+  const correct = matchesData.find(m => m.id === match.id);
+  if (!correct) return match;
+  
+  // Просто копируем правильные команды
+  return {
+    ...match,
+    team1: { ...correct.team1 },
+    team2: { ...correct.team2 }
+  };
+}
+
+// Делаем функцию доступной везде
+window.fixMatchDisplay = fixMatchDisplay;
+
+// ПЕРЕХВАТЫВАЕМ СОЗДАНИЕ КАРТОЧЕК МАТЧЕЙ
+// Сохраняем оригинальную функцию
+const originalCreateMatchCard = window.createMatchCard;
+
+// Заменяем на новую
+window.createMatchCard = function(match) {
+  // Исправляем матч перед показом
+  const fixed = fixMatchDisplay(match);
+  // Вызываем оригинальную функцию с исправленным матчем
+  return originalCreateMatchCard(fixed);
+};
+
+console.log('✅ Исправление матчей включено!');
+// =============================================
   
 </script>
 
