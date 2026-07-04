@@ -556,6 +556,10 @@ button {
     </p>
   </div>
 
+    <button class="btn btn-secondary" onclick="window.increaseAppVersion()" style="background:#ffc107; color:#000; margin-bottom:10px;">
+  🔄 Повысить версию приложения (отключить старые клиенты)
+</button>
+    
     <div class="admin-section">
   <h3>🛠️ Обслуживание</h3>
   <button class="btn btn-secondary" onclick="window.cleanDuplicateUsers()" style="background:#dc3545;">
@@ -690,7 +694,87 @@ let currentBetType = 'outcome';
 let currentOutcome = null;
 let currentFilter = 'all';
 let currentEmployeeCode = null;
+  // ========== СИСТЕМА ВЕРСИЙ ==========
+// Текущая версия приложения (увеличивайте при каждом изменении, влияющем на данные)
+const APP_VERSION = 1;
+window.APP_VERSION = APP_VERSION;
+window.isAppVersionValid = false;
+// =====================================
 
+  // ========== ФУНКЦИИ ПРОВЕРКИ ВЕРСИИ ==========
+async function checkAppVersion() {
+  try {
+    const docSnap = await getDoc(doc(window.db, "config", "app"));
+    let serverVersion = 1;
+    
+    if (docSnap.exists()) {
+      serverVersion = docSnap.data().version || 1;
+    } else {
+      // Если документа нет – создаём с версией 1
+      await setDoc(doc(window.db, "config", "app"), { version: 1 });
+    }
+
+    console.log(`📌 Локальная версия: ${APP_VERSION}, серверная: ${serverVersion}`);
+
+    if (serverVersion > APP_VERSION) {
+      // Версия устарела – блокируем
+      window.isAppVersionValid = false;
+      showVersionBanner(serverVersion);
+      return false;
+    } else {
+      window.isAppVersionValid = true;
+      // Убираем баннер, если он был
+      const oldBanner = document.getElementById('versionBanner');
+      if (oldBanner) oldBanner.remove();
+      // Разблокируем элементы
+      document.querySelectorAll('button, a, input, select, textarea').forEach(el => {
+        el.style.pointerEvents = '';
+        el.style.opacity = '';
+        el.disabled = false;
+      });
+      return true;
+    }
+  } catch (e) {
+    console.error("Ошибка проверки версии:", e);
+    // В случае ошибки разрешаем работу (чтобы не блокировать всех)
+    window.isAppVersionValid = true;
+    return true;
+  }
+}
+
+function showVersionBanner(serverVersion) {
+  // Удаляем старый баннер, если есть
+  const oldBanner = document.getElementById('versionBanner');
+  if (oldBanner) oldBanner.remove();
+
+  const banner = document.createElement('div');
+  banner.id = 'versionBanner';
+  banner.style.cssText = `
+    position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+    background: #dc3545; color: white; padding: 15px 20px;
+    text-align: center; font-weight: bold; font-size: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  `;
+  banner.innerHTML = `
+    ⚠️ Ваша версия приложения (${APP_VERSION}) устарела! 
+    Актуальная версия: ${serverVersion}. 
+    <button onclick="location.reload()" style="
+      background: white; color: #dc3545; border: none;
+      padding: 8px 20px; border-radius: 20px; font-weight: bold;
+      margin-left: 15px; cursor: pointer;
+    ">Обновить страницу</button>
+  `;
+  document.body.prepend(banner);
+
+  // Блокируем все кнопки, ссылки, инпуты (кроме кнопки обновления)
+  document.querySelectorAll('button:not(#versionBanner button), a, input, select, textarea').forEach(el => {
+    el.style.pointerEvents = 'none';
+    el.style.opacity = '0.6';
+    el.disabled = true;
+  });
+}
+// =============================================
 // Все сотрудники из Excel
 const employeesList = [
 {code:"000001", fullName:"Изосимов Юрий Алексеевич"},
@@ -1579,38 +1663,38 @@ const matchesData = [
   
 // ========== ПЛЕЙ-ОФФ (реальные пары ЧМ-2026) ==========
 // 1/16 финала (ПОЛНОСТЬЮ ПРАВИЛЬНОЕ РАСПИСАНИЕ)
-{id:"R32_1", stage:"round_of_32", team1:{name:"ЮАР", code:"RSA", flag:"🇿🇦"}, team2:{name:"Канада", code:"CAN", flag:"🇨🇦"}, date:"2026-06-28T22:00:00+03:00", nextMatch:"R16_1", dependsOn:[]},
-{id:"R32_2", stage:"round_of_32", team1:{name:"Германия", code:"GER", flag:"🇩🇪"}, team2:{name:"Парагвай", code:"PAR", flag:"🇵🇾"}, date:"2026-06-29T23:30:00+03:00", nextMatch:"R16_1", dependsOn:[]},
-{id:"R32_3", stage:"round_of_32", team1:{name:"Бразилия", code:"BRA", flag:"🇧🇷"}, team2:{name:"Япония", code:"JPN", flag:"🇯🇵"}, date:"2026-06-29T20:00:00+03:00", nextMatch:"R16_2", dependsOn:[]},
-{id:"R32_4", stage:"round_of_32", team1:{name:"Нидерланды", code:"NED", flag:"🇳🇱"}, team2:{name:"Марокко", code:"MAR", flag:"🇲🇦"}, date:"2026-06-30T04:00:00+03:00", nextMatch:"R16_2", dependsOn:[]},
-{id:"R32_5", stage:"round_of_32", team1:{name:"Франция", code:"FRA", flag:"🇫🇷"}, team2:{name:"Швеция", code:"SWE", flag:"🇸🇪"}, date:"2026-07-01T00:00:00+03:00", nextMatch:"R16_3", dependsOn:[]},
-{id:"R32_6", stage:"round_of_32", team1:{name:"Кот-д'Ивуар", code:"CIV", flag:"🇨🇮"}, team2:{name:"Норвегия", code:"NOR", flag:"🇳🇴"}, date:"2026-06-30T20:00:00+03:00", nextMatch:"R16_3", dependsOn:[]},
-{id:"R32_7", stage:"round_of_32", team1:{name:"Мексика", code:"MEX", flag:"🇲🇽"}, team2:{name:"Эквадор", code:"ECU", flag:"🇪🇨"}, date:"2026-07-01T04:00:00+03:00", nextMatch:"R16_4", dependsOn:[]},
-{id:"R32_8", stage:"round_of_32", team1:{name:"Англия", code:"ENG", flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"}, team2:{name:"ДР Конго", code:"COD", flag:"🇨🇩"}, date:"2026-07-01T19:00:00+03:00", nextMatch:"R16_4", dependsOn:[]},
-{id:"R32_9", stage:"round_of_32", team1:{name:"Бельгия", code:"BEL", flag:"🇧🇪"}, team2:{name:"Сенегал", code:"SEN", flag:"🇸🇳"}, date:"2026-07-01T23:00:00+03:00", nextMatch:"R16_5", dependsOn:[]},
-{id:"R32_10", stage:"round_of_32", team1:{name:"США", code:"USA", flag:"🇺🇸"}, team2:{name:"Босния и Герцеговина", code:"BIH", flag:"🇧🇦"}, date:"2026-07-02T03:00:00+03:00", nextMatch:"R16_5", dependsOn:[]},
-{id:"R32_11", stage:"round_of_32", team1:{name:"Испания", code:"ESP", flag:"🇪🇸"}, team2:{name:"Австрия", code:"AUT", flag:"🇦🇹"}, date:"2026-07-02T22:00:00+03:00", nextMatch:"R16_6", dependsOn:[]},
-{id:"R32_12", stage:"round_of_32", team1:{name:"Португалия", code:"POR", flag:"🇵🇹"}, team2:{name:"Хорватия", code:"CRO", flag:"🇭🇷"}, date:"2026-07-03T02:00:00+03:00", nextMatch:"R16_6", dependsOn:[]},
-{id:"R32_13", stage:"round_of_32", team1:{name:"Швейцария", code:"SUI", flag:"🇨🇭"}, team2:{name:"Алжир", code:"ALG", flag:"🇩🇿"}, date:"2026-07-03T06:00:00+03:00", nextMatch:"R16_7", dependsOn:[]},
-{id:"R32_14", stage:"round_of_32", team1:{name:"Австралия", code:"AUS", flag:"🇦🇺"}, team2:{name:"Египет", code:"EGY", flag:"🇪🇬"}, date:"2026-07-03T21:00:00+03:00", nextMatch:"R16_7", dependsOn:[]},
-{id:"R32_15", stage:"round_of_32", team1:{name:"Аргентина", code:"ARG", flag:"🇦🇷"}, team2:{name:"Кабо-Верде", code:"CPV", flag:"🇨🇻"}, date:"2026-07-04T01:00:00+03:00", nextMatch:"R16_8", dependsOn:[]},
-{id:"R32_16", stage:"round_of_32", team1:{name:"Колумбия", code:"COL", flag:"🇨🇴"}, team2:{name:"Гана", code:"GHA", flag:"🇬🇭"}, date:"2026-07-04T04:30:00+03:00", nextMatch:"R16_8", dependsOn:[]},
+{id:"R32_1", stage:"round_of_32", team1:{name:"ЮАР", code:"RSA", flag:"🇿🇦"}, team2:{name:"Канада", code:"CAN", flag:"🇨🇦"}, date:"2026-06-28T22:00:00+03:00"},
+{id:"R32_2", stage:"round_of_32", team1:{name:"Германия", code:"GER", flag:"🇩🇪"}, team2:{name:"Парагвай", code:"PAR", flag:"🇵🇾"}, date:"2026-06-29T23:30:00+03:00"},
+{id:"R32_3", stage:"round_of_32", team1:{name:"Бразилия", code:"BRA", flag:"🇧🇷"}, team2:{name:"Япония", code:"JPN", flag:"🇯🇵"}, date:"2026-06-29T20:00:00+03:00"},
+{id:"R32_4", stage:"round_of_32", team1:{name:"Нидерланды", code:"NED", flag:"🇳🇱"}, team2:{name:"Марокко", code:"MAR", flag:"🇲🇦"}, date:"2026-06-30T04:00:00+03:00"},
+{id:"R32_5", stage:"round_of_32", team1:{name:"Франция", code:"FRA", flag:"🇫🇷"}, team2:{name:"Швеция", code:"SWE", flag:"🇸🇪"}, date:"2026-07-01T00:00:00+03:00"},
+{id:"R32_6", stage:"round_of_32", team1:{name:"Кот-д'Ивуар", code:"CIV", flag:"🇨🇮"}, team2:{name:"Норвегия", code:"NOR", flag:"🇳🇴"}, date:"2026-06-30T20:00:00+03:00"},
+{id:"R32_7", stage:"round_of_32", team1:{name:"Мексика", code:"MEX", flag:"🇲🇽"}, team2:{name:"Эквадор", code:"ECU", flag:"🇪🇨"}, date:"2026-07-01T04:00:00+03:00",
+{id:"R32_8", stage:"round_of_32", team1:{name:"Англия", code:"ENG", flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"}, team2:{name:"ДР Конго", code:"COD", flag:"🇨🇩"}, date:"2026-07-01T19:00:00+03:00"},
+{id:"R32_9", stage:"round_of_32", team1:{name:"Бельгия", code:"BEL", flag:"🇧🇪"}, team2:{name:"Сенегал", code:"SEN", flag:"🇸🇳"}, date:"2026-07-01T23:00:00+03:00"},
+{id:"R32_10", stage:"round_of_32", team1:{name:"США", code:"USA", flag:"🇺🇸"}, team2:{name:"Босния и Герцеговина", code:"BIH", flag:"🇧🇦"}, date:"2026-07-02T03:00:00+03:00"},
+{id:"R32_11", stage:"round_of_32", team1:{name:"Испания", code:"ESP", flag:"🇪🇸"}, team2:{name:"Австрия", code:"AUT", flag:"🇦🇹"}, date:"2026-07-02T22:00:00+03:00"},
+{id:"R32_12", stage:"round_of_32", team1:{name:"Португалия", code:"POR", flag:"🇵🇹"}, team2:{name:"Хорватия", code:"CRO", flag:"🇭🇷"}, date:"2026-07-03T02:00:00+03:00"},
+{id:"R32_13", stage:"round_of_32", team1:{name:"Швейцария", code:"SUI", flag:"🇨🇭"}, team2:{name:"Алжир", code:"ALG", flag:"🇩🇿"}, date:"2026-07-03T06:00:00+03:00"},
+{id:"R32_14", stage:"round_of_32", team1:{name:"Австралия", code:"AUS", flag:"🇦🇺"}, team2:{name:"Египет", code:"EGY", flag:"🇪🇬"}, date:"2026-07-03T21:00:00+03:00"},
+{id:"R32_15", stage:"round_of_32", team1:{name:"Аргентина", code:"ARG", flag:"🇦🇷"}, team2:{name:"Кабо-Верде", code:"CPV", flag:"🇨🇻"}, date:"2026-07-04T01:00:00+03:00"},
+{id:"R32_16", stage:"round_of_32", team1:{name:"Колумбия", code:"COL", flag:"🇨🇴"}, team2:{name:"Гана", code:"GHA", flag:"🇬🇭"}, date:"2026-07-04T04:30:00+03:00"},
 
 // 1/8 финала
-{id:"R16_1", stage:"round_of_16", team1:{name:"Канада", code:"CAN", flag:"🇨🇦"}, team2:{name:"Марокко", code:"MAR", flag:"🇲🇦"}, date:"2026-07-04T20:00:00+03:00", nextMatch:"QF_1", dependsOn:[]},
-{id:"R16_2", stage:"round_of_16", team1:{name:"Парагвай", code:"PAR", flag:"🇵🇾"}, team2:{name:"Франция", code:"FRA", flag:"🇫🇷"}, date:"2026-07-05T00:00:00+03:00", nextMatch:"QF_1", dependsOn:[]},
-{id:"R16_3", stage:"round_of_16", team1:{name:"Бразилия", code:"BRA", flag:"🇧🇷"}, team2:{name:"Норвегия", code:"NOR", flag:"🇳🇴"}, date:"2026-07-05T23:00:00+03:00", nextMatch:"QF_2", dependsOn:[]},
-{id:"R16_4", stage:"round_of_16", team1:{name:"Мексика", code:"MEX", flag:"🇲🇽"}, team2:{name:"Англия", code:"ENG", flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"}, date:"2026-07-06T03:00:00+03:00", nextMatch:"QF_2", dependsOn:[]},
-{id:"R16_5", stage:"round_of_16", team1:{name:"Португалия", code:"POR", flag:"🇵🇹"}, team2:{name:"Испания", code:"ESP", flag:"🇪🇸"}, date:"2026-07-06T22:00:00+03:00", nextMatch:"QF_3", dependsOn:[]},
-{id:"R16_6", stage:"round_of_16", team1:{name:"США", code:"USA", flag:"🇺🇸"}, team2:{name:"Бельгия", code:"BEL", flag:"🇧🇪"}, date:"2026-07-07T03:00:00+03:00", nextMatch:"QF_3", dependsOn:[]},
-{id:"R16_7", stage:"round_of_16", team1:{name:"TBD", code:"TBD", flag:"❓"}, team2:{name:"TBD", code:"TBD", flag:"❓"}, date:"2026-07-07T19:00:00+03:00", nextMatch:"QF_4", dependsOn:[]},
-{id:"R16_8", stage:"round_of_16", team1:{name:"TBD", code:"TBD", flag:"❓"}, team2:{name:"TBD", code:"TBD", flag:"❓"}, date:"2026-07-07T23:00:00+03:00", nextMatch:"QF_4", dependsOn:[]},
+{id:"R16_1", stage:"round_of_16", team1:{name:"Канада", code:"CAN", flag:"🇨🇦"}, team2:{name:"Марокко", code:"MAR", flag:"🇲🇦"}, date:"2026-07-04T20:00:00+03:00"},
+{id:"R16_2", stage:"round_of_16", team1:{name:"Парагвай", code:"PAR", flag:"🇵🇾"}, team2:{name:"Франция", code:"FRA", flag:"🇫🇷"}, date:"2026-07-05T00:00:00+03:00"},
+{id:"R16_3", stage:"round_of_16", team1:{name:"Бразилия", code:"BRA", flag:"🇧🇷"}, team2:{name:"Норвегия", code:"NOR", flag:"🇳🇴"}, date:"2026-07-05T23:00:00+03:00"},
+{id:"R16_4", stage:"round_of_16", team1:{name:"Мексика", code:"MEX", flag:"🇲🇽"}, team2:{name:"Англия", code:"ENG", flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"}, date:"2026-07-06T03:00:00+03:00"},
+{id:"R16_5", stage:"round_of_16", team1:{name:"Португалия", code:"POR", flag:"🇵🇹"}, team2:{name:"Испания", code:"ESP", flag:"🇪🇸"}, date:"2026-07-06T22:00:00+03:00"},
+{id:"R16_6", stage:"round_of_16", team1:{name:"США", code:"USA", flag:"🇺🇸"}, team2:{name:"Бельгия", code:"BEL", flag:"🇧🇪"}, date:"2026-07-07T03:00:00+03:00"},
+{id:"R16_7", stage:"round_of_16", team1:{name:"TBD", code:"TBD", flag:"❓"}, team2:{name:"TBD", code:"TBD", flag:"❓"}, date:"2026-07-07T19:00:00+03:00"},
+{id:"R16_8", stage:"round_of_16", team1:{name:"TBD", code:"TBD", flag:"❓"}, team2:{name:"TBD", code:"TBD", flag:"❓"}, date:"2026-07-07T23:00:00+03:00"},
 
 // 1/4 финала
-{id:"QF_1", stage:"quarter", team1:{name:"TBD", code:"TBD", flag:"❓"}, team2:{name:"TBD", code:"TBD", flag:"❓"}, date:"2026-07-09T23:00:00+03:00", nextMatch:"SF_1", dependsOn:["R16_1","R16_2"]},
-{id:"QF_2", stage:"quarter", team1:{name:"TBD", code:"TBD", flag:"❓"}, team2:{name:"TBD", code:"TBD", flag:"❓"}, date:"2026-07-10T22:00:00+03:00", nextMatch:"SF_1", dependsOn:["R16_3","R16_4"]},
-{id:"QF_3", stage:"quarter", team1:{name:"TBD", code:"TBD", flag:"❓"}, team2:{name:"TBD", code:"TBD", flag:"❓"}, date:"2026-07-12T00:00:00+03:00", nextMatch:"SF_2", dependsOn:["R16_5","R16_6"]},
-{id:"QF_4", stage:"quarter", team1:{name:"TBD", code:"TBD", flag:"❓"}, team2:{name:"TBD", code:"TBD", flag:"❓"}, date:"2026-07-12T04:00:00+03:00", nextMatch:"SF_2", dependsOn:["R16_7","R16_8"]},
+{id:"QF_1", stage:"quarter", team1:{name:"TBD", code:"TBD", flag:"❓"}, team2:{name:"TBD", code:"TBD", flag:"❓"}, date:"2026-07-09T23:00:00+03:00"},
+{id:"QF_2", stage:"quarter", team1:{name:"TBD", code:"TBD", flag:"❓"}, team2:{name:"TBD", code:"TBD", flag:"❓"}, date:"2026-07-10T22:00:00+03:00"},
+{id:"QF_3", stage:"quarter", team1:{name:"TBD", code:"TBD", flag:"❓"}, team2:{name:"TBD", code:"TBD", flag:"❓"}, date:"2026-07-12T00:00:00+03:00"},
+{id:"QF_4", stage:"quarter", team1:{name:"TBD", code:"TBD", flag:"❓"}, team2:{name:"TBD", code:"TBD", flag:"❓"}, date:"2026-07-12T04:00:00+03:00"},
 
 // 1/2 финала
 {id:"SF_1", stage:"semi", team1:{name:"TBD", code:"TBD", flag:"❓"}, team2:{name:"TBD", code:"TBD", flag:"❓"}, date:"2026-07-14T22:00:00+03:00", nextMatch:"FINAL", dependsOn:["QF_1","QF_2"]},
@@ -1635,6 +1719,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 // Инициализация данных
 window.initializeData = async function() {
+  await checkAppVersion(); // ← ДОБАВЬТЕ ЭТУ СТРОКУ ПЕРВОЙ
   await window.loadEmployees();
   await window.loadMatches();
 };
@@ -1701,7 +1786,13 @@ window.closeBetModal = function() {
   }
 };
 
- window.saveBet = async function() {
+window.saveBet = async function() {
+  // 🔒 ПРОВЕРКА ВЕРСИИ — БЛОКИРУЕМ СТАРЫЕ КЛИЕНТЫ
+  if (!window.isAppVersionValid) {
+    window.showAlert('❌ Ваша версия устарела. Обновите страницу!', 'error');
+    return;
+  }
+  
   if (!currentBetMatch || !currentUser) {
     window.showAlert('Ошибка: данные не загружены', 'error');
     return;
@@ -1792,13 +1883,18 @@ window.updateBetsCounter = function() {
 
   // Админ-функция обновления счётчика броней
 window.updateBetsCounterAdmin = function() {
+  // 🔒 ПРОВЕРКА ВЕРСИИ — БЛОКИРУЕМ СТАРЫЕ КЛИЕНТЫ
+  if (!window.isAppVersionValid) {
+    window.showAlert('❌ Ваша версия устарела. Обновите страницу!', 'error');
+    return;
+  }
+  
   if (!isAdmin) {
     window.showAlert('❌ Только для админа', 'error');
     return;
   }
   
   const newCount = prompt('Введите новое количество броней (от 0 до 140):');
-  if (newCount === null) return;
   
   const count = parseInt(newCount);
   if (isNaN(count) || count < 0 || count > 140) {
@@ -2073,6 +2169,12 @@ window.setupAuthListener = function() {
 };
 
 window.cancelBet = async function(betId) {
+  // 🔒 ПРОВЕРКА ВЕРСИИ — БЛОКИРУЕМ СТАРЫЕ КЛИЕНТЫ
+  if (!window.isAppVersionValid) {
+    window.showAlert('❌ Ваша версия устарела. Обновите страницу!', 'error');
+    return;
+  }
+  
   const bet = allBets.find(b => b.id === betId);
   if (!bet) return;
   const match = allMatches.find(m => m.id === bet.matchId);
@@ -3106,6 +3208,12 @@ window.renderLeaderboard = function(users) {
 
   // Синхронизация ранних ставок для всех пользователей
 window.syncAllEarlyBets = async function() {
+  // 🔒 ПРОВЕРКА ВЕРСИИ — БЛОКИРУЕМ СТАРЫЕ КЛИЕНТЫ
+  if (!window.isAppVersionValid) {
+    window.showAlert('❌ Ваша версия устарела. Обновите страницу!', 'error');
+    return;
+  }
+  
   if (!isAdmin) {
     window.showAlert('❌ Только для админа', 'error');
     return;
@@ -3334,6 +3442,12 @@ if (finishedBets.length > 0) {
 
 // Функция очистки результата
 window.clearMatchResult = async function(matchId) {
+  // 🔒 ПРОВЕРКА ВЕРСИИ — БЛОКИРУЕМ СТАРЫЕ КЛИЕНТЫ
+  if (!window.isAppVersionValid) {
+    window.showAlert('❌ Ваша версия устарела. Обновите страницу!', 'error');
+    return;
+  }
+  
   if (!confirm('Удалить результат матча? Очки будут пересчитаны.')) return;
   
   try {
@@ -3551,6 +3665,12 @@ window.toggleBetsList = function(matchId) {
   
   // Полная синхронизация всех пользователей (только для админа)
 window.syncAllUsersPoints = async function() {
+  // 🔒 ПРОВЕРКА ВЕРСИИ — БЛОКИРУЕМ СТАРЫЕ КЛИЕНТЫ
+  if (!window.isAppVersionValid) {
+    window.showAlert('❌ Ваша версия устарела. Обновите страницу!', 'error');
+    return;
+  }
+  
   if (!isAdmin) {
     window.showAlert('❌ Только для админа', 'error');
     return;
@@ -3595,6 +3715,12 @@ window.syncAllUsersPoints = async function() {
 
 // Пересчёт очков для конкретного пользователя по коду
 window.syncUserPoints = async function() {
+  // 🔒 ПРОВЕРКА ВЕРСИИ — БЛОКИРУЕМ СТАРЫЕ КЛИЕНТЫ
+  if (!window.isAppVersionValid) {
+    window.showAlert('❌ Ваша версия устарела. Обновите страницу!', 'error');
+    return;
+  }
+  
   if (!isAdmin) {
     window.showAlert('❌ Только для админа', 'error');
     return;
@@ -3739,6 +3865,12 @@ window.recalculateUserPoints = async function(userCode) {
 
   
 window.saveMatchResult = async function(matchId) {
+  // 🔒 ПРОВЕРКА ВЕРСИИ — БЛОКИРУЕМ СТАРЫЕ КЛИЕНТЫ
+  if (!window.isAppVersionValid) {
+    window.showAlert('❌ Ваша версия устарела. Обновите страницу!', 'error');
+    return;
+  }
+  
   const score1Input = document.getElementById('result_' + matchId + '_1');
   const score2Input = document.getElementById('result_' + matchId + '_2');
   
@@ -4712,7 +4844,13 @@ window.cancelBet = async function(betId) {
   }
 };
 
-  window.cleanDuplicateUsers = async function() {
+ window.cleanDuplicateUsers = async function() {
+  // 🔒 ПРОВЕРКА ВЕРСИИ — БЛОКИРУЕМ СТАРЫЕ КЛИЕНТЫ
+  if (!window.isAppVersionValid) {
+    window.showAlert('❌ Ваша версия устарела. Обновите страницу!', 'error');
+    return;
+  }
+  
   if (!isAdmin) {
     window.showAlert('❌ Только для админа', 'error');
     return;
@@ -4861,6 +4999,45 @@ window.syncUserOnLogin = async function(code) {
   }
 };
 
+
+  // ========== АДМИН: ПОВЫШЕНИЕ ВЕРСИИ ==========
+window.increaseAppVersion = async function() {
+  // 🔒 ПРОВЕРКА ВЕРСИИ
+  if (!window.isAppVersionValid) {
+    window.showAlert('❌ Ваша версия устарела. Обновите страницу!', 'error');
+    return;
+  }
+  
+  if (!isAdmin) {
+    window.showAlert('❌ Только для админа', 'error');
+    return;
+  }
+
+  const newVersion = parseInt(prompt(
+    `Текущая версия: ${APP_VERSION}\n\nВведите новую версию (целое число, больше текущей):`
+  ));
+  
+  if (isNaN(newVersion) || newVersion <= APP_VERSION) {
+    window.showAlert(`❌ Версия должна быть больше ${APP_VERSION}`, 'error');
+    return;
+  }
+
+  try {
+    await updateDoc(doc(window.db, "config", "app"), { version: newVersion });
+    window.showAlert(`✅ Версия обновлена до ${newVersion}. Все старые клиенты будут заблокированы.`, 'success');
+    console.log(`✅ Новая версия: ${newVersion}`);
+    
+    // Обновляем проверку для текущего пользователя
+    await checkAppVersion();
+    
+  } catch (error) {
+    console.error(error);
+    window.showAlert('❌ Ошибка: ' + error.message, 'error');
+  }
+};
+// =============================================
+
+  
  window.showRulesModal = function() {
   document.getElementById('rulesModal').classList.add('active');
 };
@@ -5017,6 +5194,12 @@ document.addEventListener('click', function(event) {
 
   // Функция для исправления времени всех матчей 1/16 финала
 window.fixAllPlayoffTimes = async function() {
+  // 🔒 ПРОВЕРКА ВЕРСИИ — БЛОКИРУЕМ СТАРЫЕ КЛИЕНТЫ
+  if (!window.isAppVersionValid) {
+    window.showAlert('❌ Ваша версия устарела. Обновите страницу!', 'error');
+    return;
+  }
+  
   if (!isAdmin) {
     window.showAlert('❌ Только для админа', 'error');
     return;
@@ -5086,6 +5269,13 @@ window.fixAllPlayoffTimes = async function() {
     window.showAlert('❌ ' + error.message, 'error');
   }
 };
+
+  // ========== ПЕРИОДИЧЕСКАЯ ПРОВЕРКА ВЕРСИИ ==========
+// Каждые 5 минут проверяем, не появилась ли новая версия
+setInterval(async () => {
+  await checkAppVersion();
+}, 300000); // 300000 мс = 5 минут
+// =================================================
   
 </script>
 
