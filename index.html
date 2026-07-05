@@ -5276,44 +5276,6 @@ setInterval(async () => {
   await checkAppVersion();
 }, 300000); // 300000 мс = 5 минут
 // =================================================
-
-  // =============================================
-//  ПРОСТОЕ ИСПРАВЛЕНИЕ ОТОБРАЖЕНИЯ МАТЧЕЙ
-// =============================================
-
-// Эта функция ПОДМЕНЯЕТ команды в матчах при показе
-function fixMatchDisplay(match) {
-  if (!match) return match;
-  
-  // Находим правильный матч из matchesData
-  const correct = matchesData.find(m => m.id === match.id);
-  if (!correct) return match;
-  
-  // Просто копируем правильные команды
-  return {
-    ...match,
-    team1: { ...correct.team1 },
-    team2: { ...correct.team2 }
-  };
-}
-
-// Делаем функцию доступной везде
-window.fixMatchDisplay = fixMatchDisplay;
-
-// ПЕРЕХВАТЫВАЕМ СОЗДАНИЕ КАРТОЧЕК МАТЧЕЙ
-// Сохраняем оригинальную функцию
-const originalCreateMatchCard = window.createMatchCard;
-
-// Заменяем на новую
-window.createMatchCard = function(match) {
-  // Исправляем матч перед показом
-  const fixed = fixMatchDisplay(match);
-  // Вызываем оригинальную функцию с исправленным матчем
-  return originalCreateMatchCard(fixed);
-};
-
-console.log('✅ Исправление матчей включено!');
-// =============================================
   
 </script>
 
