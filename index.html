@@ -2651,9 +2651,11 @@ if (match.result && userBet.points > 0) {
       <span class="match-group">${groupLabel}</span>
       <div style="display: flex; gap: 10px; align-items: center;">
         <span>⏰ ${matchTime}</span>
-        <button onclick="window.showMatchBetsModal('${match.id}')" style="background:#E31E24; color:white; border:none; border-radius:15px; padding:4px 10px; font-size:11px; cursor:pointer;">
-          📋 Ставки
-        </button>
+        ${isAdmin ? `
+<button onclick="window.showMatchBetsModal('${match.id}')" style="background:#E31E24; color:white; border:none; border-radius:15px; padding:4px 10px; font-size:11px; cursor:pointer;">
+  📋 Ставки
+</button>
+` : ''}
       </div>
     </div>
     <div class="match-teams">
