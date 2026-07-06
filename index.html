@@ -5335,18 +5335,18 @@ window.progressWinners = async function() {
       'R16_8': { dependsOn: ['R32_13', 'R32_16'] },
 
       // R16 → QF
-      'QF1': { dependsOn: ['R16_2', 'R16_1'] },
-      'QF2': { dependsOn: ['R16_5', 'R16_6'] },
-      'QF3': { dependsOn: ['R16_3', 'R16_4'] },
-      'QF4': { dependsOn: ['R16_7', 'R16_8'] },
+      'QF_1': { dependsOn: ['R16_2', 'R16_1'] },
+      'QF_2': { dependsOn: ['R16_5', 'R16_6'] },
+      'QF_3': { dependsOn: ['R16_3', 'R16_4'] },
+      'QF_4': { dependsOn: ['R16_7', 'R16_8'] },
 
       // QF → SF
-      'SF1': { dependsOn: ['QF1', 'QF2'] },
-      'SF2': { dependsOn: ['QF3', 'QF4'] },
+      'SF_1': { dependsOn: ['QF_1', 'QF_2'] },
+      'SF_2': { dependsOn: ['QF_3', 'QF_4'] },
 
       // SF → FINAL / THIRD
-      'FINAL': { dependsOn: ['SF1', 'SF2'] },
-      'THIRD': { dependsOn: ['SF1', 'SF2'] }
+      'FINAL': { dependsOn: ['SF_1', 'SF_2'] },
+      'THIRD': { dependsOn: ['SF_1', 'SF_2'] }
     };
 
     // --- 4. Проходим по всем матчам и обновляем ---
