@@ -4216,7 +4216,7 @@ window.renderBracket = function() {
   });
 };
 
-  // Отображение истории завершённых матчей
+// Отображение истории завершённых матчей
 window.renderResultsHistory = function() {
   const container = document.getElementById('resultsList');
   if (!container) return;
@@ -4243,24 +4243,53 @@ window.renderResultsHistory = function() {
     const allBetsStats = window.allBetsStats || [];
     const matchBets = allBetsStats.filter(b => b.matchId === match.id);
     
-    // Угадавшие исход
+    // --- 🔥 ИСПРАВЛЕННАЯ ЛОГИКА ПОДСЧЁТА ---
+    
+    // Угадавшие исход (победа команды или ничья)
     const correctOutcomeBets = matchBets.filter(b => {
+      // Определяем реальный исход матча
+      let actualOutcome = 'draw';
+      if (match.result.team1 > match.result.team2) {
+        actualOutcome = 'team1';
+      } else if (match.result.team2 > match.result.team1) {
+        actualOutcome = 'team2';
+      } else if (match.penaltyWinner) {
+        // Если ничья и есть победитель по пенальти
+        actualOutcome = match.penaltyWinner;
+      }
+      
+      // Если ставка на исход
       if (b.betType === 'outcome') {
-        let actualOutcome = 'draw';
-        if (match.result.team1 > match.result.team2) actualOutcome = 'team1';
-        else if (match.result.team2 > match.result.team1) actualOutcome = 'team2';
         return b.outcome === actualOutcome;
       }
+      
+      // Если ставка на точный счёт — определяем исход по ставке
+      if (b.betType === 'score') {
+        const [betScore1, betScore2] = b.exactScore.split(':').map(Number);
+        let betOutcome = 'draw';
+        if (betScore1 > betScore2) {
+          betOutcome = 'team1';
+        } else if (betScore2 > betScore1) {
+          betOutcome = 'team2';
+        } else if (b.penaltyWinner) {
+          // Если в ставке указан победитель по пенальти
+          betOutcome = b.penaltyWinner;
+        }
+        return betOutcome === actualOutcome;
+      }
+      
       return false;
     });
     
-    // Угадавшие точный счёт
+    // Угадавшие точный счёт (только для ставок типа score)
     const correctScoreBets = matchBets.filter(b => {
       if (b.betType === 'score') {
         return b.exactScore === `${match.result.team1}:${match.result.team2}`;
       }
       return false;
     });
+    
+    // --- КОНЕЦ ИСПРАВЛЕННОЙ ЛОГИКИ ---
     
     const resultCard = document.createElement('div');
     resultCard.className = 'match-card';
