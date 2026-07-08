@@ -3874,10 +3874,18 @@ window.recalculateUserPoints = async function(userCode) {
 
   
 window.saveMatchResult = async function(matchId) {
-  // 🔒 ПРОВЕРКА ВЕРСИИ — БЛОКИРУЕМ СТАРЫЕ КЛИЕНТЫ
+  // 🔒 ПРОВЕРКА ВЕРСИИ
   if (!window.isAppVersionValid) {
     window.showAlert('❌ Ваша версия устарела. Обновите страницу!', 'error');
     return;
+  }
+  
+  // ⚠️ ПРОВЕРКА: ЕСЛИ РЕЗУЛЬТАТ УЖЕ ЕСТЬ — НЕ ПЕРЕЗАПИСЫВАТЬ!
+  const existingMatch = allMatches.find(m => m.id === matchId);
+  if (existingMatch && existingMatch.result) {
+    if (!confirm(`⚠️ У матча уже есть результат ${existingMatch.result.team1}:${existingMatch.result.team2}. Перезаписать?`)) {
+      return;
+    }
   }
   
   const score1Input = document.getElementById('result_' + matchId + '_1');
@@ -5323,7 +5331,6 @@ setInterval(async () => {
 // ============================================================
 
 window.progressWinners = async function() {
-  // Проверка прав
   if (!isAdmin) {
     console.log('⏭️ Пропускаем продвижение (не админ)');
     return;
@@ -5335,28 +5342,23 @@ window.progressWinners = async function() {
     );
     const db = window.db;
 
-    // --- 1. Получаем все матчи из Firestore ---
     const allMatchesSnapshot = await getDocs(collection(db, 'matches'));
     const matchesMap = {};
     allMatchesSnapshot.forEach(docSnap => {
       matchesMap[docSnap.id] = { id: docSnap.id, ...docSnap.data() };
     });
 
-    // --- 2. Функция получения победителя ---
     function getWinner(matchId) {
       const match = matchesMap[matchId];
       if (!match || !match.result) return null;
       if (match.result.team1 > match.result.team2) return match.team1;
       if (match.result.team2 > match.result.team1) return match.team2;
-      // Ничья – используем penaltyWinner
       if (match.penaltyWinner === 'team1') return match.team1;
       if (match.penaltyWinner === 'team2') return match.team2;
       return null;
     }
 
-    // --- 3. Сетка зависимостей (правильная!) ---
     const stageMap = {
-      // R32 → R16
       'R16_1': { dependsOn: ['R32_1', 'R32_4'] },
       'R16_2': { dependsOn: ['R32_2', 'R32_5'] },
       'R16_3': { dependsOn: ['R32_3', 'R32_6'] },
@@ -5365,23 +5367,16 @@ window.progressWinners = async function() {
       'R16_6': { dependsOn: ['R32_10', 'R32_9'] },
       'R16_7': { dependsOn: ['R32_15', 'R32_14'] },
       'R16_8': { dependsOn: ['R32_13', 'R32_16'] },
-
-      // R16 → QF
       'QF_1': { dependsOn: ['R16_2', 'R16_1'] },
       'QF_2': { dependsOn: ['R16_5', 'R16_6'] },
       'QF_3': { dependsOn: ['R16_3', 'R16_4'] },
       'QF_4': { dependsOn: ['R16_7', 'R16_8'] },
-
-      // QF → SF
       'SF_1': { dependsOn: ['QF_1', 'QF_2'] },
       'SF_2': { dependsOn: ['QF_3', 'QF_4'] },
-
-      // SF → FINAL / THIRD
       'FINAL': { dependsOn: ['SF_1', 'SF_2'] },
       'THIRD': { dependsOn: ['SF_1', 'SF_2'] }
     };
 
-    // --- 4. Проходим по всем матчам и обновляем ---
     let updated = 0;
 
     for (const [targetId, config] of Object.entries(stageMap)) {
@@ -5396,13 +5391,15 @@ window.progressWinners = async function() {
       const targetMatch = matchesMap[targetId];
       if (!targetMatch) continue;
 
-      // Проверяем, нужно ли обновлять
+      // 🔥 ВАЖНО: Проверяем, нужно ли обновлять
       const needUpdate =
         targetMatch.team1?.name !== winner1.name ||
         targetMatch.team2?.name !== winner2.name;
 
       if (needUpdate) {
         const ref = doc(db, 'matches', targetId);
+        
+        // ⚠️ ОБНОВЛЯЕМ ТОЛЬКО КОМАНДЫ, НЕ ТРОГАЕМ result И status!
         await updateDoc(ref, {
           team1: winner1,
           team2: winner2,
@@ -5412,6 +5409,7 @@ window.progressWinners = async function() {
           'team2.name': winner2.name,
           'team2.code': winner2.code,
           'team2.flag': winner2.flag
+          // ❌ НЕ ТРОГАЕМ: result, status, penaltyWinner!
         });
         updated++;
         console.log(`✅ ${targetId}: ${winner1.name} vs ${winner2.name}`);
@@ -5420,7 +5418,6 @@ window.progressWinners = async function() {
 
     if (updated > 0) {
       console.log(`🎉 Сетка обновлена! Обновлено ${updated} матчей.`);
-      // Обновляем отображение
       window.renderMatches();
       window.renderAdminMatches();
       window.renderBracket();
