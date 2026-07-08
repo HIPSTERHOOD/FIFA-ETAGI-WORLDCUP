@@ -1903,11 +1903,11 @@ window.updateBetsCounterAdmin = function() {
   
   const newCount = prompt('Введите новое количество броней (от 0 до 140):');
   
-  const count = parseInt(newCount);
-  if (isNaN(count) || count < 0 || count > 140) {
-    window.showAlert('❌ Введите число от 0 до 140', 'error');
-    return;
-  }
+const count = parseInt(newCount);
+if (isNaN(count) || count < 0) {
+  window.showAlert('❌ Введите корректное число (не меньше 0)', 'error');
+  return;
+}
   
   const settingsRef = doc(db, "settings", "betsCounter");
   setDoc(settingsRef, { 
