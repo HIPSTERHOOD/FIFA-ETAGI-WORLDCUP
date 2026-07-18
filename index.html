@@ -3975,9 +3975,7 @@ window.saveMatchResult = async function(matchId) {
     window.loadBetsForMatch(matchId);
     
     window.showAlert('✅ Результат сохранён! Очки начислены.', 'success');
-    
-    await window.progressWinners();
-    
+        
   } catch (error) {
     console.error(error);
     window.showAlert('❌ ' + error.message, 'error');
@@ -5373,8 +5371,6 @@ window.progressWinners = async function() {
       'QF_4': { dependsOn: ['R16_7', 'R16_8'] },
       'SF_1': { dependsOn: ['QF_1', 'QF_2'] },
       'SF_2': { dependsOn: ['QF_3', 'QF_4'] },
-      'FINAL': { dependsOn: ['SF_1', 'SF_2'] },
-      'THIRD': { dependsOn: ['SF_1', 'SF_2'] }
     };
 
     let updated = 0;
