@@ -376,7 +376,7 @@ button {
   width: 70px;
 }
 
-/* ===== АНИМАЦИИ ДЛЯ ТОП-10 ===== */
+  /* ===== АНИМАЦИИ ДЛЯ ТОП-10 ===== */
 @keyframes shimmer {
   0% { background-position: -200% center; }
   100% { background-position: 200% center; }
@@ -419,19 +419,6 @@ button {
   background: #fff3cd !important;
   border: 2px solid #E31E24 !important;
 }
-
-/* ===== МЕДАЛИ ДЛЯ ТОП-3 ===== */
-.medal-gold {
-  font-size: 28px;
-}
-
-.medal-silver {
-  font-size: 28px;
-}
-
-.medal-bronze {
-  font-size: 28px;
-}  
   
 </style>
 </head>
@@ -566,11 +553,23 @@ button {
     <div id="matchesList"><div class="loading">Загрузка матчей...</div></div>
   </div>
 
-  <div id="leaderboardTab" class="tab-content">
-    <h2 style="margin-bottom:20px;color:#E31E24;"> Таблица лидеров</h2>
-    <input type="text" class="search-input" id="leaderboardSearch" placeholder="🔍 Поиск..." oninput="window.searchLeaderboard()">
-    <div id="leaderboardList"><div class="loading">Загрузка...</div></div>
+ <div id="leaderboardTab" class="tab-content">
+  <h2 style="margin-bottom:20px;color:#E31E24;">📊 Таблица лидеров</h2>
+  
+  <!-- ===== КНОПКИ ПЕРЕКЛЮЧЕНИЯ ===== -->
+  <div class="filter-tabs" style="flex-wrap: wrap; gap: 8px; display: flex; flex-direction: column; align-items: stretch; margin-bottom: 20px;">
+    <div style="display: flex; gap: 8px; justify-content: center;">
+      <button class="filter-btn active" onclick="window.switchLeaderboardTab('all',this)" id="lbAllBtn">🏆 Все матчи</button>
+      <button class="filter-btn" onclick="window.switchLeaderboardTab('playoff',this)" id="lbPlayoffBtn">🏆 Плей-офф</button>
+    </div>
   </div>
+
+  <!-- Поиск -->
+  <input type="text" class="search-input" id="leaderboardSearch" placeholder="🔍 Поиск..." oninput="window.searchLeaderboard()">
+  
+  <!-- Список лидеров -->
+  <div id="leaderboardList"><div class="loading">Загрузка...</div></div>
+</div>
   
   
   <div id="profileTab" class="tab-content">
@@ -587,18 +586,8 @@ button {
   </div>
 
   <!-- Вкладка Результаты (добавить после профиля, перед админом) -->
-<!-- Вкладка Результаты -->
 <div id="resultsTab" class="tab-content">
-  <h2 style="margin-bottom:20px;color:#E31E24;">📊 Завершенные матчи</h2>
-  
-  <!-- Кнопки переключения -->
-  <div class="filter-tabs" style="flex-wrap: wrap; gap: 8px; display: flex; flex-direction: column; align-items: stretch; margin-bottom: 20px;">
-    <div style="display: flex; gap: 8px; justify-content: center;">
-      <button class="filter-btn active" onclick="window.switchResultsTab('all',this)" id="resultsAllBtn">🏆 Все матчи</button>
-      <button class="filter-btn" onclick="window.switchResultsTab('playoff',this)" id="resultsPlayoffBtn">🏆 Плей-офф</button>
-    </div>
-  </div>
-
+  <h2 style="margin-bottom:20px;color:#E31E24;">📊 Завершённые матчи</h2>
   <div id="resultsList"><div class="loading">Загрузка...</div></div>
 </div>
   
@@ -3208,9 +3197,27 @@ window.logout = async function() {
 };
   
 
+// =============================================
+//  ТАБЛИЦА ЛИДЕРОВ С ТОП-10 И МЕДАЛЯМИ
+// =============================================
+
+let currentLeaderboardFilter = 'all';
+
+window.switchLeaderboardTab = function(filter, btn) {
+  currentLeaderboardFilter = filter;
+  
+  // Обновляем активную кнопку
+  document.querySelectorAll('#leaderboardTab .filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  
+  // Перерисовываем таблицу
+  window.loadLeaderboard();
+};
+
 window.renderLeaderboard = function(users) {
   const container = document.getElementById('leaderboardList');
   if (!container) return;
+  
   container.innerHTML = '';
   
   if (!users || users.length === 0) {
@@ -3227,8 +3234,52 @@ window.renderLeaderboard = function(users) {
     }
   });
   
-  // 🔥 НОВОЕ: Фильтруем пользователей с 0 очков
-  const usersWithPoints = Object.values(uniqueUsers).filter(user => (user.totalPoints || 0) > 0);
+  // ===== ФИЛЬТР ПО СТАВКАМ =====
+  const filter = currentLeaderboardFilter || 'all';
+  const allBetsStats = window.allBetsStats || [];
+  
+  // Определяем ID матчей плей-офф
+  const playoffMatchIds = allMatches.filter(m => m.stage !== 'group').map(m => m.id);
+  
+  // Считаем очки для каждого пользователя с учётом фильтра
+  const userPointsMap = {};
+  
+  allBetsStats.forEach(bet => {
+    // Если фильтр плей-офф — пропускаем ставки не из плей-офф
+    if (filter === 'playoff' && !playoffMatchIds.includes(bet.matchId)) {
+      return;
+    }
+    
+    const userCode = bet.userCode;
+    if (!userCode) return;
+    
+    if (!userPointsMap[userCode]) {
+      userPointsMap[userCode] = {
+        code: userCode,
+        points: 0,
+        bets: 0
+      };
+    }
+    userPointsMap[userCode].points += (bet.points || 0);
+    userPointsMap[userCode].bets += 1;
+  });
+  
+  // Добавляем пользователей с 0 очков (чтобы они тоже отображались)
+  Object.values(uniqueUsers).forEach(user => {
+    if (!userPointsMap[user.code]) {
+      userPointsMap[user.code] = {
+        code: user.code,
+        points: 0,
+        bets: 0
+      };
+    }
+  });
+  
+  // Превращаем в массив и сортируем по очкам
+  const sortedUsers = Object.values(userPointsMap).sort((a, b) => b.points - a.points);
+  
+  // Фильтруем только тех, у кого есть очки (для топ-10)
+  const usersWithPoints = sortedUsers.filter(u => u.points > 0);
   
   // Если нет ни одного пользователя с очками
   if (usersWithPoints.length === 0) {
@@ -3236,50 +3287,71 @@ window.renderLeaderboard = function(users) {
     return;
   }
   
-  // Сортируем только пользователей с очками
-  const sortedUsers = usersWithPoints.sort((a, b) => {
-    const pointsDiff = (b.totalPoints || 0) - (a.totalPoints || 0);
-    if (pointsDiff !== 0) return pointsDiff;
-    
-    const earlyDiff = (b.totalEarlyBets || 0) - (a.totalEarlyBets || 0);
-    if (earlyDiff !== 0) return earlyDiff;
-    
-    const dateA = a.createdAt?.toMillis?.() || 0;
-    const dateB = b.createdAt?.toMillis?.() || 0;
-    return dateB - dateA;
-  });
+  const filterLabel = filter === 'playoff' ? '🏆 Плей-офф' : '🏆 Все матчи';
   
-  let currentPosition = 1;
-  let previousPoints = -1;
-  let previousEarly = -1;
-  let posCounter = 0;
+  // Заголовок с количеством участников
+  const title = document.createElement('div');
+  title.style.cssText = 'margin-bottom: 15px; font-size: 16px; font-weight: 600; color: #E31E24;';
+  title.textContent = `📊 ${filterLabel} — ${usersWithPoints.length} участников`;
+  container.appendChild(title);
   
-  sortedUsers.forEach((user, index) => {
-    if (user.totalPoints !== previousPoints || user.totalEarlyBets !== previousEarly) {
-      currentPosition = posCounter + 1;
-    }
-    previousPoints = user.totalPoints;
-    previousEarly = user.totalEarlyBets;
-    posCounter++;
+  // Рендерим список
+  usersWithPoints.forEach((user, index) => {
+    const position = index + 1;
+    const isTop10 = position <= 10;
+    const isTop3 = position <= 3;
+    
+    // Находим полное имя пользователя
+    const userInfo = Object.values(uniqueUsers).find(u => u.code === user.code);
+    const fullName = userInfo ? (userInfo.fullName || userInfo.lastName + ' ' + userInfo.initials) : user.code;
     
     const item = document.createElement('div');
-    item.className = 'leaderboard-item ' + (user.code === userData?.code ? 'current-user' : '');
+    item.className = 'leaderboard-item';
     
+    // Добавляем классы для топ-10 и топ-3
+    if (isTop10) {
+      item.classList.add('top-10');
+    }
+    if (isTop3) {
+      if (position === 1) item.classList.add('gold');
+      else if (position === 2) item.classList.add('silver');
+      else if (position === 3) item.classList.add('bronze');
+    }
+    
+    // ===== МЕДАЛИ =====
     let medal = '';
-    if (currentPosition === 1) medal = '🥇';
-    else if (currentPosition === 2) medal = '🥈';
-    else if (currentPosition === 3) medal = '🥉';
+    if (position === 1) medal = '🥇';
+    else if (position === 2) medal = '🥈';
+    else if (position === 3) medal = '🥉';
+    else if (isTop10) medal = position;  // ← БЕЗ ЗНАКА # !
+    else medal = position;
     
-    const positionDisplay = medal || currentPosition;
+    // Текущий пользователь
+    if (user.code === userData?.code) {
+      item.classList.add('current-user');
+    }
     
     item.innerHTML = `
-      <span class="position">${positionDisplay}</span>
-      <span class="user-name-lb">${user.lastName} ${user.initials}</span>
-      <span class="points">${user.totalPoints || 0} оч.</span>
+      <span class="position">${medal}</span>
+      <span class="user-name-lb">${fullName}</span>
+      <span class="points">${user.points} оч.</span>
+      <span style="font-size: 11px; color: #999; margin-left: auto;">${user.bets} ставок</span>
     `;
     
     container.appendChild(item);
   });
+  
+  // ===== СТАТИСТИКА ВНИЗУ =====
+  const stats = document.createElement('div');
+  stats.style.cssText = 'margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 10px; text-align: center; font-size: 13px; color: #666;';
+  stats.innerHTML = `
+    📊 Участников: ${usersWithPoints.length} | 
+    🏆 Топ-10: ${usersWithPoints.slice(0, 10).map(u => {
+      const userInfo = Object.values(uniqueUsers).find(usr => usr.code === u.code);
+      return userInfo ? userInfo.lastName : u.code;
+    }).join(', ')}
+  `;
+  container.appendChild(stats);
 };
 
   // Синхронизация ранних ставок для всех пользователей
@@ -5495,169 +5567,6 @@ window.progressWinners = async function() {
 };
 
 console.log('✅ Функция progressWinners добавлена!');
-
-  // =============================================
-//  ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК РЕЗУЛЬТАТОВ (ВСЕ/ПЛЕЙ-ОФФ)
-// =============================================
-
-let currentResultsFilter = 'all';
-
-window.switchResultsTab = function(filter, btn) {
-  currentResultsFilter = filter;
-  
-  // Обновляем активную кнопку
-  document.querySelectorAll('#resultsTab .filter-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  
-  // Перерисовываем результаты
-  window.renderResultsHistory();
-};
-
-// =============================================
-//  ОТРИСОВКА РЕЗУЛЬТАТОВ С ТОП-10 И МЕДАЛЯМИ
-// =============================================
-
-window.renderResultsHistory = function() {
-  const container = document.getElementById('resultsList');
-  if (!container) return;
-
-  // Получаем всех пользователей и их очки
-  const users = allUsers || [];
-  if (users.length === 0) {
-    container.innerHTML = '<div class="loading">📊 Загрузка данных...</div>';
-    return;
-  }
-
-  // Определяем, какие матчи считать
-  let filter = currentResultsFilter || 'all';
-  let matchIds = [];
-  
-  if (filter === 'playoff') {
-    // Только плей-офф (stage !== 'group')
-    matchIds = allMatches.filter(m => m.stage !== 'group').map(m => m.id);
-  }
-  // Если 'all' — берём все матчи
-
-  // Собираем очки для каждого пользователя
-  const userPoints = {};
-  const allBetsStats = window.allBetsStats || [];
-
-  allBetsStats.forEach(bet => {
-    // Если фильтр плей-офф — проверяем, что матч в списке
-    if (filter === 'playoff' && !matchIds.includes(bet.matchId)) {
-      return;
-    }
-    
-    const userCode = bet.userCode;
-    if (!userCode) return;
-    
-    if (!userPoints[userCode]) {
-      userPoints[userCode] = {
-        code: userCode,
-        points: 0,
-        bets: 0
-      };
-    }
-    userPoints[userCode].points += (bet.points || 0);
-    userPoints[userCode].bets += 1;
-  });
-
-  // Добавляем пользователей, у которых нет ставок в этом фильтре (0 очков)
-  users.forEach(user => {
-    if (!userPoints[user.code]) {
-      userPoints[user.code] = {
-        code: user.code,
-        points: 0,
-        bets: 0
-      };
-    }
-  });
-
-  // Сортируем по очкам (по убыванию)
-  const sortedUsers = Object.values(userPoints).sort((a, b) => b.points - a.points);
-
-  // Фильтруем пользователей с 0 очков
-  const usersWithPoints = sortedUsers.filter(u => u.points > 0);
-  
-  if (usersWithPoints.length === 0) {
-    container.innerHTML = '<div class="loading">📭 Нет данных для отображения</div>';
-    return;
-  }
-
-  // Рендерим
-  container.innerHTML = '';
-
-  const filterLabel = filter === 'playoff' ? '🏆 Плей-офф' : '🏆 Все матчи';
-  const title = document.createElement('div');
-  title.style.cssText = 'margin-bottom: 15px; font-size: 16px; font-weight: 600; color: #E31E24;';
-  title.textContent = `📊 ${filterLabel} — ${usersWithPoints.length} участников`;
-  container.appendChild(title);
-
-  // Создаём список
-  const list = document.createElement('div');
-  list.id = 'resultsLeaderboardList';
-
-  usersWithPoints.forEach((user, index) => {
-    const position = index + 1;
-    const isTop10 = position <= 10;
-    const isTop3 = position <= 3;
-
-    // Находим полное имя пользователя
-    const userInfo = users.find(u => u.code === user.code);
-    const fullName = userInfo ? (userInfo.fullName || userInfo.lastName + ' ' + userInfo.initials) : user.code;
-
-    const item = document.createElement('div');
-    item.className = 'leaderboard-item';
-
-    // Добавляем классы для топ-10 и топ-3
-    if (isTop10) {
-      item.classList.add('top-10');
-    }
-    if (isTop3) {
-      if (position === 1) item.classList.add('gold');
-      else if (position === 2) item.classList.add('silver');
-      else if (position === 3) item.classList.add('bronze');
-    }
-
-    // Медаль для топ-3
-    let medal = '';
-    if (position === 1) medal = '🥇';
-    else if (position === 2) medal = '🥈';
-    else if (position === 3) medal = '🥉';
-    else if (isTop10) medal = `#${position}`;
-    else medal = position;
-
-    // Текущий пользователь
-    if (user.code === userData?.code) {
-      item.classList.add('current-user');
-    }
-
-    item.innerHTML = `
-      <span class="position">${medal}</span>
-      <span class="user-name-lb">${fullName}</span>
-      <span class="points">${user.points} оч.</span>
-      <span style="font-size: 11px; color: #999; margin-left: auto;">${user.bets} ставок</span>
-    `;
-
-    list.appendChild(item);
-  });
-
-  container.appendChild(list);
-
-  // Добавляем статистику
-  const stats = document.createElement('div');
-  stats.style.cssText = 'margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 10px; text-align: center; font-size: 13px; color: #666;';
-  stats.innerHTML = `
-    📊 Участников: ${usersWithPoints.length} | 
-    🏆 Топ-10: ${usersWithPoints.slice(0, 10).map(u => {
-      const userInfo = users.find(usr => usr.code === u.code);
-      return userInfo ? userInfo.lastName : u.code;
-    }).join(', ')}
-  `;
-  container.appendChild(stats);
-};
-
-console.log('✅ Результаты с топ-10 и медалями загружены!');
 
   
 </script>
